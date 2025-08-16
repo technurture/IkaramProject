@@ -128,6 +128,10 @@ const profileFormSchema = z.object({
   bio: z.string().optional(),
   graduationYear: z.number().optional(),
   profileImage: z.string().optional(),
+  position: z.string().optional(),
+  department: z.string().optional(),
+  phoneNumber: z.string().optional(),
+  officeLocation: z.string().optional(),
 });
 
 const passwordChangeSchema = z.object({
@@ -409,6 +413,10 @@ export default function SuperAdminDashboard() {
       bio: user?.bio || "",
       graduationYear: user?.graduationYear || undefined,
       profileImage: user?.profileImage || "",
+      position: user?.position || "",
+      department: user?.department || "",
+      phoneNumber: user?.phoneNumber || "",
+      officeLocation: user?.officeLocation || "",
     },
   });
 
@@ -1268,6 +1276,65 @@ export default function SuperAdminDashboard() {
                     </FormItem>
                   )}
                 />
+                
+                {/* Staff-specific fields */}
+                <div className="grid grid-cols-2 gap-4">
+                  <FormField
+                    control={profileForm.control}
+                    name="position"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Position</FormLabel>
+                        <FormControl>
+                          <Input placeholder="e.g., Professor, Administrator" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={profileForm.control}
+                    name="department"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Department</FormLabel>
+                        <FormControl>
+                          <Input placeholder="e.g., Computer Science" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+                
+                <div className="grid grid-cols-2 gap-4">
+                  <FormField
+                    control={profileForm.control}
+                    name="phoneNumber"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Phone Number</FormLabel>
+                        <FormControl>
+                          <Input placeholder="e.g., +1-234-567-8900" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={profileForm.control}
+                    name="officeLocation"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Office Location</FormLabel>
+                        <FormControl>
+                          <Input placeholder="e.g., Building A, Room 123" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
                 
                 {/* Profile Image Upload */}
                 <div className="space-y-4">
