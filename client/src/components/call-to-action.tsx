@@ -7,7 +7,7 @@ export default function CallToAction() {
   const { user } = useAuth();
 
   return (
-    <section className="py-16 bg-gradient-to-r from-secondary-600 to-secondary-700 text-white relative overflow-hidden">
+    <section className="py-16 bg-gradient-to-r from-gray-100 to-gray-200 relative overflow-hidden">
       {/* Background decorative elements */}
       <div className="absolute inset-0 opacity-10">
         <div className="absolute top-10 left-10 w-32 h-32 bg-white rounded-full blur-xl"></div>
@@ -17,8 +17,8 @@ export default function CallToAction() {
       
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10">
         <div className="max-w-4xl mx-auto">
-          <h2 className="text-3xl lg:text-4xl font-bold mb-6 text-white">Ready to Share Your Story?</h2>
-          <p className="text-xl text-gray-100 mb-8 leading-relaxed">
+          <h2 className="text-3xl lg:text-4xl font-bold mb-6 text-gray-900">Ready to Share Your Story?</h2>
+          <p className="text-xl text-gray-800 mb-8 leading-relaxed">
             Join thousands of alumni who are connecting, sharing experiences, and building meaningful relationships. Your story matters and can inspire others in their journey.
           </p>
           
@@ -26,13 +26,13 @@ export default function CallToAction() {
             {user ? (
               <>
                 <Link href="/blogs/create">
-                  <Button className="bg-white text-secondary-700 hover:bg-gray-100 px-8 py-4 text-lg transform hover:scale-105 transition-all">
+                  <Button className="bg-primary-600 text-white hover:bg-primary-700 px-8 py-4 text-lg transform hover:scale-105 transition-all">
                     <Edit className="mr-2 h-5 w-5" />
                     Write Your Story
                   </Button>
                 </Link>
                 <Link href="/upload">
-                  <Button variant="outline" className="border-2 border-white text-white hover:bg-white hover:text-secondary-700 px-8 py-4 text-lg transition-all">
+                  <Button variant="outline" className="border-2 border-primary-600 text-primary-600 hover:bg-primary-600 hover:text-white px-8 py-4 text-lg transition-all">
                     <Upload className="mr-2 h-5 w-5" />
                     Share Media
                   </Button>
@@ -41,13 +41,13 @@ export default function CallToAction() {
             ) : (
               <>
                 <Link href="/auth">
-                  <Button className="bg-white text-secondary-700 hover:bg-gray-100 px-8 py-4 text-lg transform hover:scale-105 transition-all">
+                  <Button className="bg-primary-600 text-white hover:bg-primary-700 px-8 py-4 text-lg transform hover:scale-105 transition-all">
                     <Edit className="mr-2 h-5 w-5" />
                     Join to Share Stories
                   </Button>
                 </Link>
                 <Link href="/blogs">
-                  <Button variant="outline" className="border-2 border-white text-white hover:bg-white hover:text-secondary-700 px-8 py-4 text-lg transition-all">
+                  <Button variant="outline" className="border-2 border-primary-600 text-primary-600 hover:bg-primary-600 hover:text-white px-8 py-4 text-lg transition-all">
                     Explore Stories
                   </Button>
                 </Link>
@@ -60,24 +60,24 @@ export default function CallToAction() {
               <div className="bg-white bg-opacity-20 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4">
                 <Edit className="h-8 w-8" />
               </div>
-              <h3 className="text-xl font-semibold mb-2 text-white">Share Stories</h3>
-              <p className="text-gray-100">Write blog posts about your experiences, career insights, and life updates.</p>
+              <h3 className="text-xl font-semibold mb-2 text-gray-900">Share Stories</h3>
+              <p className="text-gray-800">Write blog posts about your experiences, career insights, and life updates.</p>
             </div>
             
             <div className="text-center">
               <div className="bg-white bg-opacity-20 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4">
                 <div className="h-8 w-8 flex items-center justify-center text-2xl">👥</div>
               </div>
-              <h3 className="text-xl font-semibold mb-2 text-white">Connect</h3>
-              <p className="text-gray-100">Engage with fellow alumni through comments, events, and networking opportunities.</p>
+              <h3 className="text-xl font-semibold mb-2 text-gray-900">Connect</h3>
+              <p className="text-gray-800">Engage with fellow alumni through comments, events, and networking opportunities.</p>
             </div>
             
             <div className="text-center">
               <div className="bg-white bg-opacity-20 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4">
                 <Download className="h-8 w-8" />
               </div>
-              <h3 className="text-xl font-semibold mb-2 text-white">Access Resources</h3>
-              <p className="text-gray-100">Download exclusive content, videos, and materials shared by the community.</p>
+              <h3 className="text-xl font-semibold mb-2 text-gray-900">Access Resources</h3>
+              <p className="text-gray-800">Download exclusive content, videos, and materials shared by the community.</p>
             </div>
           </div>
         </div>
