@@ -214,11 +214,14 @@ export default function AuthPage() {
                             autoComplete="off"
                             spellCheck="false"
                             style={{ 
-                              color: '#000 !important', 
-                              backgroundColor: '#fff !important',
-                              border: '1px solid #ccc',
-                              padding: '8px 12px'
+                              color: '#000000 !important', 
+                              backgroundColor: '#ffffff !important',
+                              border: '1px solid #ccc !important',
+                              padding: '8px 12px !important',
+                              fontSize: '14px !important',
+                              fontFamily: 'inherit !important'
                             }}
+                            className="text-black bg-white"
                             value={field.value || ''}
                             onChange={(e) => {
                               console.log('Email input changed:', e.target.value);
