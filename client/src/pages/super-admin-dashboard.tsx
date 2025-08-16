@@ -45,6 +45,17 @@ import {
   DialogDescription,
 } from "@/components/ui/dialog";
 import {
+  ScrollableDialog,
+  ScrollableDialogContent,
+  ScrollableDialogHeader,
+  ScrollableDialogBody,
+  ScrollableDialogFooter,
+  ScrollableDialogTitle,
+  ScrollableDialogDescription,
+} from "@/components/ui/scrollable-dialog";
+import { FileUpload } from "@/components/ui/file-upload";
+import { AdminTable } from "@/components/admin-table";
+import {
   Form,
   FormControl,
   FormField,
@@ -823,96 +834,203 @@ export default function SuperAdminDashboard() {
             {pendingAdmins && pendingAdmins.length > 0 && (
               <Card className="border-orange-200">
                 <CardHeader className="bg-orange-50">
-                  <CardTitle className="text-orange-800">Pending Admin Approvals</CardTitle>
+                  <CardTitle className="flex items-center text-orange-800">
+                    <UserCheck className="h-5 w-5 mr-2" />
+                    Pending Admin Approvals
+                  </CardTitle>
                 </CardHeader>
-                <CardContent className="p-6">
-                  <div className="space-y-4">
-                    {pendingAdmins.map((admin) => (
-                      <div key={admin._id} className="flex items-center justify-between p-4 border border-orange-200 rounded-lg bg-orange-50">
-                        <div className="flex-1">
-                          <h3 className="font-medium text-gray-900">
-                            {admin.firstName} {admin.lastName}
-                          </h3>
-                          <p className="text-sm text-gray-600">
-                            {admin.email} • @{admin.username}
-                          </p>
-                        </div>
-                        <div className="flex items-center space-x-2">
-                          <Button 
-                            size="sm" 
-                            onClick={() => approveAdminMutation.mutate({ id: admin._id, isApproved: true })}
-                            disabled={approveAdminMutation.isPending}
-                          >
-                            Approve
-                          </Button>
-                          <Button 
-                            size="sm" 
-                            variant="destructive"
-                            onClick={() => approveAdminMutation.mutate({ id: admin._id, isApproved: false })}
-                            disabled={approveAdminMutation.isPending}
-                          >
-                            Reject
-                          </Button>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
+                <CardContent>
+                  <AdminTable 
+                    admins={pendingAdmins} 
+                    type="pending"
+                    onApprove={(id, approved) => approveAdminMutation.mutate({ id, isApproved: approved })}
+                  />
                 </CardContent>
               </Card>
             )}
-
+            
             <Card>
               <CardHeader>
-                <CardTitle>All Administrators</CardTitle>
+                <CardTitle className="flex items-center">
+                  <Shield className="h-5 w-5 mr-2" />
+                  All Administrators
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <AdminTable 
+                  admins={allAdmins || []} 
+                  type="all"
+                  onReactivate={(id) => reactivateAdminMutation.mutate(id)}
+                  onDelete={(id) => deleteAdminMutation.mutate(id)}
+                />
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="users" className="space-y-6">
+            <div className="flex justify-between items-center">
+              <h2 className="text-2xl font-bold text-gray-900">System Users</h2>
+              <Button onClick={() => setCreateUserOpen(true)}>
+                <UserPlus className="h-4 w-4 mr-2" />
+                Add New Admin
+              </Button>
+            </div>
+            
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center">
+                  <Users className="h-5 w-5 mr-2" />
+                  All System Users
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <AdminTable 
+                  admins={allUsers || []} 
+                  type="all"
+                  onReactivate={(id) => reactivateAdminMutation.mutate(id)}
+                  onDelete={(id) => deleteAdminMutation.mutate(id)}
+                />
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="content" className="space-y-6">
+            <div className="flex justify-between items-center">
+              <h2 className="text-2xl font-bold text-gray-900">Content Management</h2>
+              <Button onClick={() => setCreateBlogOpen(true)}>
+                <Plus className="h-4 w-4 mr-2" />
+                Create Blog Post
+              </Button>
+            </div>
+            
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center">
+                  <FileText className="h-5 w-5 mr-2" />
+                  Blog Posts
+                </CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
-                  {allAdmins?.map((admin) => (
-                    <div key={admin._id} className="flex items-center justify-between p-4 border border-gray-200 rounded-lg">
+                  {recentBlogs?.map((blog) => (
+                    <div key={blog.id} className="flex items-center justify-between p-4 border rounded-lg">
                       <div className="flex-1">
-                        <h3 className="font-medium text-gray-900">
-                          {admin.firstName} {admin.lastName}
-                        </h3>
-                        <p className="text-sm text-gray-600">
-                          {admin.email} • @{admin.username}
-                        </p>
+                        <h3 className="font-medium text-gray-900">{blog.title}</h3>
+                        <p className="text-sm text-gray-600 truncate">{blog.excerpt}</p>
+                        <div className="flex items-center space-x-2 mt-2">
+                          <Badge variant="outline">{blog.status}</Badge>
+                          <span className="text-xs text-gray-500">
+                            by {blog.author.firstName} {blog.author.lastName}
+                          </span>
+                        </div>
                       </div>
                       <div className="flex items-center space-x-2">
-                        <Badge variant={admin.role === 'super_admin' ? 'default' : 'secondary'}>
-                          {admin.role?.replace('_', ' ') || 'user'}
-                        </Badge>
-                        <Badge variant={admin.isApproved ? 'default' : 'destructive'}>
-                          {admin.isApproved ? 'Approved' : 'Pending'}
-                        </Badge>
-                        <Badge variant={admin.isActive ? 'default' : 'secondary'}>
-                          {admin.isActive ? 'Active' : 'Inactive'}
-                        </Badge>
-                        {admin.role !== 'super_admin' && (
-                          <div className="flex space-x-1">
-                            {!admin.isActive && (
-                              <Button 
-                                size="sm" 
-                                variant="outline"
-                                onClick={() => reactivateAdminMutation.mutate(admin._id)}
-                                disabled={reactivateAdminMutation.isPending}
-                              >
-                                Reactivate
-                              </Button>
-                            )}
-                            <Button 
-                              size="sm" 
-                              variant="destructive"
-                              onClick={() => {
-                                if (confirm('Are you sure you want to permanently delete this admin?')) {
-                                  deleteAdminMutation.mutate(admin._id);
-                                }
-                              }}
-                              disabled={deleteAdminMutation.isPending}
-                            >
-                              Delete
-                            </Button>
-                          </div>
-                        )}
+                        <Button variant="ghost" size="sm">
+                          <Edit className="h-4 w-4" />
+                        </Button>
+                        <Button variant="ghost" size="sm">
+                          <Eye className="h-4 w-4" />
+                        </Button>
+                        <Button variant="ghost" size="sm">
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="events" className="space-y-6">
+            <div className="flex justify-between items-center">
+              <h2 className="text-2xl font-bold text-gray-900">Event Management</h2>
+              <Button onClick={() => setCreateEventOpen(true)}>
+                <Plus className="h-4 w-4 mr-2" />
+                Create Event
+              </Button>
+            </div>
+            
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center">
+                  <Calendar className="h-5 w-5 mr-2" />
+                  Events
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  {recentEvents?.map((event) => (
+                    <div key={event.id} className="flex items-center justify-between p-4 border rounded-lg">
+                      <div className="flex-1">
+                        <h3 className="font-medium text-gray-900">{event.title}</h3>
+                        <p className="text-sm text-gray-600 truncate">{event.description}</p>
+                        <div className="flex items-center space-x-2 mt-2">
+                          <Badge variant="outline">{event.status}</Badge>
+                          <span className="text-xs text-gray-500">
+                            {new Date(event.startDate).toLocaleDateString()}
+                          </span>
+                        </div>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <Button variant="ghost" size="sm">
+                          <Edit className="h-4 w-4" />
+                        </Button>
+                        <Button variant="ghost" size="sm">
+                          <Eye className="h-4 w-4" />
+                        </Button>
+                        <Button variant="ghost" size="sm">
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="staff" className="space-y-6">
+            <div className="flex justify-between items-center">
+              <h2 className="text-2xl font-bold text-gray-900">Staff Management</h2>
+              <Button onClick={() => setCreateStaffOpen(true)}>
+                <Plus className="h-4 w-4 mr-2" />
+                Add Staff Member
+              </Button>
+            </div>
+            
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center">
+                  <Users className="h-5 w-5 mr-2" />
+                  Staff Members
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {recentStaff?.map((staff) => (
+                    <div key={staff.id} className="border rounded-lg p-4">
+                      <div className="flex items-center space-x-3 mb-3">
+                        <div className="h-10 w-10 rounded-full bg-primary-100 flex items-center justify-center">
+                          <User className="h-5 w-5 text-primary-600" />
+                        </div>
+                        <div className="flex-1">
+                          <h3 className="font-medium text-gray-900">
+                            {staff.user?.firstName} {staff.user?.lastName}
+                          </h3>
+                          <p className="text-sm text-gray-600">{staff.position}</p>
+                        </div>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <Badge variant="outline">{staff.department}</Badge>
+                        <div className="flex items-center space-x-1">
+                          <Button variant="ghost" size="sm">
+                            <Edit className="h-3 w-3" />
+                          </Button>
+                          <Button variant="ghost" size="sm">
+                            <Trash2 className="h-3 w-3" />
+                          </Button>
+                        </div>
                       </div>
                     </div>
                   ))}
@@ -1149,14 +1267,15 @@ export default function SuperAdminDashboard() {
         </Dialog>
 
         {/* Create Blog Modal */}
-        <Dialog open={createBlogOpen} onOpenChange={setCreateBlogOpen}>
-          <DialogContent className="max-w-2xl">
-            <DialogHeader>
-              <DialogTitle>Create New Blog Post</DialogTitle>
-              <DialogDescription>Write and publish a new blog post for the community.</DialogDescription>
-            </DialogHeader>
-            <Form {...blogForm}>
-              <form onSubmit={blogForm.handleSubmit(onCreateBlog)} className="space-y-4">
+        <ScrollableDialog open={createBlogOpen} onOpenChange={setCreateBlogOpen}>
+          <ScrollableDialogContent className="max-w-2xl">
+            <ScrollableDialogHeader>
+              <ScrollableDialogTitle>Create New Blog Post</ScrollableDialogTitle>
+              <ScrollableDialogDescription>Write and publish a new blog post for the community.</ScrollableDialogDescription>
+            </ScrollableDialogHeader>
+            <ScrollableDialogBody>
+              <Form {...blogForm}>
+                <form onSubmit={blogForm.handleSubmit(onCreateBlog)} className="space-y-4">
                 <FormField
                   control={blogForm.control}
                   name="title"
@@ -1233,28 +1352,52 @@ export default function SuperAdminDashboard() {
                     )}
                   />
                 </div>
-                <div className="flex justify-end space-x-2">
-                  <Button type="button" variant="outline" onClick={() => setCreateBlogOpen(false)}>
-                    Cancel
-                  </Button>
-                  <Button type="submit" disabled={createBlogMutation.isPending}>
-                    {createBlogMutation.isPending ? "Creating..." : "Create Blog"}
-                  </Button>
-                </div>
-              </form>
-            </Form>
-          </DialogContent>
-        </Dialog>
+                  
+                  {/* File Upload Section */}
+                  <div className="space-y-4">
+                    <FileUpload
+                      label="Featured Image"
+                      description="Upload a featured image for this blog post"
+                      accept="image/*"
+                      multiple={false}
+                      maxFiles={1}
+                      onUrlsChange={(urls) => blogForm.setValue('featuredImage', urls[0] || '')}
+                      data-testid="blog-featured-image-upload"
+                    />
+                    
+                    <FileUpload
+                      label="Attachments"
+                      description="Upload additional files, images, or documents"
+                      multiple={true}
+                      maxFiles={5}
+                      onUrlsChange={(urls) => blogForm.setValue('attachments', urls)}
+                      data-testid="blog-attachments-upload"
+                    />
+                  </div>
+                </form>
+              </Form>
+            </ScrollableDialogBody>
+            <ScrollableDialogFooter>
+              <Button type="button" variant="outline" onClick={() => setCreateBlogOpen(false)}>
+                Cancel
+              </Button>
+              <Button type="submit" onClick={blogForm.handleSubmit(onCreateBlog)} disabled={createBlogMutation.isPending}>
+                {createBlogMutation.isPending ? "Creating..." : "Create Blog"}
+              </Button>
+            </ScrollableDialogFooter>
+          </ScrollableDialogContent>
+        </ScrollableDialog>
 
         {/* Create Event Modal */}
-        <Dialog open={createEventOpen} onOpenChange={setCreateEventOpen}>
-          <DialogContent className="max-w-2xl">
-            <DialogHeader>
-              <DialogTitle>Create New Event</DialogTitle>
-              <DialogDescription>Organize a new event for the alumni community.</DialogDescription>
-            </DialogHeader>
-            <Form {...eventForm}>
-              <form onSubmit={eventForm.handleSubmit(onCreateEvent)} className="space-y-4">
+        <ScrollableDialog open={createEventOpen} onOpenChange={setCreateEventOpen}>
+          <ScrollableDialogContent className="max-w-2xl">
+            <ScrollableDialogHeader>
+              <ScrollableDialogTitle>Create New Event</ScrollableDialogTitle>
+              <ScrollableDialogDescription>Organize a new event for the alumni community.</ScrollableDialogDescription>
+            </ScrollableDialogHeader>
+            <ScrollableDialogBody>
+              <Form {...eventForm}>
+                <form onSubmit={eventForm.handleSubmit(onCreateEvent)} className="space-y-4">
                 <FormField
                   control={eventForm.control}
                   name="title"

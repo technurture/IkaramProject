@@ -4,6 +4,37 @@ import type { IMongoStorage } from "./mongodb-storage";
 import { setupAuth } from "./auth";
 import { upload, uploadToCloudinary, deleteFromCloudinary } from "./cloudinary";
 import { User, insertBlogSchema, insertCommentSchema, insertEventSchema, insertStaffSchema } from "@shared/mongodb-schema";
+import { scrypt, randomBytes, timingSafeEqual } from "crypto";
+import { promisify } from "util";
+
+const scryptAsync = promisify(scrypt);
+
+async function hashPassword(password: string) {
+  const salt = randomBytes(16).toString("hex");
+  const buf = (await scryptAsync(password, salt, 64)) as Buffer;
+  return `${salt}.${buf.toString("hex")}`;
+}
+
+async function comparePasswords(supplied: string, stored: string) {
+  try {
+    const [salt, hashed] = stored.split(".");
+    if (!salt || !hashed) {
+      return false;
+    }
+    
+    const hashedBuf = Buffer.from(hashed, "hex");
+    const suppliedBuf = (await scryptAsync(supplied, salt, 64)) as Buffer;
+    
+    if (hashedBuf.length !== suppliedBuf.length) {
+      return false;
+    }
+    
+    return timingSafeEqual(hashedBuf, suppliedBuf);
+  } catch (error) {
+    console.error('Password comparison error:', error);
+    return false;
+  }
+}
 
 export async function registerRoutes(app: Express, storage: IMongoStorage): Promise<Server> {
   // Setup authentication routes with storage
@@ -387,6 +418,62 @@ export async function registerRoutes(app: Express, storage: IMongoStorage): Prom
     }
   });
 
+  // Media upload route - supports multiple files
+  app.post("/api/media/upload", requireAuth, upload.array('files', 10), async (req, res) => {
+    try {
+      const files = req.files as Express.Multer.File[];
+      if (!files || files.length === 0) {
+        return res.status(400).json({ message: "No files uploaded" });
+      }
+
+      const uploadResults = [];
+
+      for (const file of files) {
+        try {
+          // Upload to Cloudinary
+          const result = await uploadToCloudinary(file.buffer, file.originalname);
+          
+          // Save to database
+          const media = await storage.createMedia({
+            filename: result.public_id,
+            originalName: file.originalname,
+            mimeType: file.mimetype,
+            size: file.size,
+            path: result.secure_url,
+            cloudinaryId: result.public_id,
+            cloudinaryPublicId: result.public_id,
+            cloudinaryUrl: result.secure_url,
+            uploadedBy: req.user!._id
+          });
+
+          uploadResults.push({
+            id: media._id,
+            url: result.secure_url,
+            secure_url: result.secure_url,
+            public_id: result.public_id,
+            filename: file.originalname,
+            size: file.size,
+            type: file.mimetype
+          });
+        } catch (error) {
+          console.error('File upload error:', error);
+          uploadResults.push({
+            filename: file.originalname,
+            error: 'Upload failed'
+          });
+        }
+      }
+
+      res.status(201).json({
+        files: uploadResults,
+        url: uploadResults[0]?.url, // For backwards compatibility
+        secure_url: uploadResults[0]?.secure_url
+      });
+    } catch (error) {
+      res.status(500).json({ message: "Upload failed" });
+    }
+  });
+
   // Media upload routes
   app.post("/api/upload", requireAuth, upload.single('file'), async (req, res) => {
     try {
@@ -622,7 +709,7 @@ export async function registerRoutes(app: Express, storage: IMongoStorage): Prom
   app.put("/api/user/change-password", requireAuth, async (req, res) => {
     try {
       const { currentPassword, newPassword } = req.body;
-      const userId = req.user._id;
+      const userId = req.user!._id;
 
       // Get current user
       const user = await storage.getUser(userId);

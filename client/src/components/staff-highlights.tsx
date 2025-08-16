@@ -57,7 +57,7 @@ export default function StaffHighlights() {
 
         <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
           {featuredStaff.map((member) => (
-            <div key={member.id} className="text-center group">
+            <div key={member._id || member.userId} className="text-center group">
               <div className="relative mb-6">
                 <Avatar className="w-32 h-32 mx-auto shadow-lg group-hover:shadow-xl transition-shadow duration-300 border-4 border-white">
                   <AvatarImage 

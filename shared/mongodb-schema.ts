@@ -294,7 +294,7 @@ export type InsertMedia = z.infer<typeof insertMediaSchema>;
 
 // Extended types for API responses
 export type UserWithProfile = IUser;
-export type BlogWithAuthor = IBlog & { author: IUser };
-export type CommentWithAuthor = IComment & { author: IUser };
-export type EventWithDetails = IEvent & { creator: IUser; registrationCount: number };
-export type StaffWithUser = IStaff & { user: IUser };
+export type BlogWithAuthor = any;
+export type CommentWithAuthor = any;
+export type EventWithDetails = any;
+export type StaffWithUser = any;

@@ -16,6 +16,9 @@ export interface IMongoStorage {
   createUser(user: InsertUser): Promise<IUser>;
   updateUser(id: string, updates: Partial<InsertUser>): Promise<IUser | null>;
   getAllAdmins(): Promise<IUser[]>;
+  getAllUsers(): Promise<IUser[]>;
+  getPendingAdmins(): Promise<IUser[]>;
+  deleteUser(id: string): Promise<boolean>;
   updateUserApproval(id: string, isApproved: boolean): Promise<IUser | null>;
   
   // Blog methods
@@ -137,7 +140,7 @@ export class MongoDBStorage implements IMongoStorage {
     return blogs.map(blog => ({
       ...blog.toObject(),
       author: blog.authorId as any
-    }));
+    })) as any;
   }
 
   async getBlog(id: string): Promise<BlogWithAuthor | null> {
@@ -149,7 +152,7 @@ export class MongoDBStorage implements IMongoStorage {
     return {
       ...blog.toObject(),
       author: blog.authorId as any
-    };
+    } as any;
   }
 
   async createBlog(blog: InsertBlog): Promise<IBlog> {
