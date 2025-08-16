@@ -610,7 +610,10 @@ export default function SuperAdminDashboard() {
                         <div className="flex items-center space-x-2">
                           <Button 
                             size="sm" 
-                            onClick={() => approveAdminMutation.mutate({ id: admin._id, isApproved: true })}
+                            onClick={() => {
+                              console.log('Approving admin:', admin);
+                              approveAdminMutation.mutate({ id: admin._id, isApproved: true });
+                            }}
                             disabled={approveAdminMutation.isPending}
                           >
                             Approve
@@ -618,7 +621,10 @@ export default function SuperAdminDashboard() {
                           <Button 
                             size="sm" 
                             variant="destructive"
-                            onClick={() => approveAdminMutation.mutate({ id: admin._id, isApproved: false })}
+                            onClick={() => {
+                              console.log('Rejecting admin:', admin);
+                              approveAdminMutation.mutate({ id: admin._id, isApproved: false });
+                            }}
                             disabled={approveAdminMutation.isPending}
                           >
                             Reject

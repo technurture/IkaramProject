@@ -104,6 +104,10 @@ export class MongoDBStorage implements IMongoStorage {
     return await User.find({ role: 'admin' }).sort({ createdAt: -1 });
   }
 
+  async getPendingAdmins(): Promise<IUser[]> {
+    return await User.find({ role: 'admin', isApproved: false }).sort({ createdAt: -1 });
+  }
+
   async updateUserApproval(id: string, isApproved: boolean): Promise<IUser | null> {
     return await User.findByIdAndUpdate(id, { isApproved, updatedAt: new Date() }, { new: true });
   }

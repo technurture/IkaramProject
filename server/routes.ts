@@ -453,11 +453,10 @@ export async function registerRoutes(app: Express, storage: IMongoStorage): Prom
   // Super Admin routes for managing admin approvals
   app.get("/api/admin/pending", requireSuperAdmin, async (req, res) => {
     try {
-      const pendingAdmins = await storage.getAllAdmins();
-      const pending = pendingAdmins.filter(admin => !admin.isApproved);
+      const pendingAdmins = await storage.getPendingAdmins();
       
       // Remove passwords from response
-      const adminsWithoutPasswords = pending.map(({ password, ...admin }) => admin);
+      const adminsWithoutPasswords = pendingAdmins.map(({ password, ...admin }) => admin);
       res.json(adminsWithoutPasswords);
     } catch (error) {
       res.status(500).json({ message: "Failed to fetch pending admins" });
@@ -478,7 +477,13 @@ export async function registerRoutes(app: Express, storage: IMongoStorage): Prom
 
   app.put("/api/admin/:id/approve", requireSuperAdmin, async (req, res) => {
     try {
+      console.log("Admin approval request:", { id: req.params.id, body: req.body });
       const { isApproved } = req.body;
+      
+      if (!req.params.id || req.params.id === 'undefined') {
+        return res.status(400).json({ message: "Invalid admin ID" });
+      }
+      
       const updatedAdmin = await storage.updateUserApproval(req.params.id, isApproved);
       
       if (!updatedAdmin) {
@@ -491,6 +496,7 @@ export async function registerRoutes(app: Express, storage: IMongoStorage): Prom
         admin: adminWithoutPassword
       });
     } catch (error) {
+      console.error("Admin approval error:", error);
       res.status(500).json({ message: "Failed to update admin approval" });
     }
   });
