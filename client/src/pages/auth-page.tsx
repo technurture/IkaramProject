@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "@/hooks/use-auth";
-import { Redirect } from "wouter";
+import { Redirect, Link } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -10,6 +10,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { ArrowLeft } from "lucide-react";
 
 const loginSchema = z.object({
   email: z.string().email("Please enter a valid email address"),
@@ -68,9 +69,27 @@ export default function AuthPage() {
   return (
     <div className="min-h-screen bg-gray-50 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-md w-full space-y-8">
+        {/* Back to Home Button */}
+        <div className="flex justify-start">
+          <Link href="/">
+            <Button variant="ghost" className="flex items-center gap-2 text-gray-600 hover:text-gray-900">
+              <ArrowLeft className="h-4 w-4" />
+              Back to Home
+            </Button>
+          </Link>
+        </div>
+        
         <div className="text-center">
-          <div className="h-16 w-16 rounded-full bg-primary-600 flex items-center justify-center mx-auto mb-4">
-            <span className="text-white font-bold text-2xl">OSA</span>
+          <div className="flex justify-center mb-4">
+            <img 
+              src="/logo.png" 
+              alt="Ikaram Alumni" 
+              className="h-16 w-auto"
+              onError={(e) => {
+                // Fallback to logo.jpeg if png fails
+                e.currentTarget.src = "/logo.jpeg";
+              }}
+            />
           </div>
           <h2 className="text-3xl font-bold text-gray-900">
             {mode === "login" ? "Welcome back!" : "Join our community"}

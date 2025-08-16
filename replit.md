@@ -100,6 +100,7 @@ Preferred communication style: Simple, everyday language.
 
 ### Media Storage Integration
 - **Cloud Provider**: Cloudinary for optimized media delivery
+- **Connection**: cloudinary://238391684591371:6vbkTWWobbPi1SvmuPpAwL5AUYA@dvgewacb7
 - **Supported Formats**: Images, videos, documents, and general file uploads
 - **Features**: Automatic optimization, format conversion, and CDN delivery
 - **Security**: Role-based upload permissions and secure deletion
@@ -114,6 +115,11 @@ Preferred communication style: Simple, everyday language.
   - PUT /api/admin/:id/approve - Approve/reject admin accounts
   - PUT /api/admin/:id/reactivate - Reactivate deactivated admins
 
+### UI/UX Improvements
+- Fixed login page logo display (supports both PNG and JPEG formats)
+- Added navigation back to home from login page
+- Proper logo fallback mechanism implemented
+
 ### Security Enhancements
 - Database credentials stored securely in environment variables
 - Enhanced role-based access control with three-tier system (user, admin, super_admin)
@@ -126,3 +132,4 @@ Preferred communication style: Simple, everyday language.
 - **Frontend**: Vite development server with hot module replacement
 - **API Status**: All endpoints functional (blogs, events, staff, media, auth)
 - **Database**: Connected and seeded with super admin account
+- **Migration Status**: Complete and ready for development
