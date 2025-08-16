@@ -1,4 +1,4 @@
-import { User } from "@shared/mongodb-schema";
+import { User, Staff } from "@shared/mongodb-schema";
 import { scrypt, randomBytes } from "crypto";
 import { promisify } from "util";
 
@@ -17,6 +17,25 @@ export async function seedSuperAdmin() {
     
     if (existingSuperAdmin) {
       console.log('✅ Super admin already exists:', existingSuperAdmin.email);
+      
+      // Check if staff profile exists for super admin
+      const existingStaff = await Staff.findOne({ userId: existingSuperAdmin._id });
+      if (!existingStaff) {
+        // Create staff profile for existing super admin
+        const staffData = {
+          userId: existingSuperAdmin._id,
+          position: "System Administrator",
+          department: "Information Technology",
+          bio: "System administrator with full access to manage the platform and approve other administrators.",
+          phoneNumber: "+1-555-0100",
+          officeLocation: "Admin Building, Room 101"
+        };
+        
+        const staff = new Staff(staffData);
+        await staff.save();
+        console.log('✅ Staff profile created for existing super admin');
+      }
+      
       return existingSuperAdmin;
     }
 
@@ -36,7 +55,21 @@ export async function seedSuperAdmin() {
     const superAdmin = new User(superAdminData);
     await superAdmin.save();
 
+    // Create staff profile for super admin
+    const staffData = {
+      userId: superAdmin._id,
+      position: "System Administrator",
+      department: "Information Technology",
+      bio: "System administrator with full access to manage the platform and approve other administrators.",
+      phoneNumber: "+1-555-0100",
+      officeLocation: "Admin Building, Room 101"
+    };
+    
+    const staff = new Staff(staffData);
+    await staff.save();
+
     console.log('✅ Super admin created successfully!');
+    console.log('✅ Staff profile created for super admin');
     console.log('📧 Email: superadmin@ikaram.edu');
     console.log('🔑 Password: SuperAdmin123!');
     console.log('⚠️  Please change the default password after first login!');
