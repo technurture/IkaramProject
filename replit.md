@@ -179,4 +179,7 @@ Preferred communication style: Simple, everyday language.
 - Implemented complete CRUD operations across all features
 - Fixed all React key warnings and LSP compilation errors
 - Enhanced upload capabilities with multiple file support and validation
+- Added profile image upload functionality to edit profile modal
+- Made edit profile modal scrollable with proper dialog components
+- Fixed staff card key warnings and all form schema compatibility
 - Migration fully completed with all user requirements implemented

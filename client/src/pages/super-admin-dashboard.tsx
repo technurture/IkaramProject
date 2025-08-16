@@ -110,6 +110,8 @@ const staffFormSchema = z.object({
   officeLocation: z.string().optional(),
   // Auto-admin option
   makeAdmin: z.boolean().default(true),
+  // Profile image
+  profileImage: z.string().optional(),
 }).refine(
   (data) => data.existingUserId || (data.firstName && data.lastName && data.email && data.username),
   {
@@ -125,6 +127,7 @@ const profileFormSchema = z.object({
   username: z.string().min(3).max(50),
   bio: z.string().optional(),
   graduationYear: z.number().optional(),
+  profileImage: z.string().optional(),
 });
 
 const passwordChangeSchema = z.object({
@@ -405,6 +408,7 @@ export default function SuperAdminDashboard() {
       username: user?.username || "",
       bio: user?.bio || "",
       graduationYear: user?.graduationYear || undefined,
+      profileImage: user?.profileImage || "",
     },
   });
 
@@ -467,6 +471,7 @@ export default function SuperAdminDashboard() {
       phoneNumber: "",
       officeLocation: "",
       makeAdmin: true,
+      profileImage: "",
     },
   });
 
@@ -1018,7 +1023,7 @@ export default function SuperAdminDashboard() {
               <CardContent>
                 <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
                   {recentStaff?.map((staff: any) => (
-                    <div key={staff.id} className="border rounded-lg p-4">
+                    <div key={staff._id} className="border rounded-lg p-4">
                       <div className="flex items-center space-x-3 mb-3">
                         <div className="h-10 w-10 rounded-full bg-primary-100 flex items-center justify-center">
                           <User className="h-5 w-5 text-primary-600" />
@@ -1169,14 +1174,15 @@ export default function SuperAdminDashboard() {
         </Tabs>
 
         {/* Profile Edit Modal */}
-        <Dialog open={profileOpen} onOpenChange={setProfileOpen}>
-          <DialogContent className="max-w-lg">
-            <DialogHeader>
-              <DialogTitle>Edit Profile</DialogTitle>
-              <DialogDescription>Update your personal information and account details.</DialogDescription>
-            </DialogHeader>
-            <Form {...profileForm}>
-              <form onSubmit={profileForm.handleSubmit(onUpdateProfile)} className="space-y-4">
+        <ScrollableDialog open={profileOpen} onOpenChange={setProfileOpen}>
+          <ScrollableDialogContent className="max-w-lg">
+            <ScrollableDialogHeader>
+              <ScrollableDialogTitle>Edit Profile</ScrollableDialogTitle>
+              <ScrollableDialogDescription>Update your personal information and account details.</ScrollableDialogDescription>
+            </ScrollableDialogHeader>
+            <ScrollableDialogBody>
+              <Form {...profileForm}>
+                <form onSubmit={profileForm.handleSubmit(onUpdateProfile)} className="space-y-4">
                 <div className="grid grid-cols-2 gap-4">
                   <FormField
                     control={profileForm.control}
@@ -1262,18 +1268,32 @@ export default function SuperAdminDashboard() {
                     </FormItem>
                   )}
                 />
-                <div className="flex justify-end space-x-2">
-                  <Button type="button" variant="outline" onClick={() => setProfileOpen(false)}>
-                    Cancel
-                  </Button>
-                  <Button type="submit" disabled={updateProfileMutation.isPending}>
-                    {updateProfileMutation.isPending ? "Saving..." : "Save Changes"}
-                  </Button>
+                
+                {/* Profile Image Upload */}
+                <div className="space-y-4">
+                  <FileUpload
+                    label="Profile Image"
+                    description="Upload a profile picture"
+                    accept="image/*"
+                    multiple={false}
+                    maxFiles={1}
+                    onUrlsChange={(urls) => profileForm.setValue('profileImage', urls[0] || '')}
+                    data-testid="profile-image-upload"
+                  />
                 </div>
               </form>
             </Form>
-          </DialogContent>
-        </Dialog>
+            </ScrollableDialogBody>
+            <ScrollableDialogFooter>
+              <Button type="button" variant="outline" onClick={() => setProfileOpen(false)}>
+                Cancel
+              </Button>
+              <Button type="submit" onClick={profileForm.handleSubmit(onUpdateProfile)} disabled={updateProfileMutation.isPending}>
+                {updateProfileMutation.isPending ? "Saving..." : "Save Changes"}
+              </Button>
+            </ScrollableDialogFooter>
+          </ScrollableDialogContent>
+        </ScrollableDialog>
 
         {/* Create Blog Modal */}
         <ScrollableDialog open={createBlogOpen} onOpenChange={setCreateBlogOpen}>
