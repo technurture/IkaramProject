@@ -38,14 +38,14 @@ export default function Navbar() {
             <div className="flex items-center space-x-4 cursor-pointer">
               <div className="flex-shrink-0">
                 <img 
-                  src="/logo.jpeg" 
-                  alt="Community Comprehensive High School Logo" 
-                  className="h-10 w-10 object-contain rounded-full"
+                  src="@assets/logo-removebg-preview_1755351782642.png" 
+                  alt="Community High School Logo" 
+                  className="h-12 w-12 object-contain"
                 />
               </div>
               <div className="hidden md:block">
                 <h1 className="text-xl font-bold text-gray-900">
-                  CCHS Ikaram-Akoko
+                  CHS Ikaram
                 </h1>
                 <p className="text-sm text-gray-500">Old Students Association</p>
               </div>

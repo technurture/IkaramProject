@@ -14,9 +14,9 @@ export default function AboutPage() {
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <div className="flex justify-center mb-6">
             <img 
-              src="/logo.jpeg" 
-              alt="Community Comprehensive High School Logo" 
-              className="h-24 w-24 object-contain rounded-full"
+              src="@assets/logo-removebg-preview_1755351782642.png" 
+              alt="Community High School Logo" 
+              className="h-32 w-32 object-contain"
             />
           </div>
           <h1 className="text-4xl lg:text-5xl font-bold mb-6">Community Comprehensive High School</h1>

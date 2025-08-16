@@ -238,8 +238,8 @@ export class DatabaseStorage implements IStorage {
       ...blogData,
       likes: likes.map(like => ({ userId: like.userId })),
       _count: {
-        comments: commentCount[0]?.count || 0,
-        likes: likeCount[0]?.count || 0
+        comments: Number(commentCount[0]?.count || 0),
+        likes: Number(likeCount[0]?.count || 0)
       }
     };
   }
