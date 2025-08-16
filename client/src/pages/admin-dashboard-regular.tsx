@@ -72,9 +72,7 @@ const eventFormSchema = insertEventSchema.omit({ createdBy: true }).extend({
   registrationDeadline: z.string().optional(),
 });
 
-const userFormSchema = insertUserSchema.omit({ isActive: true, isApproved: true });
 
-const staffFormSchema = insertStaffSchema.omit({ isActive: true });
 
 const profileFormSchema = z.object({
   firstName: z.string().min(1).max(50),
@@ -83,6 +81,7 @@ const profileFormSchema = z.object({
   username: z.string().min(3).max(50),
   bio: z.string().optional(),
   graduationYear: z.number().optional(),
+  profileImage: z.string().optional(),
 });
 
 const passwordChangeSchema = z.object({
@@ -103,11 +102,10 @@ export default function RegularAdminDashboard() {
   const [activeTab, setActiveTab] = useState("overview");
   const [createBlogOpen, setCreateBlogOpen] = useState(false);
   const [createEventOpen, setCreateEventOpen] = useState(false);
-  const [createUserOpen, setCreateUserOpen] = useState(false);
-  const [createStaffOpen, setCreateStaffOpen] = useState(false);
-  const [settingsOpen, setSettingsOpen] = useState(false);
+
   const [profileOpen, setProfileOpen] = useState(false);
   const [changePasswordOpen, setChangePasswordOpen] = useState(false);
+  const [uploadingImage, setUploadingImage] = useState(false);
 
   // Redirect if not admin
   if (!user || user.role !== 'admin') {
@@ -137,6 +135,16 @@ export default function RegularAdminDashboard() {
     queryFn: async () => {
       const response = await fetch("/api/events?limit=5");
       if (!response.ok) throw new Error("Failed to fetch events");
+      return response.json();
+    },
+  });
+
+  // Query to get all admins for the directory (regular admins can view all admins)
+  const { data: admins } = useQuery<IUser[]>({
+    queryKey: ["/api/admin/all"],
+    queryFn: async () => {
+      const response = await fetch("/api/admin/all");
+      if (!response.ok) throw new Error("Failed to fetch admins");
       return response.json();
     },
   });
@@ -200,39 +208,7 @@ export default function RegularAdminDashboard() {
     },
   });
 
-  // User creation mutation (limited for regular admins)
-  const createUserMutation = useMutation({
-    mutationFn: async (data: z.infer<typeof userFormSchema>) => {
-      // Regular admins can only create users, not other admins
-      const userData = { ...data, role: "user" };
-      const res = await apiRequest("POST", "/api/register", userData);
-      return await res.json();
-    },
-    onSuccess: () => {
-      toast({ title: "User created successfully" });
-      setCreateUserOpen(false);
-      queryClient.invalidateQueries({ queryKey: ["/api/admin/stats"] });
-    },
-    onError: (error: Error) => {
-      toast({ title: "Failed to create user", description: error.message, variant: "destructive" });
-    },
-  });
 
-  // Staff creation mutation
-  const createStaffMutation = useMutation({
-    mutationFn: async (data: z.infer<typeof staffFormSchema>) => {
-      const res = await apiRequest("POST", "/api/staff", data);
-      return await res.json();
-    },
-    onSuccess: () => {
-      toast({ title: "Staff member added successfully" });
-      setCreateStaffOpen(false);
-      queryClient.invalidateQueries({ queryKey: ["/api/staff"] });
-    },
-    onError: (error: Error) => {
-      toast({ title: "Failed to add staff member", description: error.message, variant: "destructive" });
-    },
-  });
 
   // Password change mutation
   const changePasswordMutation = useMutation({
@@ -260,6 +236,7 @@ export default function RegularAdminDashboard() {
       username: user?.username || "",
       bio: user?.bio || "",
       graduationYear: user?.graduationYear || undefined,
+      profileImage: user?.profileImage || "",
     },
   });
 
@@ -290,29 +267,7 @@ export default function RegularAdminDashboard() {
     },
   });
 
-  // User form (limited for regular admins)
-  const userForm = useForm<z.infer<typeof userFormSchema>>({
-    resolver: zodResolver(userFormSchema),
-    defaultValues: {
-      username: "",
-      email: "",
-      password: "",
-      firstName: "",
-      lastName: "",
-      role: "user",
-    },
-  });
 
-  // Staff form
-  const staffForm = useForm<z.infer<typeof staffFormSchema>>({
-    resolver: zodResolver(staffFormSchema),
-    defaultValues: {
-      userId: "",
-      position: "",
-      department: "",
-      bio: "",
-    },
-  });
 
   // Password change form
   const passwordForm = useForm<z.infer<typeof passwordChangeSchema>>({
@@ -323,6 +278,55 @@ export default function RegularAdminDashboard() {
       confirmPassword: "",
     },
   });
+
+  // Profile image upload mutation
+  const uploadImageMutation = useMutation({
+    mutationFn: async (file: File) => {
+      const formData = new FormData();
+      formData.append('file', file);
+      
+      const response = await fetch('/api/upload', {
+        method: 'POST',
+        body: formData,
+      });
+      
+      if (!response.ok) throw new Error('Failed to upload image');
+      return response.json();
+    },
+    onSuccess: (data) => {
+      profileForm.setValue('profileImage', data.url);
+      toast({ title: "Image uploaded successfully" });
+    },
+    onError: (error: Error) => {
+      toast({ title: "Failed to upload image", description: error.message, variant: "destructive" });
+    },
+  });
+
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Validate file type
+    const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
+    if (!validTypes.includes(file.type)) {
+      toast({ title: "Invalid file type", description: "Please upload a JPEG, PNG, or WebP image.", variant: "destructive" });
+      return;
+    }
+
+    // Validate file size (5MB max)
+    const maxSize = 5 * 1024 * 1024;
+    if (file.size > maxSize) {
+      toast({ title: "File too large", description: "Please upload an image smaller than 5MB.", variant: "destructive" });
+      return;
+    }
+
+    setUploadingImage(true);
+    try {
+      await uploadImageMutation.mutateAsync(file);
+    } finally {
+      setUploadingImage(false);
+    }
+  };
 
   const onUpdateProfile = (values: z.infer<typeof profileFormSchema>) => {
     // Trim whitespace from text fields
@@ -360,31 +364,7 @@ export default function RegularAdminDashboard() {
     createEventMutation.mutate(trimmedValues);
   };
 
-  const onCreateUser = (values: z.infer<typeof userFormSchema>) => {
-    // Trim whitespace from text fields
-    const trimmedValues = {
-      ...values,
-      firstName: values.firstName.trim(),
-      lastName: values.lastName.trim(),
-      email: values.email.trim(),
-      username: values.username.trim(),
-      password: values.password.trim(),
-      bio: values.bio?.trim(),
-    };
-    createUserMutation.mutate(trimmedValues);
-  };
 
-  const onCreateStaff = (values: z.infer<typeof staffFormSchema>) => {
-    // Trim whitespace from text fields
-    const trimmedValues = {
-      ...values,
-      position: values.position.trim(),
-      department: values.department?.trim(),
-      phoneNumber: values.phoneNumber?.trim(),
-      bio: values.bio?.trim(),
-    };
-    createStaffMutation.mutate(trimmedValues);
-  };
 
   const onChangePassword = (values: z.infer<typeof passwordChangeSchema>) => {
     changePasswordMutation.mutate(values);
@@ -426,31 +406,18 @@ export default function RegularAdminDashboard() {
                   <Calendar className="h-4 w-4 mr-2" />
                   Create Event
                 </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={() => setCreateUserOpen(true)}>
-                  <UserPlus className="h-4 w-4 mr-2" />
-                  Add User
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => setCreateStaffOpen(true)}>
-                  <Users className="h-4 w-4 mr-2" />
-                  Add Staff Member
-                </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
-            <Button variant="outline" onClick={() => setSettingsOpen(true)}>
-              <Settings className="h-4 w-4 mr-2" />
-              Settings
-            </Button>
+
           </div>
         </div>
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-5">
+          <TabsList className="grid w-full grid-cols-4">
             <TabsTrigger value="overview">Overview</TabsTrigger>
-            <TabsTrigger value="users">Users</TabsTrigger>
+            <TabsTrigger value="admins">Admins</TabsTrigger>
             <TabsTrigger value="content">Content</TabsTrigger>
             <TabsTrigger value="events">Events</TabsTrigger>
-            <TabsTrigger value="staff">Staff</TabsTrigger>
           </TabsList>
 
           <TabsContent value="overview" className="space-y-6">
@@ -570,22 +537,52 @@ export default function RegularAdminDashboard() {
             </div>
           </TabsContent>
 
-          <TabsContent value="users" className="space-y-6">
+          <TabsContent value="admins" className="space-y-6">
             <div className="flex justify-between items-center">
-              <h2 className="text-2xl font-bold text-gray-900">User Management</h2>
-              <Button onClick={() => setCreateUserOpen(true)}>
-                <Plus className="h-4 w-4 mr-2" />
-                Add User
-              </Button>
+              <h2 className="text-2xl font-bold text-gray-900">Administrator Directory</h2>
             </div>
             
             <Card>
               <CardContent className="p-6">
-                <div className="text-center py-8">
-                  <Users className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                  <h3 className="text-lg font-medium text-gray-900 mb-2">User Management</h3>
-                  <p className="text-gray-600">User management interface would be implemented here</p>
-                  <p className="text-sm text-blue-600 mt-2">Note: As a regular admin, you can only create standard users</p>
+                <div className="space-y-4">
+                  {admins?.map((admin) => (
+                    <div key={admin._id} className="flex items-center justify-between p-4 border border-gray-200 rounded-lg">
+                      <div className="flex items-center space-x-4">
+                        <div className="flex-shrink-0">
+                          {admin.profileImage ? (
+                            <img
+                              src={admin.profileImage}
+                              alt={`${admin.firstName} ${admin.lastName}`}
+                              className="h-12 w-12 rounded-full object-cover"
+                            />
+                          ) : (
+                            <div className="h-12 w-12 rounded-full bg-gray-300 flex items-center justify-center">
+                              <User className="h-6 w-6 text-gray-600" />
+                            </div>
+                          )}
+                        </div>
+                        <div className="flex-1">
+                          <h3 className="font-medium text-gray-900">
+                            {admin.firstName} {admin.lastName}
+                          </h3>
+                          <p className="text-sm text-gray-600">
+                            {admin.email} • @{admin.username}
+                          </p>
+                          <div className="flex items-center space-x-2 mt-1">
+                            <Badge variant={admin.role === 'super_admin' ? 'default' : 'secondary'}>
+                              {admin.role === 'super_admin' ? 'Super Admin' : 'Admin'}
+                            </Badge>
+                            <Badge variant={admin.isApproved ? 'outline' : 'destructive'}>
+                              {admin.isApproved ? 'Active' : 'Pending'}
+                            </Badge>
+                          </div>
+                        </div>
+                      </div>
+                      <div className="text-sm text-gray-500">
+                        View Only
+                      </div>
+                    </div>
+                  ))}
                 </div>
               </CardContent>
             </Card>
@@ -670,25 +667,7 @@ export default function RegularAdminDashboard() {
             </Card>
           </TabsContent>
 
-          <TabsContent value="staff" className="space-y-6">
-            <div className="flex justify-between items-center">
-              <h2 className="text-2xl font-bold text-gray-900">Staff Management</h2>
-              <Button onClick={() => setCreateStaffOpen(true)}>
-                <Plus className="h-4 w-4 mr-2" />
-                Add Staff Member
-              </Button>
-            </div>
-            
-            <Card>
-              <CardContent className="p-6">
-                <div className="text-center py-8">
-                  <UserCheck className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                  <h3 className="text-lg font-medium text-gray-900 mb-2">Staff Management</h3>
-                  <p className="text-gray-600">Staff management interface would be implemented here</p>
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
+
         </Tabs>
 
         {/* Profile Edit Modal */}
@@ -780,6 +759,49 @@ export default function RegularAdminDashboard() {
                           {...field} 
                           onChange={e => field.onChange(e.target.value ? parseInt(e.target.value) : undefined)} 
                         />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={profileForm.control}
+                  name="profileImage"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Profile Image</FormLabel>
+                      <FormControl>
+                        <div className="space-y-4">
+                          {field.value && (
+                            <div className="flex items-center space-x-4">
+                              <img
+                                src={field.value}
+                                alt="Profile preview"
+                                className="h-20 w-20 rounded-full object-cover border-2 border-gray-300"
+                              />
+                              <Button
+                                type="button"
+                                variant="outline"
+                                size="sm"
+                                onClick={() => field.onChange('')}
+                              >
+                                Remove Image
+                              </Button>
+                            </div>
+                          )}
+                          <div className="flex items-center space-x-4">
+                            <Input
+                              type="file"
+                              accept="image/*"
+                              onChange={handleImageUpload}
+                              className="file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+                              disabled={uploadingImage}
+                            />
+                            {uploadingImage && (
+                              <div className="text-sm text-gray-600">Uploading...</div>
+                            )}
+                          </div>
+                        </div>
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -1010,209 +1032,6 @@ export default function RegularAdminDashboard() {
                 </div>
               </form>
             </Form>
-          </DialogContent>
-        </Dialog>
-
-        {/* Create User Modal (Limited for Regular Admins) */}
-        <Dialog open={createUserOpen} onOpenChange={setCreateUserOpen}>
-          <DialogContent className="max-w-lg">
-            <DialogHeader>
-              <DialogTitle>Add New User</DialogTitle>
-              <DialogDescription>Create a new user account for the platform. As a regular admin, you can only create standard users.</DialogDescription>
-            </DialogHeader>
-            <Form {...userForm}>
-              <form onSubmit={userForm.handleSubmit(onCreateUser)} className="space-y-4">
-                <div className="grid grid-cols-2 gap-4">
-                  <FormField
-                    control={userForm.control}
-                    name="firstName"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>First Name</FormLabel>
-                        <FormControl>
-                          <Input placeholder="John" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={userForm.control}
-                    name="lastName"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Last Name</FormLabel>
-                        <FormControl>
-                          <Input placeholder="Doe" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
-                <FormField
-                  control={userForm.control}
-                  name="email"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Email</FormLabel>
-                      <FormControl>
-                        <Input type="email" placeholder="john.doe@example.com" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={userForm.control}
-                  name="username"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Username</FormLabel>
-                      <FormControl>
-                        <Input placeholder="johndoe" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={userForm.control}
-                  name="password"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Password</FormLabel>
-                      <FormControl>
-                        <Input type="password" placeholder="Minimum 6 characters" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={userForm.control}
-                  name="graduationYear"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Graduation Year</FormLabel>
-                      <FormControl>
-                        <Input type="number" placeholder="2023" {...field} onChange={e => field.onChange(e.target.value ? parseInt(e.target.value) : undefined)} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <div className="bg-blue-50 p-3 rounded-md">
-                  <p className="text-sm text-blue-700">
-                    Note: New users will be created with "user" role by default. Contact a super admin to create admin accounts.
-                  </p>
-                </div>
-                <div className="flex justify-end space-x-2">
-                  <Button type="button" variant="outline" onClick={() => setCreateUserOpen(false)}>
-                    Cancel
-                  </Button>
-                  <Button type="submit" disabled={createUserMutation.isPending}>
-                    {createUserMutation.isPending ? "Creating..." : "Create User"}
-                  </Button>
-                </div>
-              </form>
-            </Form>
-          </DialogContent>
-        </Dialog>
-
-        {/* Create Staff Modal */}
-        <Dialog open={createStaffOpen} onOpenChange={setCreateStaffOpen}>
-          <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
-            <DialogHeader>
-              <DialogTitle>Add Staff Member</DialogTitle>
-              <DialogDescription>Add a new staff member to the platform.</DialogDescription>
-            </DialogHeader>
-            <Form {...staffForm}>
-              <form onSubmit={staffForm.handleSubmit(onCreateStaff)} className="space-y-4">
-                <FormField
-                  control={staffForm.control}
-                  name="userId"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>User ID</FormLabel>
-                      <FormControl>
-                        <Input placeholder="Enter existing user ID" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={staffForm.control}
-                  name="position"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Position</FormLabel>
-                      <FormControl>
-                        <Input placeholder="e.g., Alumni Coordinator" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={staffForm.control}
-                  name="department"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Department</FormLabel>
-                      <FormControl>
-                        <Input placeholder="e.g., Alumni Relations" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={staffForm.control}
-                  name="bio"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Bio</FormLabel>
-                      <FormControl>
-                        <Textarea placeholder="Brief bio about the staff member" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <div className="flex justify-end space-x-2">
-                  <Button type="button" variant="outline" onClick={() => setCreateStaffOpen(false)}>
-                    Cancel
-                  </Button>
-                  <Button type="submit" disabled={createStaffMutation.isPending}>
-                    {createStaffMutation.isPending ? "Adding..." : "Add Staff Member"}
-                  </Button>
-                </div>
-              </form>
-            </Form>
-          </DialogContent>
-        </Dialog>
-
-        {/* Settings Modal */}
-        <Dialog open={settingsOpen} onOpenChange={setSettingsOpen}>
-          <DialogContent className="max-w-md">
-            <DialogHeader>
-              <DialogTitle>Admin Settings</DialogTitle>
-              <DialogDescription>Configure your admin preferences and settings.</DialogDescription>
-            </DialogHeader>
-            <div className="space-y-4">
-              <div className="text-center py-8">
-                <Settings className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                <h3 className="text-lg font-medium text-gray-900 mb-2">Admin Settings</h3>
-                <p className="text-gray-600">Admin configuration panel would be implemented here</p>
-              </div>
-              <div className="flex justify-end">
-                <Button onClick={() => setSettingsOpen(false)}>
-                  Close
-                </Button>
-              </div>
-            </div>
           </DialogContent>
         </Dialog>
 

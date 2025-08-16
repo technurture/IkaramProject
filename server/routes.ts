@@ -523,7 +523,7 @@ export async function registerRoutes(app: Express, storage: IMongoStorage): Prom
     }
   });
 
-  app.get("/api/admin/all", requireSuperAdmin, async (req, res) => {
+  app.get("/api/admin/all", requireAdmin, async (req, res) => {
     try {
       const allAdmins = await storage.getAllAdmins();
       
