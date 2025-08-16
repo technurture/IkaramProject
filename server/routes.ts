@@ -345,8 +345,8 @@ export async function registerRoutes(app: Express, storage: IMongoStorage): Prom
         size: req.file.size,
         cloudinaryPublicId: cloudinaryResult.public_id,
         cloudinaryUrl: cloudinaryResult.secure_url,
-        uploadedBy: req.user.id,
-        isDownloadable: req.body.isDownloadable === 'true'
+        uploadedBy: req.user!._id,
+        path: cloudinaryResult.secure_url
       });
 
       res.status(201).json({
@@ -381,12 +381,14 @@ export async function registerRoutes(app: Express, storage: IMongoStorage): Prom
       }
 
       // Only allow uploader or admin to delete
-      if (media.uploadedBy !== req.user._id && req.user.role !== 'admin' && req.user.role !== 'super_admin') {
+      if (media.uploadedBy !== req.user!._id && req.user!.role !== 'admin' && req.user!.role !== 'super_admin') {
         return res.status(403).json({ message: "Not authorized to delete this media" });
       }
 
       // Delete from Cloudinary
-      await deleteFromCloudinary(media.cloudinaryPublicId);
+      if (media.cloudinaryPublicId) {
+        await deleteFromCloudinary(media.cloudinaryPublicId);
+      }
       
       // Delete from database
       const deleted = await storage.deleteMedia(req.params.id);
