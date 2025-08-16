@@ -1,6 +1,6 @@
 import mongoose from 'mongoose';
 
-const MONGODB_URL = process.env.MONGODB_URL;
+const MONGODB_URL = process.env.MONGODB_URL || "mongodb+srv://technurture619:EljLBiQMpurchBD1@ikaram.13ysrj8.mongodb.net/?retryWrites=true&w=majority&appName=Ikaram";
 
 if (!MONGODB_URL) {
   throw new Error('MONGODB_URL environment variable is not defined');

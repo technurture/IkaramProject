@@ -168,6 +168,8 @@ export interface IMedia extends Document {
   size: number;
   path: string;
   cloudinaryId?: string;
+  cloudinaryPublicId?: string;
+  cloudinaryUrl?: string;
   uploadedBy: string;
   createdAt: Date;
 }
@@ -179,6 +181,8 @@ const mediaSchema = new Schema<IMedia>({
   size: { type: Number, required: true },
   path: { type: String, required: true },
   cloudinaryId: { type: String },
+  cloudinaryPublicId: { type: String },
+  cloudinaryUrl: { type: String },
   uploadedBy: { type: String, required: true, ref: 'User' },
   createdAt: { type: Date, default: Date.now }
 });
@@ -275,6 +279,8 @@ export const insertMediaSchema = z.object({
   size: z.number(),
   path: z.string(),
   cloudinaryId: z.string().optional(),
+  cloudinaryPublicId: z.string().optional(),
+  cloudinaryUrl: z.string().optional(),
   uploadedBy: z.string()
 });
 

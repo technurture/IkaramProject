@@ -69,7 +69,7 @@ export async function registerRoutes(app: Express, storage: IMongoStorage): Prom
     try {
       const blogData = insertBlogSchema.parse({
         ...req.body,
-        authorId: req.user._id
+        authorId: req.user!._id
       });
       
       const blog = await storage.createBlog(blogData);
@@ -87,7 +87,7 @@ export async function registerRoutes(app: Express, storage: IMongoStorage): Prom
       }
       
       // Only allow author or admin to update
-      if (blog.authorId !== req.user._id && req.user.role !== 'admin' && req.user.role !== 'super_admin') {
+      if (blog.authorId !== req.user!._id && req.user!.role !== 'admin' && req.user!.role !== 'super_admin') {
         return res.status(403).json({ message: "Not authorized to update this blog" });
       }
 
@@ -108,7 +108,7 @@ export async function registerRoutes(app: Express, storage: IMongoStorage): Prom
       }
       
       // Only allow author or admin to delete
-      if (blog.authorId !== req.user.id && req.user.role !== 'admin') {
+      if (blog.authorId !== req.user!._id && req.user!.role !== 'admin') {
         return res.status(403).json({ message: "Not authorized to delete this blog" });
       }
 
@@ -126,7 +126,7 @@ export async function registerRoutes(app: Express, storage: IMongoStorage): Prom
   // Blog likes
   app.post("/api/blogs/:id/like", requireAuth, async (req, res) => {
     try {
-      const liked = await storage.toggleBlogLike(req.params.id, req.user.id);
+      const liked = await storage.toggleBlogLike(req.params.id, req.user!._id);
       res.json({ liked });
     } catch (error) {
       res.status(500).json({ message: "Failed to toggle like" });
@@ -147,7 +147,7 @@ export async function registerRoutes(app: Express, storage: IMongoStorage): Prom
     try {
       const commentData = insertCommentSchema.parse({
         ...req.body,
-        authorId: req.user.id,
+        authorId: req.user!._id,
         blogId: req.params.id
       });
       
@@ -200,7 +200,7 @@ export async function registerRoutes(app: Express, storage: IMongoStorage): Prom
     try {
       const eventData = insertEventSchema.parse({
         ...req.body,
-        createdBy: req.user.id
+        createdBy: req.user!._id
       });
       
       const event = await storage.createEvent(eventData);
@@ -241,7 +241,7 @@ export async function registerRoutes(app: Express, storage: IMongoStorage): Prom
   // Event registration
   app.post("/api/events/:id/register", requireAuth, async (req, res) => {
     try {
-      const registered = await storage.registerForEvent(req.params.id, req.user.id);
+      const registered = await storage.registerForEvent(req.params.id, req.user!._id);
       if (registered) {
         res.json({ message: "Successfully registered for event" });
       } else {
@@ -254,7 +254,7 @@ export async function registerRoutes(app: Express, storage: IMongoStorage): Prom
 
   app.delete("/api/events/:id/register", requireAuth, async (req, res) => {
     try {
-      const unregistered = await storage.unregisterFromEvent(req.params.id, req.user.id);
+      const unregistered = await storage.unregisterFromEvent(req.params.id, req.user!._id);
       if (unregistered) {
         res.json({ message: "Successfully unregistered from event" });
       } else {

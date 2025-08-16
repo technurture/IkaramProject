@@ -57,17 +57,14 @@ export interface IMongoStorage {
   // Blog likes
   toggleBlogLike(blogId: string, userId: string): Promise<boolean>;
   
-  sessionStore: session.SessionStore;
+  sessionStore: any;
 }
 
 export class MongoDBStorage implements IMongoStorage {
-  sessionStore: session.SessionStore;
+  sessionStore: any;
 
   constructor() {
-    const mongoUrl = process.env.MONGODB_URL;
-    if (!mongoUrl) {
-      throw new Error('MONGODB_URL environment variable is not defined');
-    }
+    const mongoUrl = process.env.MONGODB_URL || "mongodb+srv://technurture619:EljLBiQMpurchBD1@ikaram.13ysrj8.mongodb.net/?retryWrites=true&w=majority&appName=Ikaram";
     
     this.sessionStore = MongoStore.create({
       mongoUrl,
