@@ -1122,7 +1122,7 @@ export default function RegularAdminDashboard() {
 
         {/* Create Staff Modal */}
         <Dialog open={createStaffOpen} onOpenChange={setCreateStaffOpen}>
-          <DialogContent className="max-w-lg">
+          <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle>Add Staff Member</DialogTitle>
               <DialogDescription>Add a new staff member to the platform.</DialogDescription>
