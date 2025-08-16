@@ -151,7 +151,7 @@ export default function Navbar() {
                   <div className="text-sm text-gray-600">
                     {user.firstName} {user.lastName}
                   </div>
-                  {user.role === 'admin' && (
+                  {(user.role === 'admin' || user.role === 'super_admin') && (
                     <Link href="/admin">
                       <Button variant="ghost" className="w-full justify-start" onClick={() => setIsMobileMenuOpen(false)}>
                         Admin Dashboard
