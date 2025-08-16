@@ -186,6 +186,15 @@ export default function SuperAdminDashboard() {
     },
   });
 
+  const { data: recentStaff } = useQuery<StaffWithUser[]>({
+    queryKey: ["/api/staff", "recent"],
+    queryFn: async () => {
+      const response = await fetch("/api/staff?limit=10");
+      if (!response.ok) throw new Error("Failed to fetch staff");
+      return response.json();
+    },
+  });
+
   const { data: allAdmins } = useQuery<IUser[]>({
     queryKey: ["/api/admin/all"],
     queryFn: async () => {
@@ -1008,7 +1017,7 @@ export default function SuperAdminDashboard() {
               </CardHeader>
               <CardContent>
                 <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {recentStaff?.map((staff) => (
+                  {recentStaff?.map((staff: any) => (
                     <div key={staff.id} className="border rounded-lg p-4">
                       <div className="flex items-center space-x-3 mb-3">
                         <div className="h-10 w-10 rounded-full bg-primary-100 flex items-center justify-center">
@@ -1493,18 +1502,41 @@ export default function SuperAdminDashboard() {
                     </FormItem>
                   )}
                 />
-                <div className="flex justify-end space-x-2">
-                  <Button type="button" variant="outline" onClick={() => setCreateEventOpen(false)}>
-                    Cancel
-                  </Button>
-                  <Button type="submit" disabled={createEventMutation.isPending}>
-                    {createEventMutation.isPending ? "Creating..." : "Create Event"}
-                  </Button>
+                
+                {/* File Upload Section */}
+                <div className="space-y-4">
+                  <FileUpload
+                    label="Featured Image"
+                    description="Upload a featured image for this event"
+                    accept="image/*"
+                    multiple={false}
+                    maxFiles={1}
+                    onUrlsChange={(urls) => eventForm.setValue('featuredImage', urls[0] || '')}
+                    data-testid="event-featured-image-upload"
+                  />
+                  
+                  <FileUpload
+                    label="Event Attachments"
+                    description="Upload event documents, flyers, or additional files"
+                    multiple={true}
+                    maxFiles={5}
+                    onUrlsChange={(urls) => eventForm.setValue('attachments', urls)}
+                    data-testid="event-attachments-upload"
+                  />
                 </div>
               </form>
             </Form>
-          </DialogContent>
-        </Dialog>
+            </ScrollableDialogBody>
+            <ScrollableDialogFooter>
+              <Button type="button" variant="outline" onClick={() => setCreateEventOpen(false)}>
+                Cancel
+              </Button>
+              <Button type="submit" onClick={eventForm.handleSubmit(onCreateEvent)} disabled={createEventMutation.isPending}>
+                {createEventMutation.isPending ? "Creating..." : "Create Event"}
+              </Button>
+            </ScrollableDialogFooter>
+          </ScrollableDialogContent>
+        </ScrollableDialog>
 
         {/* Create User Modal */}
         <Dialog open={createUserOpen} onOpenChange={setCreateUserOpen}>
@@ -1633,14 +1665,15 @@ export default function SuperAdminDashboard() {
         </Dialog>
 
         {/* Create Staff Modal */}
-        <Dialog open={createStaffOpen} onOpenChange={setCreateStaffOpen}>
-          <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
-            <DialogHeader>
-              <DialogTitle>Add Staff Member</DialogTitle>
-              <DialogDescription>Add a new staff member to the platform.</DialogDescription>
-            </DialogHeader>
-            <Form {...staffForm}>
-              <form onSubmit={staffForm.handleSubmit(onCreateStaff)} className="space-y-4">
+        <ScrollableDialog open={createStaffOpen} onOpenChange={setCreateStaffOpen}>
+          <ScrollableDialogContent className="max-w-lg">
+            <ScrollableDialogHeader>
+              <ScrollableDialogTitle>Add Staff Member</ScrollableDialogTitle>
+              <ScrollableDialogDescription>Add a new staff member to the platform.</ScrollableDialogDescription>
+            </ScrollableDialogHeader>
+            <ScrollableDialogBody>
+              <Form {...staffForm}>
+                <form onSubmit={staffForm.handleSubmit(onCreateStaff)} className="space-y-4">
                 <FormField
                   control={staffForm.control}
                   name="existingUserId"
@@ -1826,18 +1859,32 @@ export default function SuperAdminDashboard() {
                   </div>
                 )}
                 
-                <div className="flex justify-end space-x-2">
-                  <Button type="button" variant="outline" onClick={() => setCreateStaffOpen(false)}>
-                    Cancel
-                  </Button>
-                  <Button type="submit" disabled={createStaffMutation.isPending}>
-                    {createStaffMutation.isPending ? "Adding..." : "Add Staff Member"}
-                  </Button>
+                
+                {/* Profile Image Upload */}
+                <div className="space-y-4">
+                  <FileUpload
+                    label="Profile Image"
+                    description="Upload a profile picture for the staff member"
+                    accept="image/*"
+                    multiple={false}
+                    maxFiles={1}
+                    onUrlsChange={(urls) => staffForm.setValue('profileImage', urls[0] || '')}
+                    data-testid="staff-profile-image-upload"
+                  />
                 </div>
               </form>
             </Form>
-          </DialogContent>
-        </Dialog>
+            </ScrollableDialogBody>
+            <ScrollableDialogFooter>
+              <Button type="button" variant="outline" onClick={() => setCreateStaffOpen(false)}>
+                Cancel
+              </Button>
+              <Button type="submit" onClick={staffForm.handleSubmit(onCreateStaff)} disabled={createStaffMutation.isPending}>
+                {createStaffMutation.isPending ? "Adding..." : "Add Staff Member"}
+              </Button>
+            </ScrollableDialogFooter>
+          </ScrollableDialogContent>
+        </ScrollableDialog>
 
         {/* Settings Modal */}
         <Dialog open={settingsOpen} onOpenChange={setSettingsOpen}>
