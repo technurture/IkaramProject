@@ -215,12 +215,12 @@ export default function SuperAdminDashboard() {
       return await res.json();
     },
     onSuccess: () => {
-      toast({ title: "User created successfully" });
+      toast({ title: "Admin created successfully" });
       setCreateUserOpen(false);
       queryClient.invalidateQueries({ queryKey: ["/api/admin/stats"] });
     },
     onError: (error: Error) => {
-      toast({ title: "Failed to create user", description: error.message, variant: "destructive" });
+      toast({ title: "Failed to create admin", description: error.message, variant: "destructive" });
     },
   });
 
@@ -416,7 +416,7 @@ export default function SuperAdminDashboard() {
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={() => setCreateUserOpen(true)}>
                   <UserPlus className="h-4 w-4 mr-2" />
-                  Add User
+                  Add Admin
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={() => setCreateStaffOpen(true)}>
                   <Users className="h-4 w-4 mr-2" />
@@ -440,7 +440,7 @@ export default function SuperAdminDashboard() {
           <TabsList className="grid w-full grid-cols-6">
             <TabsTrigger value="overview">Overview</TabsTrigger>
             <TabsTrigger value="admin">Admin Management</TabsTrigger>
-            <TabsTrigger value="users">Users</TabsTrigger>
+            <TabsTrigger value="users">Admins</TabsTrigger>
             <TabsTrigger value="content">Content</TabsTrigger>
             <TabsTrigger value="events">Events</TabsTrigger>
             <TabsTrigger value="staff">Staff</TabsTrigger>
@@ -453,7 +453,7 @@ export default function SuperAdminDashboard() {
                 <CardContent className="p-6">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-sm font-medium text-gray-600">Total Users</p>
+                      <p className="text-sm font-medium text-gray-600">Total Admins</p>
                       <p className="text-3xl font-bold text-gray-900">
                         {statsLoading ? "..." : stats?.totalUsers?.toLocaleString()}
                       </p>
@@ -461,7 +461,7 @@ export default function SuperAdminDashboard() {
                     <Users className="h-8 w-8 text-primary-600" />
                   </div>
                   <p className="text-sm text-green-600 mt-2">
-                    +{stats?.newUsersThisMonth} this month
+                    +{stats?.newUsersThisMonth} new admins this month
                   </p>
                 </CardContent>
               </Card>
@@ -667,10 +667,10 @@ export default function SuperAdminDashboard() {
 
           <TabsContent value="users" className="space-y-6">
             <div className="flex justify-between items-center">
-              <h2 className="text-2xl font-bold text-gray-900">User Management</h2>
+              <h2 className="text-2xl font-bold text-gray-900">Admin Management</h2>
               <Button onClick={() => setCreateUserOpen(true)}>
                 <Plus className="h-4 w-4 mr-2" />
-                Add User
+                Add Admin
               </Button>
             </div>
             
@@ -1111,8 +1111,8 @@ export default function SuperAdminDashboard() {
         <Dialog open={createUserOpen} onOpenChange={setCreateUserOpen}>
           <DialogContent className="max-w-lg">
             <DialogHeader>
-              <DialogTitle>Add New User</DialogTitle>
-              <DialogDescription>Create a new user account for the platform.</DialogDescription>
+              <DialogTitle>Add New Admin</DialogTitle>
+              <DialogDescription>Create a new admin account for the platform.</DialogDescription>
             </DialogHeader>
             <Form {...userForm}>
               <form onSubmit={userForm.handleSubmit(onCreateUser)} className="space-y-4">
@@ -1225,7 +1225,7 @@ export default function SuperAdminDashboard() {
                     Cancel
                   </Button>
                   <Button type="submit" disabled={createUserMutation.isPending}>
-                    {createUserMutation.isPending ? "Creating..." : "Create User"}
+                    {createUserMutation.isPending ? "Creating..." : "Create Admin"}
                   </Button>
                 </div>
               </form>
