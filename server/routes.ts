@@ -3,7 +3,7 @@ import { createServer, type Server } from "http";
 import type { IMongoStorage } from "./mongodb-storage";
 import { setupAuth } from "./auth";
 import { upload, uploadToCloudinary, deleteFromCloudinary } from "./cloudinary";
-import { insertBlogSchema, insertCommentSchema, insertEventSchema, insertStaffSchema } from "@shared/mongodb-schema";
+import { User, insertBlogSchema, insertCommentSchema, insertEventSchema, insertStaffSchema } from "@shared/mongodb-schema";
 
 export async function registerRoutes(app: Express, storage: IMongoStorage): Promise<Server> {
   // Setup authentication routes with storage
@@ -400,6 +400,47 @@ export async function registerRoutes(app: Express, storage: IMongoStorage): Prom
       }
     } catch (error) {
       res.status(500).json({ message: "Failed to delete media" });
+    }
+  });
+
+  // Admin stats endpoint
+  app.get("/api/admin/stats", requireAdmin, async (req, res) => {
+    try {
+      const now = new Date();
+      const oneMonthAgo = new Date(now.getFullYear(), now.getMonth() - 1, now.getDate());
+      const oneWeekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+
+      // Get total counts and recent additions in parallel
+      const [
+        totalUsers,
+        newUsersThisMonth,
+        totalBlogs,
+        newBlogsThisWeek,
+        totalEvents,
+        upcomingEvents,
+        pendingAdmins
+      ] = await Promise.all([
+        User.countDocuments({}),
+        User.countDocuments({ createdAt: { $gte: oneMonthAgo } }),
+        storage.getBlogs().then(blogs => blogs.length),
+        storage.getBlogs().then(blogs => blogs.filter(blog => new Date(blog.createdAt) >= oneWeekAgo).length),
+        storage.getEvents().then(events => events.length),
+        storage.getEvents().then(events => events.filter(event => new Date(event.startDate) > now).length),
+        storage.getAllAdmins().then(admins => admins.filter(admin => !admin.isApproved).length)
+      ]);
+
+      res.json({
+        totalUsers,
+        newUsersThisMonth,
+        totalBlogs,
+        newBlogsThisWeek,
+        totalEvents,
+        upcomingEvents,
+        pendingApprovals: pendingAdmins
+      });
+    } catch (error) {
+      console.error('Stats error:', error);
+      res.status(500).json({ message: "Failed to fetch admin stats" });
     }
   });
 

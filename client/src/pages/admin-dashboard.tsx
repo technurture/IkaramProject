@@ -34,16 +34,9 @@ export default function AdminDashboard() {
   const { data: stats, isLoading: statsLoading } = useQuery({
     queryKey: ["/api/admin/stats"],
     queryFn: async () => {
-      // Mock data for demonstration - in real app this would be API calls
-      return {
-        totalUsers: 2847,
-        newUsersThisMonth: 156,
-        totalBlogs: 1293,
-        newBlogsThisWeek: 23,
-        totalEvents: 156,
-        upcomingEvents: 12,
-        pendingApprovals: 8
-      };
+      const response = await fetch("/api/admin/stats");
+      if (!response.ok) throw new Error("Failed to fetch admin stats");
+      return response.json();
     },
   });
 
