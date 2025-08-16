@@ -267,6 +267,8 @@ export default function SuperAdminDashboard() {
       toast({ title: "Staff member added successfully" });
       setCreateStaffOpen(false);
       queryClient.invalidateQueries({ queryKey: ["/api/staff"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/users/all"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/stats"] });
     },
     onError: (error: Error) => {
       toast({ title: "Failed to add staff member", description: error.message, variant: "destructive" });
@@ -445,9 +447,10 @@ export default function SuperAdminDashboard() {
   };
 
   const onCreateStaff = (values: z.infer<typeof staffFormSchema>) => {
-    // Trim whitespace from text fields
+    // Trim whitespace from text fields and handle the new_user case
     const trimmedValues = {
       ...values,
+      existingUserId: values.existingUserId === "new_user" ? undefined : values.existingUserId,
       firstName: values.firstName?.trim(),
       lastName: values.lastName?.trim(),
       email: values.email?.trim(),
@@ -1361,7 +1364,7 @@ export default function SuperAdminDashboard() {
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          <SelectItem value="">Create New User</SelectItem>
+                          <SelectItem value="new_user">Create New User</SelectItem>
                           {allUsers?.map((user) => (
                             <SelectItem key={user._id} value={user._id}>
                               {user.firstName} {user.lastName} ({user.email})
@@ -1374,7 +1377,7 @@ export default function SuperAdminDashboard() {
                   )}
                 />
                 
-                {!staffForm.watch("existingUserId") && (
+                {(!staffForm.watch("existingUserId") || staffForm.watch("existingUserId") === "new_user") && (
                   <>
                     <div className="grid grid-cols-2 gap-4">
                       <FormField
