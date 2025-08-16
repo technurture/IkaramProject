@@ -50,6 +50,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import {
   Select,
@@ -64,12 +65,16 @@ import { useToast } from "@/hooks/use-toast";
 // Form schemas
 const blogFormSchema = insertBlogSchema.omit({ authorId: true }).extend({
   startDate: z.string().optional(),
+  featuredImage: z.string().optional(),
+  attachments: z.array(z.string()).optional(),
 });
 
 const eventFormSchema = insertEventSchema.omit({ createdBy: true }).extend({
   startDate: z.string(),
   endDate: z.string().optional(),
   registrationDeadline: z.string().optional(),
+  featuredImage: z.string().optional(),
+  attachments: z.array(z.string()).optional(),
 });
 
 
@@ -106,6 +111,8 @@ export default function RegularAdminDashboard() {
   const [profileOpen, setProfileOpen] = useState(false);
   const [changePasswordOpen, setChangePasswordOpen] = useState(false);
   const [uploadingImage, setUploadingImage] = useState(false);
+  const [uploadingBlogMedia, setUploadingBlogMedia] = useState(false);
+  const [uploadingEventMedia, setUploadingEventMedia] = useState(false);
 
   // Redirect if not admin
   if (!user || user.role !== 'admin') {
@@ -250,6 +257,8 @@ export default function RegularAdminDashboard() {
       category: "",
       status: "published",
       tags: [],
+      featuredImage: "",
+      attachments: [],
     },
   });
 
@@ -264,6 +273,8 @@ export default function RegularAdminDashboard() {
       category: "",
       isVirtual: false,
       status: "upcoming",
+      featuredImage: "",
+      attachments: [],
     },
   });
 
@@ -325,6 +336,58 @@ export default function RegularAdminDashboard() {
       await uploadImageMutation.mutateAsync(file);
     } finally {
       setUploadingImage(false);
+    }
+  };
+
+  // Blog media upload handler
+  const handleBlogMediaUpload = async (e: React.ChangeEvent<HTMLInputElement>, type: 'featured' | 'attachment') => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Validate file size (10MB max)
+    const maxSize = 10 * 1024 * 1024;
+    if (file.size > maxSize) {
+      toast({ title: "File too large", description: "Please upload a file smaller than 10MB.", variant: "destructive" });
+      return;
+    }
+
+    setUploadingBlogMedia(true);
+    try {
+      const result = await uploadImageMutation.mutateAsync(file);
+      if (type === 'featured') {
+        blogForm.setValue('featuredImage', result.url);
+      } else {
+        const currentAttachments = blogForm.getValues('attachments') || [];
+        blogForm.setValue('attachments', [...currentAttachments, result.url]);
+      }
+    } finally {
+      setUploadingBlogMedia(false);
+    }
+  };
+
+  // Event media upload handler
+  const handleEventMediaUpload = async (e: React.ChangeEvent<HTMLInputElement>, type: 'featured' | 'attachment') => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Validate file size (10MB max)
+    const maxSize = 10 * 1024 * 1024;
+    if (file.size > maxSize) {
+      toast({ title: "File too large", description: "Please upload a file smaller than 10MB.", variant: "destructive" });
+      return;
+    }
+
+    setUploadingEventMedia(true);
+    try {
+      const result = await uploadImageMutation.mutateAsync(file);
+      if (type === 'featured') {
+        eventForm.setValue('featuredImage', result.url);
+      } else {
+        const currentAttachments = eventForm.getValues('attachments') || [];
+        eventForm.setValue('attachments', [...currentAttachments, result.url]);
+      }
+    } finally {
+      setUploadingEventMedia(false);
     }
   };
 
@@ -822,7 +885,7 @@ export default function RegularAdminDashboard() {
 
         {/* Create Blog Modal */}
         <Dialog open={createBlogOpen} onOpenChange={setCreateBlogOpen}>
-          <DialogContent className="max-w-2xl">
+          <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle>Create New Blog Post</DialogTitle>
               <DialogDescription>Write and publish a new blog post for the community.</DialogDescription>
@@ -905,6 +968,105 @@ export default function RegularAdminDashboard() {
                     )}
                   />
                 </div>
+                {/* Featured Image Upload */}
+                <FormField
+                  control={blogForm.control}
+                  name="featuredImage"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Featured Image</FormLabel>
+                      <FormControl>
+                        <div className="space-y-4">
+                          {field.value && (
+                            <div className="flex items-center space-x-4">
+                              <img
+                                src={field.value}
+                                alt="Featured image preview"
+                                className="h-20 w-32 rounded object-cover border-2 border-gray-300"
+                              />
+                              <Button
+                                type="button"
+                                variant="outline"
+                                size="sm"
+                                onClick={() => field.onChange('')}
+                              >
+                                Remove Image
+                              </Button>
+                            </div>
+                          )}
+                          <div className="flex items-center space-x-4">
+                            <Input
+                              type="file"
+                              accept="image/*,video/*"
+                              onChange={(e) => handleBlogMediaUpload(e, 'featured')}
+                              className="file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+                              disabled={uploadingBlogMedia}
+                            />
+                            {uploadingBlogMedia && (
+                              <div className="text-sm text-gray-600">Uploading...</div>
+                            )}
+                          </div>
+                        </div>
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                {/* Attachments */}
+                <FormField
+                  control={blogForm.control}
+                  name="attachments"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Additional Files (Images, Videos, Documents)</FormLabel>
+                      <FormControl>
+                        <div className="space-y-4">
+                          {field.value && field.value.length > 0 && (
+                            <div className="space-y-2">
+                              <Label className="text-sm font-medium">Uploaded Files:</Label>
+                              {field.value.map((url, index) => (
+                                <div key={index} className="flex items-center justify-between bg-gray-50 p-2 rounded">
+                                  <span className="text-sm text-gray-700 truncate flex-1 mr-2">
+                                    {url.split('/').pop()}
+                                  </span>
+                                  <Button
+                                    type="button"
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={() => {
+                                      const newAttachments = field.value?.filter((_, i) => i !== index) || [];
+                                      field.onChange(newAttachments);
+                                    }}
+                                  >
+                                    Remove
+                                  </Button>
+                                </div>
+                              ))}
+                            </div>
+                          )}
+                          <div className="flex items-center space-x-4">
+                            <Input
+                              type="file"
+                              accept="image/*,video/*,.pdf,.doc,.docx,.xls,.xlsx"
+                              onChange={(e) => handleBlogMediaUpload(e, 'attachment')}
+                              className="file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-green-50 file:text-green-700 hover:file:bg-green-100"
+                              disabled={uploadingBlogMedia}
+                            />
+                            {uploadingBlogMedia && (
+                              <div className="text-sm text-gray-600">Uploading...</div>
+                            )}
+                          </div>
+                          <p className="text-xs text-gray-500">
+                            Supported: Images, Videos, PDF, Word, Excel files (max 10MB each)
+                          </p>
+                        </div>
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
                 <div className="flex justify-end space-x-2">
                   <Button type="button" variant="outline" onClick={() => setCreateBlogOpen(false)}>
                     Cancel
@@ -920,7 +1082,7 @@ export default function RegularAdminDashboard() {
 
         {/* Create Event Modal */}
         <Dialog open={createEventOpen} onOpenChange={setCreateEventOpen}>
-          <DialogContent className="max-w-2xl">
+          <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle>Create New Event</DialogTitle>
               <DialogDescription>Organize a new event for the alumni community.</DialogDescription>
@@ -1022,6 +1184,105 @@ export default function RegularAdminDashboard() {
                     </FormItem>
                   )}
                 />
+                {/* Featured Image Upload */}
+                <FormField
+                  control={eventForm.control}
+                  name="featuredImage"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Featured Image</FormLabel>
+                      <FormControl>
+                        <div className="space-y-4">
+                          {field.value && (
+                            <div className="flex items-center space-x-4">
+                              <img
+                                src={field.value}
+                                alt="Featured image preview"
+                                className="h-20 w-32 rounded object-cover border-2 border-gray-300"
+                              />
+                              <Button
+                                type="button"
+                                variant="outline"
+                                size="sm"
+                                onClick={() => field.onChange('')}
+                              >
+                                Remove Image
+                              </Button>
+                            </div>
+                          )}
+                          <div className="flex items-center space-x-4">
+                            <Input
+                              type="file"
+                              accept="image/*,video/*"
+                              onChange={(e) => handleEventMediaUpload(e, 'featured')}
+                              className="file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+                              disabled={uploadingEventMedia}
+                            />
+                            {uploadingEventMedia && (
+                              <div className="text-sm text-gray-600">Uploading...</div>
+                            )}
+                          </div>
+                        </div>
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                {/* Attachments */}
+                <FormField
+                  control={eventForm.control}
+                  name="attachments"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Additional Files (Images, Videos, Documents)</FormLabel>
+                      <FormControl>
+                        <div className="space-y-4">
+                          {field.value && field.value.length > 0 && (
+                            <div className="space-y-2">
+                              <Label className="text-sm font-medium">Uploaded Files:</Label>
+                              {field.value.map((url, index) => (
+                                <div key={index} className="flex items-center justify-between bg-gray-50 p-2 rounded">
+                                  <span className="text-sm text-gray-700 truncate flex-1 mr-2">
+                                    {url.split('/').pop()}
+                                  </span>
+                                  <Button
+                                    type="button"
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={() => {
+                                      const newAttachments = field.value?.filter((_, i) => i !== index) || [];
+                                      field.onChange(newAttachments);
+                                    }}
+                                  >
+                                    Remove
+                                  </Button>
+                                </div>
+                              ))}
+                            </div>
+                          )}
+                          <div className="flex items-center space-x-4">
+                            <Input
+                              type="file"
+                              accept="image/*,video/*,.pdf,.doc,.docx,.xls,.xlsx"
+                              onChange={(e) => handleEventMediaUpload(e, 'attachment')}
+                              className="file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-green-50 file:text-green-700 hover:file:bg-green-100"
+                              disabled={uploadingEventMedia}
+                            />
+                            {uploadingEventMedia && (
+                              <div className="text-sm text-gray-600">Uploading...</div>
+                            )}
+                          </div>
+                          <p className="text-xs text-gray-500">
+                            Supported: Images, Videos, PDF, Word, Excel files (max 10MB each)
+                          </p>
+                        </div>
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
                 <div className="flex justify-end space-x-2">
                   <Button type="button" variant="outline" onClick={() => setCreateEventOpen(false)}>
                     Cancel
