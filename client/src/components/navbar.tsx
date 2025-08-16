@@ -45,9 +45,8 @@ export default function Navbar() {
               </div>
               <div className="hidden md:block">
                 <h1 className="text-xl font-bold text-gray-900">
-                  CHS Ikaram
+                  Ikaram
                 </h1>
-                <p className="text-sm text-gray-500">Old Students Association</p>
               </div>
             </div>
           </Link>

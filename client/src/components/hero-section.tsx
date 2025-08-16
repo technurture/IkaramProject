@@ -3,15 +3,15 @@ import { Link } from "wouter";
 
 export default function HeroSection() {
   return (
-    <section className="relative bg-gradient-to-br from-primary-600 via-primary-700 to-primary-800 py-12 md:py-20 lg:py-24 overflow-hidden">
+    <section className="relative bg-gradient-to-br from-gray-50 to-white py-12 md:py-20 lg:py-24 overflow-hidden">
       {/* Background Image with Overlay */}
       <div className="absolute inset-0 z-0">
         <img 
           src="https://images.unsplash.com/photo-1523240795612-9a054b0db644?w=1920&h=1080&fit=crop" 
           alt="Alumni graduation background" 
-          className="w-full h-full object-cover opacity-30"
+          className="w-full h-full object-cover opacity-20"
         />
-        <div className="absolute inset-0 bg-gradient-to-br from-primary-800/80 via-primary-700/75 to-primary-600/80"></div>
+        <div className="absolute inset-0 bg-gradient-to-br from-white/85 via-gray-50/85 to-white/90"></div>
       </div>
       
       {/* Decorative Elements */}
@@ -25,10 +25,10 @@ export default function HeroSection() {
         <div className="grid lg:grid-cols-2 gap-8 lg:gap-12 items-center">
           <div className="space-y-6 lg:space-y-8 text-center lg:text-left">
             <div className="space-y-4">
-              <h1 className="text-3xl sm:text-4xl lg:text-5xl xl:text-6xl font-bold leading-tight text-white">
-                Connect. Share. <span className="text-yellow-400">Grow Together.</span>
+              <h1 className="text-3xl sm:text-4xl lg:text-5xl xl:text-6xl font-bold leading-tight text-gray-900 drop-shadow-lg">
+                Connect. Share. <span className="text-primary-600">Grow Together.</span>
               </h1>
-              <p className="text-lg sm:text-xl text-gray-100 leading-relaxed max-w-2xl mx-auto lg:mx-0">
+              <p className="text-lg sm:text-xl text-gray-800 leading-relaxed max-w-2xl mx-auto lg:mx-0 drop-shadow-md">
                 Join our vibrant alumni community where stories are shared, connections are made, and opportunities flourish. Share your journey, inspire others, and stay connected with your alma mater.
               </p>
             </div>
@@ -48,16 +48,16 @@ export default function HeroSection() {
 
             <div className="grid grid-cols-3 gap-4 sm:gap-8 pt-4 max-w-md mx-auto lg:mx-0">
               <div className="text-center">
-                <div className="text-2xl sm:text-3xl font-bold text-white">2,847</div>
-                <div className="text-gray-300 text-xs sm:text-sm">Active Members</div>
+                <div className="text-2xl sm:text-3xl font-bold text-gray-900 drop-shadow-md">2,847</div>
+                <div className="text-gray-700 text-xs sm:text-sm drop-shadow-sm">Active Members</div>
               </div>
               <div className="text-center">
-                <div className="text-2xl sm:text-3xl font-bold text-white">1,293</div>
-                <div className="text-gray-300 text-xs sm:text-sm">Stories Shared</div>
+                <div className="text-2xl sm:text-3xl font-bold text-gray-900 drop-shadow-md">1,293</div>
+                <div className="text-gray-700 text-xs sm:text-sm drop-shadow-sm">Stories Shared</div>
               </div>
               <div className="text-center">
-                <div className="text-2xl sm:text-3xl font-bold text-white">156</div>
-                <div className="text-gray-300 text-xs sm:text-sm">Events Hosted</div>
+                <div className="text-2xl sm:text-3xl font-bold text-gray-900 drop-shadow-md">156</div>
+                <div className="text-gray-700 text-xs sm:text-sm drop-shadow-sm">Events Hosted</div>
               </div>
             </div>
           </div>
