@@ -134,8 +134,8 @@ export default function Navbar() {
           <div className="px-4 py-4 space-y-3">
             {navigation.map((item) => (
               <Link key={item.name} href={item.href}>
-                <a
-                  className={`block font-medium ${
+                <span
+                  className={`block font-medium cursor-pointer ${
                     location === item.href
                       ? "text-primary-700"
                       : "text-gray-700 hover:text-primary-700"
@@ -143,7 +143,7 @@ export default function Navbar() {
                   onClick={() => setIsMobileMenuOpen(false)}
                 >
                   {item.name}
-                </a>
+                </span>
               </Link>
             ))}
             <div className="pt-3 border-t border-gray-200 space-y-3">
@@ -154,7 +154,7 @@ export default function Navbar() {
                   </div>
                   {user.role === 'admin' && (
                     <Link href="/admin">
-                      <Button variant="ghost" className="w-full justify-start">
+                      <Button variant="ghost" className="w-full justify-start" onClick={() => setIsMobileMenuOpen(false)}>
                         Admin Dashboard
                       </Button>
                     </Link>
@@ -162,7 +162,10 @@ export default function Navbar() {
                   <Button
                     variant="ghost"
                     className="w-full justify-start"
-                    onClick={handleLogout}
+                    onClick={() => {
+                      handleLogout();
+                      setIsMobileMenuOpen(false);
+                    }}
                   >
                     Log out
                   </Button>
@@ -170,12 +173,12 @@ export default function Navbar() {
               ) : (
                 <>
                   <Link href="/auth">
-                    <Button variant="ghost" className="w-full">
+                    <Button variant="ghost" className="w-full" onClick={() => setIsMobileMenuOpen(false)}>
                       Sign In
                     </Button>
                   </Link>
                   <Link href="/auth">
-                    <Button className="w-full">Join Us</Button>
+                    <Button className="w-full" onClick={() => setIsMobileMenuOpen(false)}>Join Us</Button>
                   </Link>
                 </>
               )}

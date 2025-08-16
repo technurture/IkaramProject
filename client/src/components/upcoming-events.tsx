@@ -46,16 +46,16 @@ export default function UpcomingEvents() {
   }
 
   return (
-    <section className="py-16 bg-gray-50">
+    <section className="py-12 sm:py-16 bg-gray-50">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center mb-12">
-          <h2 className="text-3xl lg:text-4xl font-bold text-gray-900 mb-4">Upcoming Events</h2>
-          <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+        <div className="text-center mb-8 sm:mb-12">
+          <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 mb-4">Upcoming Events</h2>
+          <p className="text-lg sm:text-xl text-gray-600 max-w-3xl mx-auto">
             Join us for networking, learning, and celebration. Connect with fellow alumni and expand your professional network.
           </p>
         </div>
 
-        <div className="grid lg:grid-cols-2 gap-8">
+        <div className="grid lg:grid-cols-2 gap-6 lg:gap-8">
           {events.map((event) => (
             <Card key={event.id} className="overflow-hidden hover:shadow-xl transition-shadow duration-300">
               <div className="md:flex">
@@ -68,7 +68,7 @@ export default function UpcomingEvents() {
                     />
                   </div>
                 )}
-                <div className={`${event.featuredImage ? 'md:w-2/3' : 'w-full'} p-6`}>
+                <div className={`${event.featuredImage ? 'md:w-2/3' : 'w-full'} p-4 sm:p-6`}>
                   <div className="flex items-center justify-between mb-4">
                     <Badge variant="outline">
                       {event.category}

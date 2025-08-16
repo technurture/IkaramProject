@@ -156,7 +156,7 @@ export class DatabaseStorage implements IStorage {
           count: count(comments.id)
         })
         .from(comments)
-        .where(sql`${comments.blogId} = ANY(${blogIds})`)
+        .where(sql`${comments.blogId} IN (${blogIds.map(() => '?').join(',')})`, ...blogIds)
         .groupBy(comments.blogId);
     }
 
@@ -167,7 +167,7 @@ export class DatabaseStorage implements IStorage {
           count: count(blogLikes.id)
         })
         .from(blogLikes)
-        .where(sql`${blogLikes.blogId} = ANY(${blogIds})`)
+        .where(sql`${blogLikes.blogId} IN (${blogIds.map(() => '?').join(',')})`, ...blogIds)
         .groupBy(blogLikes.blogId);
 
       likes = await db
@@ -176,7 +176,7 @@ export class DatabaseStorage implements IStorage {
           userId: blogLikes.userId
         })
         .from(blogLikes)
-        .where(sql`${blogLikes.blogId} = ANY(${blogIds})`);
+        .where(sql`${blogLikes.blogId} IN (${blogIds.map(() => '?').join(',')})`, ...blogIds);
     }
 
     return blogsWithAuthor.map(blog => ({
