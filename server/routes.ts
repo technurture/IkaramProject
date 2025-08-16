@@ -455,8 +455,12 @@ export async function registerRoutes(app: Express, storage: IMongoStorage): Prom
     try {
       const pendingAdmins = await storage.getPendingAdmins();
       
-      // Remove passwords from response
-      const adminsWithoutPasswords = pendingAdmins.map(({ password, ...admin }) => admin);
+      // Convert to plain objects and remove passwords
+      const adminsWithoutPasswords = pendingAdmins.map(admin => {
+        const plainAdmin = admin.toObject();
+        const { password, ...adminWithoutPassword } = plainAdmin;
+        return adminWithoutPassword;
+      });
       res.json(adminsWithoutPasswords);
     } catch (error) {
       res.status(500).json({ message: "Failed to fetch pending admins" });
@@ -467,8 +471,12 @@ export async function registerRoutes(app: Express, storage: IMongoStorage): Prom
     try {
       const allAdmins = await storage.getAllAdmins();
       
-      // Remove passwords from response
-      const adminsWithoutPasswords = allAdmins.map(({ password, ...admin }) => admin);
+      // Convert to plain objects and remove passwords
+      const adminsWithoutPasswords = allAdmins.map(admin => {
+        const plainAdmin = admin.toObject();
+        const { password, ...adminWithoutPassword } = plainAdmin;
+        return adminWithoutPassword;
+      });
       res.json(adminsWithoutPasswords);
     } catch (error) {
       res.status(500).json({ message: "Failed to fetch admins" });
@@ -477,7 +485,6 @@ export async function registerRoutes(app: Express, storage: IMongoStorage): Prom
 
   app.put("/api/admin/:id/approve", requireSuperAdmin, async (req, res) => {
     try {
-      console.log("Admin approval request:", { id: req.params.id, body: req.body });
       const { isApproved } = req.body;
       
       if (!req.params.id || req.params.id === 'undefined') {
@@ -490,13 +497,12 @@ export async function registerRoutes(app: Express, storage: IMongoStorage): Prom
         return res.status(404).json({ message: "Admin not found" });
       }
 
-      const { password, ...adminWithoutPassword } = updatedAdmin;
+      const { password, ...adminWithoutPassword } = updatedAdmin.toObject();
       res.json({ 
         message: `Admin ${isApproved ? 'approved' : 'rejected'} successfully`,
         admin: adminWithoutPassword
       });
     } catch (error) {
-      console.error("Admin approval error:", error);
       res.status(500).json({ message: "Failed to update admin approval" });
     }
   });
