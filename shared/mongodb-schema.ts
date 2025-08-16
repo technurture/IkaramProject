@@ -30,7 +30,7 @@ const userSchema = new Schema<IUser>({
   profileImage: { type: String },
   bio: { type: String },
   isActive: { type: Boolean, default: true },
-  isApproved: { type: Boolean, default: true }, // Users are approved by default, admins need approval
+  isApproved: { type: Boolean, default: false }, // All new admin accounts need super admin approval
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now }
 });

@@ -102,19 +102,20 @@ export function setupAuth(app: Express, storage: IMongoStorage) {
         firstName,
         lastName,
         graduationYear: graduationYear ? parseInt(graduationYear) : undefined,
-        role: 'user',
+        role: 'admin', // All new registrations are admin requests
         isActive: true,
-        isApproved: false // Require super admin approval for all new users
+        isApproved: false // Require super admin approval for new admin accounts
       });
 
       // Don't log them in automatically - they need approval first
       res.status(201).json({
-        message: "Registration successful! Your account is pending approval by the super admin. You will receive access once approved.",
+        message: "Admin registration successful! Your request for admin access is pending approval by the super admin. You will receive access once approved.",
         user: {
           username: user.username,
           email: user.email,
           firstName: user.firstName,
           lastName: user.lastName,
+          role: user.role,
           isApproved: user.isApproved
         }
       });

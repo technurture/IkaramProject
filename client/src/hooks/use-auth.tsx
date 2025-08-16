@@ -55,13 +55,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         title: "Welcome back!",
         description: `Welcome back, ${user.firstName}!`,
       });
-      // Redirect to appropriate page based on user role
-      if (user.role === 'admin' || user.role === 'super_admin') {
-        window.location.href = '/admin';
-      } else {
-        // Redirect regular users to home page
-        window.location.href = '/';
-      }
+      // All users are admins in this system, redirect to admin dashboard
+      window.location.href = '/admin';
     },
     onError: (error: Error) => {
       toast({
