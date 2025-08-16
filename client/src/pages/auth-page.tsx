@@ -53,9 +53,6 @@ export default function AuthPage() {
     },
   });
 
-  // Debug: Watch form values
-  const watchedValues = registerForm.watch();
-  console.log('Form values:', watchedValues);
 
   // Redirect if already logged in
   if (user) {
@@ -208,30 +205,15 @@ export default function AuthPage() {
                       <FormItem>
                         <FormLabel>Email Address</FormLabel>
                         <FormControl>
-                          <input 
-                            type="email" 
+                          <Input 
+                            type="text" 
                             placeholder="your@email.com" 
-                            autoComplete="off"
-                            spellCheck="false"
-                            style={{ 
-                              width: '100%',
-                              height: '40px',
-                              color: '#000000',
-                              backgroundColor: '#ffffff',
-                              border: '1px solid #d1d5db',
-                              borderRadius: '6px',
-                              padding: '8px 12px',
-                              fontSize: '14px',
-                              fontFamily: 'inherit',
-                              outline: 'none'
-                            }}
                             value={field.value || ''}
                             onChange={(e) => {
-                              console.log('Email input changed:', e.target.value);
                               field.onChange(e.target.value);
                             }}
                             onBlur={field.onBlur}
-                            name={field.name}
+                            name="email"
                           />
                         </FormControl>
                         <FormMessage />
