@@ -38,7 +38,7 @@ export default function Navbar() {
             <div className="flex items-center space-x-4 cursor-pointer">
               <div className="flex-shrink-0">
                 <img 
-                  src="@assets/logo-removebg-preview_1755351782642.png" 
+                  src="/logo.png" 
                   alt="Community High School Logo" 
                   className="h-12 w-12 object-contain"
                 />

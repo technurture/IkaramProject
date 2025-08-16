@@ -144,31 +144,40 @@ export class DatabaseStorage implements IStorage {
 
     // Get counts for each blog
     const blogIds = blogsWithAuthor.map(blog => blog.id);
-    const commentCounts = await db
-      .select({
-        blogId: comments.blogId,
-        count: count(comments.id)
-      })
-      .from(comments)
-      .where(sql`${comments.blogId} = ANY(${blogIds})`)
-      .groupBy(comments.blogId);
+    
+    let commentCounts: { blogId: string; count: number }[] = [];
+    let likeCounts: { blogId: string; count: number }[] = [];
+    let likes: { blogId: string; userId: string }[] = [];
 
-    const likeCounts = await db
-      .select({
-        blogId: blogLikes.blogId,
-        count: count(blogLikes.id)
-      })
-      .from(blogLikes)
-      .where(sql`${blogLikes.blogId} = ANY(${blogIds})`)
-      .groupBy(blogLikes.blogId);
+    if (blogIds.length > 0) {
+      commentCounts = await db
+        .select({
+          blogId: comments.blogId,
+          count: count(comments.id)
+        })
+        .from(comments)
+        .where(sql`${comments.blogId} = ANY(${blogIds})`)
+        .groupBy(comments.blogId);
+    }
 
-    const likes = await db
-      .select({
-        blogId: blogLikes.blogId,
-        userId: blogLikes.userId
-      })
-      .from(blogLikes)
-      .where(sql`${blogLikes.blogId} = ANY(${blogIds})`);
+    if (blogIds.length > 0) {
+      likeCounts = await db
+        .select({
+          blogId: blogLikes.blogId,
+          count: count(blogLikes.id)
+        })
+        .from(blogLikes)
+        .where(sql`${blogLikes.blogId} = ANY(${blogIds})`)
+        .groupBy(blogLikes.blogId);
+
+      likes = await db
+        .select({
+          blogId: blogLikes.blogId,
+          userId: blogLikes.userId
+        })
+        .from(blogLikes)
+        .where(sql`${blogLikes.blogId} = ANY(${blogIds})`);
+    }
 
     return blogsWithAuthor.map(blog => ({
       ...blog,
@@ -263,7 +272,7 @@ export class DatabaseStorage implements IStorage {
 
   async deleteBlog(id: string): Promise<boolean> {
     const result = await db.delete(blogs).where(eq(blogs.id, id));
-    return result.rowCount > 0;
+    return (result.rowCount ?? 0) > 0;
   }
 
   async getBlogsByAuthor(authorId: string): Promise<BlogWithAuthor[]> {
