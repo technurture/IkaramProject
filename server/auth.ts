@@ -102,7 +102,9 @@ export function setupAuth(app: Express, storage: IMongoStorage) {
         firstName,
         lastName,
         graduationYear: graduationYear ? parseInt(graduationYear) : undefined,
-        role: 'user'
+        role: 'user',
+        isActive: true,
+        isApproved: true
       });
 
       req.login(user, (err) => {
