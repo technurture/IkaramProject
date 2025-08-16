@@ -10,91 +10,178 @@ export default function AboutPage() {
       <Navbar />
       
       {/* Hero Section */}
-      <section className="bg-gradient-to-r from-primary-800 to-primary-900 text-white py-16">
+      <section className="bg-gradient-to-r from-green-800 to-green-900 text-white py-16">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h1 className="text-4xl lg:text-5xl font-bold mb-6">About Our Association</h1>
-          <p className="text-xl text-primary-100 max-w-3xl mx-auto">
-            Building bridges between past, present, and future generations of students through meaningful connections and shared experiences.
+          <div className="flex justify-center mb-6">
+            <img 
+              src="/logo.jpeg" 
+              alt="Community Comprehensive High School Logo" 
+              className="h-24 w-24 object-contain rounded-full"
+            />
+          </div>
+          <h1 className="text-4xl lg:text-5xl font-bold mb-6">Community Comprehensive High School</h1>
+          <h2 className="text-2xl lg:text-3xl font-semibold mb-4">Ikaram-Akoko Old Students Association</h2>
+          <p className="text-xl text-green-100 max-w-3xl mx-auto">
+            Promoting friendship, understanding, and the general welfare of all members while supporting our alma mater.
           </p>
         </div>
       </section>
 
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        {/* Mission & Vision */}
-        <div className="grid lg:grid-cols-2 gap-12 mb-16">
+        {/* About the School and Association */}
+        <div className="grid lg:grid-cols-1 gap-12 mb-16">
           <Card>
             <CardContent className="p-8">
-              <div className="flex items-center mb-6">
-                <Target className="h-8 w-8 text-primary-600 mr-3" />
-                <h2 className="text-2xl font-bold text-gray-900">Our Mission</h2>
-              </div>
-              <p className="text-gray-700 leading-relaxed">
-                To foster lifelong connections among alumni, support their personal and professional growth, 
-                and strengthen the bond between graduates and their alma mater through engaging programs, 
-                networking opportunities, and community service initiatives.
+              <h2 className="text-3xl font-bold text-gray-900 mb-6 text-center">About Community Comprehensive High School, Ikaram-Akoko</h2>
+              <p className="text-gray-700 leading-relaxed mb-4">
+                Community Comprehensive High School, Ikaram-Akoko is located in Ondo State, Nigeria. Our school has been 
+                a beacon of educational excellence, nurturing generations of students who have gone on to make significant 
+                contributions to society both locally and internationally.
               </p>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardContent className="p-8">
-              <div className="flex items-center mb-6">
-                <Globe className="h-8 w-8 text-secondary-600 mr-3" />
-                <h2 className="text-2xl font-bold text-gray-900">Our Vision</h2>
-              </div>
               <p className="text-gray-700 leading-relaxed">
-                To create a global network of empowered alumni who contribute to society's advancement 
-                while maintaining strong ties to their educational foundation, inspiring current students 
-                and future generations through their achievements and service.
+                The Old Students Association was established to maintain the strong bonds forged during our school years 
+                and to continue supporting both our alma mater and fellow alumni throughout their lives and careers.
               </p>
             </CardContent>
           </Card>
         </div>
 
-        {/* Values */}
+        {/* Mission & Objectives */}
         <div className="mb-16">
-          <h2 className="text-3xl font-bold text-gray-900 text-center mb-12">Our Core Values</h2>
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
-            <Card className="text-center">
+          <h2 className="text-3xl font-bold text-gray-900 text-center mb-12">Our Aims and Objectives</h2>
+          <div className="grid lg:grid-cols-2 gap-8">
+            <Card>
               <CardContent className="p-6">
-                <div className="bg-primary-100 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4">
-                  <Users className="h-8 w-8 text-primary-600" />
+                <div className="flex items-center mb-4">
+                  <Target className="h-8 w-8 text-green-600 mr-3" />
+                  <h3 className="text-xl font-bold text-gray-900">Unity & Friendship</h3>
                 </div>
-                <h3 className="text-xl font-semibold text-gray-900 mb-3">Community</h3>
-                <p className="text-gray-600">Building strong, supportive relationships among alumni worldwide.</p>
+                <p className="text-gray-700 leading-relaxed">
+                  To promote and foster friendship, business and social contacts, and good interpersonal 
+                  relationships amongst members of the Association, its branches, and sister associations 
+                  irrespective of place of domicile.
+                </p>
               </CardContent>
             </Card>
 
-            <Card className="text-center">
+            <Card>
               <CardContent className="p-6">
-                <div className="bg-secondary-100 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4">
-                  <Award className="h-8 w-8 text-secondary-600" />
+                <div className="flex items-center mb-4">
+                  <Users className="h-8 w-8 text-yellow-600 mr-3" />
+                  <h3 className="text-xl font-bold text-gray-900">Member Welfare</h3>
                 </div>
-                <h3 className="text-xl font-semibold text-gray-900 mb-3">Excellence</h3>
-                <p className="text-gray-600">Striving for the highest standards in all our programs and initiatives.</p>
+                <p className="text-gray-700 leading-relaxed">
+                  To promote the general welfare of the members of the Association and encourage 
+                  the rights of all bonafide members while maintaining the highest standard of conduct, 
+                  etiquette, and discipline.
+                </p>
               </CardContent>
             </Card>
 
-            <Card className="text-center">
+            <Card>
               <CardContent className="p-6">
-                <div className="bg-purple-100 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4">
-                  <div className="h-8 w-8 flex items-center justify-center text-2xl">🤝</div>
+                <div className="flex items-center mb-4">
+                  <Globe className="h-8 w-8 text-green-600 mr-3" />
+                  <h3 className="text-xl font-bold text-gray-900">Alma Mater Support</h3>
                 </div>
-                <h3 className="text-xl font-semibold text-gray-900 mb-3">Integrity</h3>
-                <p className="text-gray-600">Maintaining the highest ethical standards in all our interactions.</p>
+                <p className="text-gray-700 leading-relaxed">
+                  To improve, promote and support the alma mater whenever the need arises, subject to 
+                  the financial position of the Association, and promote sound learning culture and 
+                  environment for students and teachers.
+                </p>
               </CardContent>
             </Card>
 
-            <Card className="text-center">
+            <Card>
               <CardContent className="p-6">
-                <div className="bg-green-100 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4">
-                  <div className="h-8 w-8 flex items-center justify-center text-2xl">🚀</div>
+                <div className="flex items-center mb-4">
+                  <Award className="h-8 w-8 text-yellow-600 mr-3" />
+                  <h3 className="text-xl font-bold text-gray-900">Knowledge Exchange</h3>
                 </div>
-                <h3 className="text-xl font-semibold text-gray-900 mb-3">Innovation</h3>
-                <p className="text-gray-600">Embracing new ideas and technologies to better serve our community.</p>
+                <p className="text-gray-700 leading-relaxed">
+                  To promote free exchange of ideas and information among members and between the 
+                  Association and its branches/affiliates, fostering continuous learning and development.
+                </p>
               </CardContent>
             </Card>
           </div>
+        </div>
+
+        {/* Organizational Structure */}
+        <div className="mb-16">
+          <h2 className="text-3xl font-bold text-gray-900 text-center mb-12">Organizational Structure</h2>
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <Card>
+              <CardContent className="p-6">
+                <h3 className="text-xl font-semibold text-gray-900 mb-4">Executive Council</h3>
+                <ul className="space-y-2 text-gray-700">
+                  <li>• President</li>
+                  <li>• Vice President</li>
+                  <li>• General Secretary</li>
+                  <li>• Assistant General Secretary</li>
+                  <li>• Treasurer</li>
+                </ul>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardContent className="p-6">
+                <h3 className="text-xl font-semibold text-gray-900 mb-4">Key Officers</h3>
+                <ul className="space-y-2 text-gray-700">
+                  <li>• Financial Secretary</li>
+                  <li>• Publicity Secretary</li>
+                  <li>• Social & Welfare Secretary</li>
+                  <li>• Chief Whip</li>
+                  <li>• Auditor</li>
+                </ul>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardContent className="p-6">
+                <h3 className="text-xl font-semibold text-gray-900 mb-4">Governance</h3>
+                <ul className="space-y-2 text-gray-700">
+                  <li>• General Assembly (Supreme Organ)</li>
+                  <li>• Central Representative Committee</li>
+                  <li>• Two-year officer terms</li>
+                  <li>• Annual General Meetings</li>
+                  <li>• Democratic elections</li>
+                </ul>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+
+        {/* Membership */}
+        <div className="mb-16">
+          <Card>
+            <CardContent className="p-8">
+              <h2 className="text-3xl font-bold text-gray-900 mb-6 text-center">Membership</h2>
+              <div className="grid md:grid-cols-2 gap-8">
+                <div>
+                  <h3 className="text-xl font-semibold text-gray-900 mb-4">Who Can Join?</h3>
+                  <p className="text-gray-700 leading-relaxed mb-4">
+                    Membership is open to any person who attended or graduated from Community Comprehensive High School, 
+                    Ikaram-Akoko, notwithstanding their place of residence or domicile.
+                  </p>
+                  <p className="text-gray-700 leading-relaxed">
+                    Financial members enjoy full privileges and rights as provided in the constitution, including 
+                    the right to contest for elective positions.
+                  </p>
+                </div>
+                <div>
+                  <h3 className="text-xl font-semibold text-gray-900 mb-4">Financial Support</h3>
+                  <p className="text-gray-700 leading-relaxed mb-2">Our funding sources include:</p>
+                  <ul className="space-y-2 text-gray-700">
+                    <li>• Annual dues determined by members</li>
+                    <li>• Voluntary donations from members and supporters</li>
+                    <li>• Fundraising activities when needed</li>
+                    <li>• Special levies as approved</li>
+                  </ul>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
         </div>
 
         {/* History */}

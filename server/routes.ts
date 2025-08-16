@@ -11,7 +11,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Helper function to require authentication
   const requireAuth = (req: any, res: any, next: any) => {
-    if (!req.isAuthenticated()) {
+    if (!req.isAuthenticated() || !req.user) {
       return res.status(401).json({ message: "Authentication required" });
     }
     next();
@@ -19,7 +19,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Helper function to require admin role
   const requireAdmin = (req: any, res: any, next: any) => {
-    if (!req.isAuthenticated() || req.user.role !== 'admin') {
+    if (!req.isAuthenticated() || !req.user || req.user.role !== 'admin') {
       return res.status(403).json({ message: "Admin access required" });
     }
     next();

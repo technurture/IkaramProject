@@ -38,7 +38,7 @@ export const comments = pgTable("comments", {
   content: text("content").notNull(),
   authorId: varchar("author_id").notNull().references(() => users.id),
   blogId: varchar("blog_id").notNull().references(() => blogs.id, { onDelete: "cascade" }),
-  parentId: varchar("parent_id").references(() => comments.id),
+  parentId: varchar("parent_id"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull()
 });

@@ -174,8 +174,8 @@ export class DatabaseStorage implements IStorage {
       ...blog,
       likes: likes.filter(like => like.blogId === blog.id).map(like => ({ userId: like.userId })),
       _count: {
-        comments: commentCounts.find(c => c.blogId === blog.id)?.count || 0,
-        likes: likeCounts.find(l => l.blogId === blog.id)?.count || 0
+        comments: Number(commentCounts.find(c => c.blogId === blog.id)?.count || 0),
+        likes: Number(likeCounts.find(l => l.blogId === blog.id)?.count || 0)
       }
     }));
   }
@@ -263,7 +263,7 @@ export class DatabaseStorage implements IStorage {
 
   async deleteBlog(id: string): Promise<boolean> {
     const result = await db.delete(blogs).where(eq(blogs.id, id));
-    return result.count > 0;
+    return result.rowCount > 0;
   }
 
   async getBlogsByAuthor(authorId: string): Promise<BlogWithAuthor[]> {

@@ -34,35 +34,37 @@ export default function Navbar() {
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           {/* Logo and Brand */}
-          <div className="flex items-center space-x-4">
-            <div className="flex-shrink-0">
-              <div className="h-10 w-10 rounded-full bg-primary-600 flex items-center justify-center">
-                <span className="text-white font-bold text-xl">OSA</span>
+          <Link href="/">
+            <div className="flex items-center space-x-4 cursor-pointer">
+              <div className="flex-shrink-0">
+                <img 
+                  src="/logo.jpeg" 
+                  alt="Community Comprehensive High School Logo" 
+                  className="h-10 w-10 object-contain rounded-full"
+                />
+              </div>
+              <div className="hidden md:block">
+                <h1 className="text-xl font-bold text-gray-900">
+                  CCHS Ikaram-Akoko
+                </h1>
+                <p className="text-sm text-gray-500">Old Students Association</p>
               </div>
             </div>
-            <div className="hidden md:block">
-              <Link href="/">
-                <h1 className="text-xl font-bold text-gray-900 cursor-pointer">
-                  Old Student Association
-                </h1>
-              </Link>
-              <p className="text-sm text-gray-500">Alumni Community Platform</p>
-            </div>
-          </div>
+          </Link>
 
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center space-x-8">
             {navigation.map((item) => (
               <Link key={item.name} href={item.href}>
-                <a
-                  className={`font-medium transition-colors ${
+                <span
+                  className={`font-medium transition-colors cursor-pointer ${
                     location === item.href
-                      ? "text-primary-700"
-                      : "text-gray-700 hover:text-primary-700"
+                      ? "text-green-700"
+                      : "text-gray-700 hover:text-green-700"
                   }`}
                 >
                   {item.name}
-                </a>
+                </span>
               </Link>
             ))}
           </div>
