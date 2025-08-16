@@ -286,23 +286,65 @@ export default function RegularAdminDashboard() {
   });
 
   const onUpdateProfile = (values: z.infer<typeof profileFormSchema>) => {
-    updateProfileMutation.mutate(values);
+    // Trim whitespace from text fields
+    const trimmedValues = {
+      ...values,
+      firstName: values.firstName.trim(),
+      lastName: values.lastName.trim(),
+      email: values.email.trim(),
+      username: values.username.trim(),
+      bio: values.bio?.trim(),
+    };
+    updateProfileMutation.mutate(trimmedValues);
   };
 
   const onCreateBlog = (values: z.infer<typeof blogFormSchema>) => {
-    createBlogMutation.mutate(values);
+    // Trim whitespace from text fields
+    const trimmedValues = {
+      ...values,
+      title: values.title.trim(),
+      content: values.content.trim(),
+      excerpt: values.excerpt?.trim(),
+      tags: values.tags?.map((tag: string) => tag.trim()),
+    };
+    createBlogMutation.mutate(trimmedValues);
   };
 
   const onCreateEvent = (values: z.infer<typeof eventFormSchema>) => {
-    createEventMutation.mutate(values);
+    // Trim whitespace from text fields
+    const trimmedValues = {
+      ...values,
+      title: values.title.trim(),
+      description: values.description.trim(),
+      location: values.location?.trim(),
+    };
+    createEventMutation.mutate(trimmedValues);
   };
 
   const onCreateUser = (values: z.infer<typeof userFormSchema>) => {
-    createUserMutation.mutate(values);
+    // Trim whitespace from text fields
+    const trimmedValues = {
+      ...values,
+      firstName: values.firstName.trim(),
+      lastName: values.lastName.trim(),
+      email: values.email.trim(),
+      username: values.username.trim(),
+      password: values.password.trim(),
+      bio: values.bio?.trim(),
+    };
+    createUserMutation.mutate(trimmedValues);
   };
 
   const onCreateStaff = (values: z.infer<typeof staffFormSchema>) => {
-    createStaffMutation.mutate(values);
+    // Trim whitespace from text fields
+    const trimmedValues = {
+      ...values,
+      position: values.position.trim(),
+      department: values.department?.trim(),
+      phoneNumber: values.phoneNumber?.trim(),
+      bio: values.bio?.trim(),
+    };
+    createStaffMutation.mutate(trimmedValues);
   };
 
   return (

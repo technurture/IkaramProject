@@ -76,7 +76,12 @@ export default function AuthPage() {
   }
 
   const handleLogin = (data: LoginData) => {
-    loginMutation.mutate(data);
+    // Trim whitespace from all fields
+    const trimmedData = {
+      email: data.email.trim(),
+      password: data.password.trim()
+    };
+    loginMutation.mutate(trimmedData);
   };
 
   const handleRegister = (data: RegisterData) => {
@@ -227,7 +232,7 @@ export default function AuthPage() {
                       type="text"
                       placeholder="John" 
                       value={registerData.firstName}
-                      onChange={(e) => setRegisterData({...registerData, firstName: e.target.value})}
+                      onChange={(e) => setRegisterData({...registerData, firstName: e.target.value.trim()})}
                       className={registerErrors.firstName ? 'border-red-500' : ''}
                     />
                     {registerErrors.firstName && (
@@ -241,7 +246,7 @@ export default function AuthPage() {
                       type="text"
                       placeholder="Doe" 
                       value={registerData.lastName}
-                      onChange={(e) => setRegisterData({...registerData, lastName: e.target.value})}
+                      onChange={(e) => setRegisterData({...registerData, lastName: e.target.value.trim()})}
                       className={registerErrors.lastName ? 'border-red-500' : ''}
                     />
                     {registerErrors.lastName && (
@@ -257,7 +262,7 @@ export default function AuthPage() {
                     type="email"
                     placeholder="your@email.com" 
                     value={registerData.email}
-                    onChange={(e) => setRegisterData({...registerData, email: e.target.value})}
+                    onChange={(e) => setRegisterData({...registerData, email: e.target.value.trim()})}
                     className={registerErrors.email ? 'border-red-500' : ''}
                   />
                   {registerErrors.email && (
@@ -272,7 +277,7 @@ export default function AuthPage() {
                     type="text"
                     placeholder="johndoe" 
                     value={registerData.username}
-                    onChange={(e) => setRegisterData({...registerData, username: e.target.value})}
+                    onChange={(e) => setRegisterData({...registerData, username: e.target.value.trim()})}
                     className={registerErrors.username ? 'border-red-500' : ''}
                   />
                   {registerErrors.username && (

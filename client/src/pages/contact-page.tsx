@@ -42,6 +42,15 @@ export default function ContactPage() {
   const handleSubmit = async (data: ContactData) => {
     setIsSubmitting(true);
     
+    // Trim whitespace from all text fields
+    const trimmedData = {
+      ...data,
+      name: data.name.trim(),
+      email: data.email.trim(),
+      subject: data.subject.trim(),
+      message: data.message.trim(),
+    };
+    
     // Simulate form submission
     try {
       await new Promise(resolve => setTimeout(resolve, 1000));
