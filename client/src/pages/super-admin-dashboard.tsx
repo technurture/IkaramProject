@@ -217,6 +217,8 @@ export default function SuperAdminDashboard() {
     onSuccess: () => {
       toast({ title: "Admin created successfully" });
       setCreateUserOpen(false);
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/pending"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/all"] });
       queryClient.invalidateQueries({ queryKey: ["/api/admin/stats"] });
     },
     onError: (error: Error) => {
@@ -248,7 +250,9 @@ export default function SuperAdminDashboard() {
     },
     onSuccess: () => {
       toast({ title: "Admin status updated successfully" });
-      queryClient.invalidateQueries({ queryKey: ["/api/admin"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/pending"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/all"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/stats"] });
     },
     onError: (error: Error) => {
       toast({ title: "Failed to update admin status", description: error.message, variant: "destructive" });
@@ -263,7 +267,9 @@ export default function SuperAdminDashboard() {
     },
     onSuccess: () => {
       toast({ title: "Admin reactivated successfully" });
-      queryClient.invalidateQueries({ queryKey: ["/api/admin"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/pending"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/all"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/stats"] });
     },
     onError: (error: Error) => {
       toast({ title: "Failed to reactivate admin", description: error.message, variant: "destructive" });
@@ -278,7 +284,9 @@ export default function SuperAdminDashboard() {
     },
     onSuccess: () => {
       toast({ title: "Admin deleted successfully" });
-      queryClient.invalidateQueries({ queryKey: ["/api/admin"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/pending"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/all"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/stats"] });
     },
     onError: (error: Error) => {
       toast({ title: "Failed to delete admin", description: error.message, variant: "destructive" });
