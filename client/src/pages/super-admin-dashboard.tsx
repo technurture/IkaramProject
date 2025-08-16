@@ -649,7 +649,7 @@ export default function SuperAdminDashboard() {
                       </div>
                       <div className="flex items-center space-x-2">
                         <Badge variant={admin.role === 'super_admin' ? 'default' : 'secondary'}>
-                          {admin.role.replace('_', ' ')}
+                          {admin.role?.replace('_', ' ') || 'user'}
                         </Badge>
                         <Badge variant={admin.isApproved ? 'default' : 'destructive'}>
                           {admin.isApproved ? 'Approved' : 'Pending'}
