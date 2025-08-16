@@ -88,7 +88,7 @@ export default function Navbar() {
                       {user.firstName} {user.lastName}
                     </span>
                   </DropdownMenuItem>
-                  {user.role === 'admin' && (
+                  {(user.role === 'admin' || user.role === 'super_admin') && (
                     <DropdownMenuItem asChild>
                       <Link href="/admin">Admin Dashboard</Link>
                     </DropdownMenuItem>

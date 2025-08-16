@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { User, BlogWithAuthor, EventWithDetails, StaffWithUser } from "@shared/schema";
+import { IUser, BlogWithAuthor, EventWithDetails, StaffWithUser } from "@shared/mongodb-schema";
 import Navbar from "@/components/navbar";
 import Footer from "@/components/footer";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -26,8 +26,8 @@ export default function AdminDashboard() {
   const { user } = useAuth();
   const [activeTab, setActiveTab] = useState("overview");
 
-  // Redirect if not admin
-  if (!user || user.role !== 'admin') {
+  // Redirect if not admin or super admin
+  if (!user || (user.role !== 'admin' && user.role !== 'super_admin')) {
     return <Redirect to="/" />;
   }
 
