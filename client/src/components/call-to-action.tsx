@@ -17,8 +17,8 @@ export default function CallToAction() {
       
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10">
         <div className="max-w-4xl mx-auto">
-          <h2 className="text-3xl lg:text-4xl font-bold mb-6">Ready to Share Your Story?</h2>
-          <p className="text-xl text-secondary-100 mb-8 leading-relaxed">
+          <h2 className="text-3xl lg:text-4xl font-bold mb-6 text-white">Ready to Share Your Story?</h2>
+          <p className="text-xl text-gray-100 mb-8 leading-relaxed">
             Join thousands of alumni who are connecting, sharing experiences, and building meaningful relationships. Your story matters and can inspire others in their journey.
           </p>
           
@@ -60,24 +60,24 @@ export default function CallToAction() {
               <div className="bg-white bg-opacity-20 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4">
                 <Edit className="h-8 w-8" />
               </div>
-              <h3 className="text-xl font-semibold mb-2">Share Stories</h3>
-              <p className="text-secondary-100">Write blog posts about your experiences, career insights, and life updates.</p>
+              <h3 className="text-xl font-semibold mb-2 text-white">Share Stories</h3>
+              <p className="text-gray-100">Write blog posts about your experiences, career insights, and life updates.</p>
             </div>
             
             <div className="text-center">
               <div className="bg-white bg-opacity-20 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4">
                 <div className="h-8 w-8 flex items-center justify-center text-2xl">👥</div>
               </div>
-              <h3 className="text-xl font-semibold mb-2">Connect</h3>
-              <p className="text-secondary-100">Engage with fellow alumni through comments, events, and networking opportunities.</p>
+              <h3 className="text-xl font-semibold mb-2 text-white">Connect</h3>
+              <p className="text-gray-100">Engage with fellow alumni through comments, events, and networking opportunities.</p>
             </div>
             
             <div className="text-center">
               <div className="bg-white bg-opacity-20 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4">
                 <Download className="h-8 w-8" />
               </div>
-              <h3 className="text-xl font-semibold mb-2">Access Resources</h3>
-              <p className="text-secondary-100">Download exclusive content, videos, and materials shared by the community.</p>
+              <h3 className="text-xl font-semibold mb-2 text-white">Access Resources</h3>
+              <p className="text-gray-100">Download exclusive content, videos, and materials shared by the community.</p>
             </div>
           </div>
         </div>

@@ -25,10 +25,10 @@ export default function HeroSection() {
         <div className="grid lg:grid-cols-2 gap-8 lg:gap-12 items-center">
           <div className="space-y-6 lg:space-y-8 text-center lg:text-left">
             <div className="space-y-4">
-              <h1 className="text-3xl sm:text-4xl lg:text-5xl xl:text-6xl font-bold leading-tight">
-                Connect. Share. <span className="text-secondary-400">Grow Together.</span>
+              <h1 className="text-3xl sm:text-4xl lg:text-5xl xl:text-6xl font-bold leading-tight text-white">
+                Connect. Share. <span className="text-yellow-400">Grow Together.</span>
               </h1>
-              <p className="text-lg sm:text-xl text-primary-100 leading-relaxed max-w-2xl mx-auto lg:mx-0">
+              <p className="text-lg sm:text-xl text-gray-100 leading-relaxed max-w-2xl mx-auto lg:mx-0">
                 Join our vibrant alumni community where stories are shared, connections are made, and opportunities flourish. Share your journey, inspire others, and stay connected with your alma mater.
               </p>
             </div>
@@ -48,16 +48,16 @@ export default function HeroSection() {
 
             <div className="grid grid-cols-3 gap-4 sm:gap-8 pt-4 max-w-md mx-auto lg:mx-0">
               <div className="text-center">
-                <div className="text-2xl sm:text-3xl font-bold">2,847</div>
-                <div className="text-primary-200 text-xs sm:text-sm">Active Members</div>
+                <div className="text-2xl sm:text-3xl font-bold text-white">2,847</div>
+                <div className="text-gray-300 text-xs sm:text-sm">Active Members</div>
               </div>
               <div className="text-center">
-                <div className="text-2xl sm:text-3xl font-bold">1,293</div>
-                <div className="text-primary-200 text-xs sm:text-sm">Stories Shared</div>
+                <div className="text-2xl sm:text-3xl font-bold text-white">1,293</div>
+                <div className="text-gray-300 text-xs sm:text-sm">Stories Shared</div>
               </div>
               <div className="text-center">
-                <div className="text-2xl sm:text-3xl font-bold">156</div>
-                <div className="text-primary-200 text-xs sm:text-sm">Events Hosted</div>
+                <div className="text-2xl sm:text-3xl font-bold text-white">156</div>
+                <div className="text-gray-300 text-xs sm:text-sm">Events Hosted</div>
               </div>
             </div>
           </div>

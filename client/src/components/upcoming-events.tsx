@@ -50,7 +50,7 @@ export default function UpcomingEvents() {
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-8 sm:mb-12">
           <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 mb-4">Upcoming Events</h2>
-          <p className="text-lg sm:text-xl text-gray-600 max-w-3xl mx-auto">
+          <p className="text-lg sm:text-xl text-gray-700 max-w-3xl mx-auto">
             Join us for networking, learning, and celebration. Connect with fellow alumni and expand your professional network.
           </p>
         </div>
@@ -82,20 +82,20 @@ export default function UpcomingEvents() {
                     {event.title}
                   </h3>
                   
-                  <p className="text-gray-600 mb-4 line-clamp-3">
+                  <p className="text-gray-700 mb-4 line-clamp-3">
                     {event.description}
                   </p>
                   
                   <div className="space-y-2 mb-4">
-                    <div className="flex items-center text-gray-600">
+                    <div className="flex items-center text-gray-700">
                       <Calendar className="h-4 w-4 mr-2" />
                       <span>{format(new Date(event.startDate), 'EEEE, MMMM dd, yyyy \'at\' h:mm a')}</span>
                     </div>
-                    <div className="flex items-center text-gray-600">
+                    <div className="flex items-center text-gray-700">
                       <MapPin className="h-4 w-4 mr-2" />
                       <span>{event.location}</span>
                     </div>
-                    <div className="flex items-center text-gray-600">
+                    <div className="flex items-center text-gray-700">
                       <Users className="h-4 w-4 mr-2" />
                       <span>{event._count.registrations} attending</span>
                     </div>
