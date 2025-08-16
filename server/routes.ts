@@ -518,13 +518,31 @@ export async function registerRoutes(app: Express, storage: IMongoStorage): Prom
         return res.status(404).json({ message: "Admin not found" });
       }
 
-      const { password, ...adminWithoutPassword } = updatedAdmin;
+      const { password, ...adminWithoutPassword } = updatedAdmin.toObject();
       res.json({ 
         message: "Admin reactivated successfully",
         admin: adminWithoutPassword
       });
     } catch (error) {
       res.status(500).json({ message: "Failed to reactivate admin" });
+    }
+  });
+
+  app.delete("/api/admin/:id", requireSuperAdmin, async (req, res) => {
+    try {
+      if (!req.params.id || req.params.id === 'undefined') {
+        return res.status(400).json({ message: "Invalid admin ID" });
+      }
+      
+      const deleted = await storage.deleteUser(req.params.id);
+      
+      if (!deleted) {
+        return res.status(404).json({ message: "Admin not found" });
+      }
+
+      res.json({ message: "Admin deleted successfully" });
+    } catch (error) {
+      res.status(500).json({ message: "Failed to delete admin" });
     }
   });
 

@@ -105,11 +105,21 @@ export class MongoDBStorage implements IMongoStorage {
   }
 
   async getPendingAdmins(): Promise<IUser[]> {
-    return await User.find({ role: 'admin', isApproved: false }).sort({ createdAt: -1 });
+    return await User.find({ role: 'admin', isApproved: false, isActive: true }).sort({ createdAt: -1 });
   }
 
   async updateUserApproval(id: string, isApproved: boolean): Promise<IUser | null> {
-    return await User.findByIdAndUpdate(id, { isApproved, updatedAt: new Date() }, { new: true });
+    // If rejecting an admin, set them as inactive as well
+    const updates = isApproved 
+      ? { isApproved: true, isActive: true, updatedAt: new Date() }
+      : { isApproved: false, isActive: false, updatedAt: new Date() };
+    
+    return await User.findByIdAndUpdate(id, updates, { new: true });
+  }
+
+  async deleteUser(id: string): Promise<boolean> {
+    const result = await User.findByIdAndDelete(id);
+    return !!result;
   }
 
   // Blog methods

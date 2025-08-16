@@ -255,6 +255,36 @@ export default function SuperAdminDashboard() {
     },
   });
 
+  // Admin reactivation mutation
+  const reactivateAdminMutation = useMutation({
+    mutationFn: async (id: string) => {
+      const res = await apiRequest("PUT", `/api/admin/${id}/reactivate`);
+      return await res.json();
+    },
+    onSuccess: () => {
+      toast({ title: "Admin reactivated successfully" });
+      queryClient.invalidateQueries({ queryKey: ["/api/admin"] });
+    },
+    onError: (error: Error) => {
+      toast({ title: "Failed to reactivate admin", description: error.message, variant: "destructive" });
+    },
+  });
+
+  // Admin deletion mutation
+  const deleteAdminMutation = useMutation({
+    mutationFn: async (id: string) => {
+      const res = await apiRequest("DELETE", `/api/admin/${id}`);
+      return await res.json();
+    },
+    onSuccess: () => {
+      toast({ title: "Admin deleted successfully" });
+      queryClient.invalidateQueries({ queryKey: ["/api/admin"] });
+    },
+    onError: (error: Error) => {
+      toast({ title: "Failed to delete admin", description: error.message, variant: "destructive" });
+    },
+  });
+
   // Profile form
   const profileForm = useForm<z.infer<typeof profileFormSchema>>({
     resolver: zodResolver(profileFormSchema),
@@ -657,6 +687,32 @@ export default function SuperAdminDashboard() {
                         <Badge variant={admin.isActive ? 'default' : 'secondary'}>
                           {admin.isActive ? 'Active' : 'Inactive'}
                         </Badge>
+                        {admin.role !== 'super_admin' && (
+                          <div className="flex space-x-1">
+                            {!admin.isActive && (
+                              <Button 
+                                size="sm" 
+                                variant="outline"
+                                onClick={() => reactivateAdminMutation.mutate(admin._id)}
+                                disabled={reactivateAdminMutation.isPending}
+                              >
+                                Reactivate
+                              </Button>
+                            )}
+                            <Button 
+                              size="sm" 
+                              variant="destructive"
+                              onClick={() => {
+                                if (confirm('Are you sure you want to permanently delete this admin?')) {
+                                  deleteAdminMutation.mutate(admin._id);
+                                }
+                              }}
+                              disabled={deleteAdminMutation.isPending}
+                            >
+                              Delete
+                            </Button>
+                          </div>
+                        )}
                       </div>
                     </div>
                   ))}
