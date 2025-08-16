@@ -53,6 +53,10 @@ export default function AuthPage() {
     },
   });
 
+  // Debug: Watch form values
+  const watchedValues = registerForm.watch();
+  console.log('Form values:', watchedValues);
+
   // Redirect if already logged in
   if (user) {
     // Redirect to admin dashboard if user is admin or super_admin
@@ -208,6 +212,7 @@ export default function AuthPage() {
                             type="email" 
                             placeholder="your@email.com" 
                             autoComplete="email"
+                            style={{ color: '#000', backgroundColor: '#fff' }}
                             {...field} 
                           />
                         </FormControl>
