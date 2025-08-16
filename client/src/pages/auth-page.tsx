@@ -209,11 +209,23 @@ export default function AuthPage() {
                         <FormLabel>Email Address</FormLabel>
                         <FormControl>
                           <Input 
-                            type="email" 
+                            type="text" 
                             placeholder="your@email.com" 
-                            autoComplete="email"
-                            style={{ color: '#000', backgroundColor: '#fff' }}
-                            {...field} 
+                            autoComplete="off"
+                            spellCheck="false"
+                            style={{ 
+                              color: '#000 !important', 
+                              backgroundColor: '#fff !important',
+                              border: '1px solid #ccc',
+                              padding: '8px 12px'
+                            }}
+                            value={field.value || ''}
+                            onChange={(e) => {
+                              console.log('Email input changed:', e.target.value);
+                              field.onChange(e.target.value);
+                            }}
+                            onBlur={field.onBlur}
+                            name={field.name}
                           />
                         </FormControl>
                         <FormMessage />
