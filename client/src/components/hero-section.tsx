@@ -46,14 +46,31 @@ export default function HeroSection() {
           </div>
 
           <div className="relative">
-            <img 
-              src="https://images.unsplash.com/photo-1515187029135-18ee286d815b?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=800&h=600" 
-              alt="Alumni networking event" 
-              className="rounded-2xl shadow-2xl w-full h-auto"
-            />
+            {/* Main hero image with multiple layers for depth */}
+            <div className="relative overflow-hidden rounded-2xl shadow-2xl">
+              <img 
+                src="https://images.unsplash.com/photo-1523240795612-9a054b0db644?w=800&h=600&fit=crop" 
+                alt="Alumni graduation ceremony with students celebrating" 
+                className="w-full h-auto object-cover"
+              />
+              
+              {/* Gradient overlay for better text contrast */}
+              <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent"></div>
+              
+              {/* Success stats overlay on image */}
+              <div className="absolute bottom-6 left-6 bg-white/90 backdrop-blur-sm text-gray-800 p-4 rounded-xl shadow-lg">
+                <div className="flex items-center space-x-3">
+                  <div className="text-green-500 text-2xl">📈</div>
+                  <div>
+                    <div className="font-bold text-lg">95%</div>
+                    <div className="text-sm text-gray-600">Success Rate</div>
+                  </div>
+                </div>
+              </div>
+            </div>
             
             {/* Floating Achievement Cards */}
-            <div className="absolute -top-4 -left-4 bg-white text-gray-800 p-4 rounded-xl shadow-lg">
+            <div className="absolute -top-4 -left-4 bg-white text-gray-800 p-4 rounded-xl shadow-lg border border-yellow-200">
               <div className="flex items-center space-x-3">
                 <div className="text-yellow-500 text-xl">🏆</div>
                 <div>
@@ -65,11 +82,19 @@ export default function HeroSection() {
             
             <div className="absolute -bottom-4 -right-4 bg-secondary-600 text-white p-4 rounded-xl shadow-lg">
               <div className="flex items-center space-x-3">
-                <div className="text-xl">👥</div>
+                <div className="text-xl">🌍</div>
                 <div>
                   <div className="font-semibold">Global Network</div>
                   <div className="text-sm opacity-90">50+ Countries</div>
                 </div>
+              </div>
+            </div>
+            
+            {/* Additional floating element - Latest Achievement */}
+            <div className="absolute top-1/2 -translate-y-1/2 -right-8 bg-green-500 text-white p-3 rounded-lg shadow-lg rotate-3">
+              <div className="text-center">
+                <div className="text-sm font-medium">Latest</div>
+                <div className="text-xs opacity-90">Milestone</div>
               </div>
             </div>
           </div>

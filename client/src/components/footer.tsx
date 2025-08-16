@@ -44,33 +44,33 @@ export default function Footer() {
             <h4 className="text-lg font-semibold mb-4">Quick Links</h4>
             <ul className="space-y-2">
               <li>
-                <Link href="/">
-                  <a className="text-gray-300 hover:text-white transition-colors">Home</a>
+                <Link href="/" className="text-gray-300 hover:text-white transition-colors">
+                  Home
                 </Link>
               </li>
               <li>
-                <Link href="/blogs">
-                  <a className="text-gray-300 hover:text-white transition-colors">Blog Stories</a>
+                <Link href="/blogs" className="text-gray-300 hover:text-white transition-colors">
+                  Blog Stories
                 </Link>
               </li>
               <li>
-                <Link href="/events">
-                  <a className="text-gray-300 hover:text-white transition-colors">Events</a>
+                <Link href="/events" className="text-gray-300 hover:text-white transition-colors">
+                  Events
                 </Link>
               </li>
               <li>
-                <Link href="/staff">
-                  <a className="text-gray-300 hover:text-white transition-colors">Our Team</a>
+                <Link href="/staff" className="text-gray-300 hover:text-white transition-colors">
+                  Our Team
                 </Link>
               </li>
               <li>
-                <Link href="/about">
-                  <a className="text-gray-300 hover:text-white transition-colors">About Us</a>
+                <Link href="/about" className="text-gray-300 hover:text-white transition-colors">
+                  About Us
                 </Link>
               </li>
               <li>
-                <Link href="/contact">
-                  <a className="text-gray-300 hover:text-white transition-colors">Contact</a>
+                <Link href="/contact" className="text-gray-300 hover:text-white transition-colors">
+                  Contact
                 </Link>
               </li>
             </ul>

@@ -59,12 +59,12 @@ export default function StaffHighlights() {
           {featuredStaff.map((member) => (
             <div key={member.id} className="text-center group">
               <div className="relative mb-6">
-                <Avatar className="w-32 h-32 mx-auto shadow-lg group-hover:shadow-xl transition-shadow duration-300">
+                <Avatar className="w-32 h-32 mx-auto shadow-lg group-hover:shadow-xl transition-shadow duration-300 border-4 border-white">
                   <AvatarImage 
-                    src={member.profileImage || member.user.profileImage || undefined} 
+                    src={member.profileImage || member.user.profileImage || `https://images.unsplash.com/photo-${member.id.slice(0,8) === '933da78a' ? '1507003211169-0a1dd7228f2d' : member.id.slice(0,8) === 'a2b3c4d5' ? '1519345182560-3ba82c6f5414' : '1494790108755-74ae6b6fb36e'}?w=200&h=200&fit=crop&crop=face`} 
                     alt={`${member.user.firstName} ${member.user.lastName}`}
                   />
-                  <AvatarFallback className="text-2xl">
+                  <AvatarFallback className="text-2xl bg-gradient-to-br from-primary-500 to-secondary-500 text-white">
                     {member.user.firstName[0]}{member.user.lastName[0]}
                   </AvatarFallback>
                 </Avatar>

@@ -7,8 +7,15 @@ export default function CallToAction() {
   const { user } = useAuth();
 
   return (
-    <section className="py-16 bg-gradient-to-r from-secondary-600 to-secondary-700 text-white">
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8 text-center">
+    <section className="py-16 bg-gradient-to-r from-secondary-600 to-secondary-700 text-white relative overflow-hidden">
+      {/* Background decorative elements */}
+      <div className="absolute inset-0 opacity-10">
+        <div className="absolute top-10 left-10 w-32 h-32 bg-white rounded-full blur-xl"></div>
+        <div className="absolute bottom-10 right-10 w-24 h-24 bg-yellow-300 rounded-full blur-lg"></div>
+        <div className="absolute top-1/2 left-1/3 w-16 h-16 bg-pink-300 rounded-full blur-md"></div>
+      </div>
+      
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10">
         <div className="max-w-4xl mx-auto">
           <h2 className="text-3xl lg:text-4xl font-bold mb-6">Ready to Share Your Story?</h2>
           <p className="text-xl text-secondary-100 mb-8 leading-relaxed">
