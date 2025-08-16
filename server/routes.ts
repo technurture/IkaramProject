@@ -14,6 +14,12 @@ export async function registerRoutes(app: Express, storage: IMongoStorage): Prom
     if (!req.isAuthenticated() || !req.user) {
       return res.status(401).json({ message: "Authentication required" });
     }
+    
+    // Check if user is approved
+    if (!req.user.isApproved) {
+      return res.status(403).json({ message: "Account pending approval by super admin" });
+    }
+    
     next();
   };
 

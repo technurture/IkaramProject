@@ -123,7 +123,19 @@ export default function AuthPage() {
       graduationYear: registerData.graduationYear ? parseInt(registerData.graduationYear) : undefined
     };
     
-    registerMutation.mutate(submitData);
+    registerMutation.mutate(submitData, {
+      onSuccess: () => {
+        // Clear the form after successful registration
+        setRegisterData({
+          firstName: '',
+          lastName: '',
+          email: '',
+          username: '',
+          password: '',
+          graduationYear: ''
+        });
+      }
+    });
   };
 
   return (

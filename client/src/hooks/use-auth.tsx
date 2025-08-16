@@ -14,7 +14,7 @@ type AuthContextType = {
   error: Error | null;
   loginMutation: UseMutationResult<SelectUser, Error, LoginData>;
   logoutMutation: UseMutationResult<void, Error, void>;
-  registerMutation: UseMutationResult<SelectUser, Error, RegisterData>;
+  registerMutation: UseMutationResult<{ message: string; user: SelectUser }, Error, RegisterData>;
 };
 
 type LoginData = {
@@ -74,11 +74,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const res = await apiRequest("POST", "/api/register", credentials);
       return await res.json();
     },
-    onSuccess: (user: SelectUser) => {
-      queryClient.setQueryData(["/api/user"], user);
+    onSuccess: (response: { message: string; user: SelectUser }) => {
+      // Don't set user data since they're not logged in yet
+      // Show the approval message instead
       toast({
-        title: "Welcome!",
-        description: `Welcome to the Old Student Association, ${user.firstName}!`,
+        title: "Registration Successful!",
+        description: response.message,
+        duration: 8000, // Show for longer to ensure user sees it
       });
     },
     onError: (error: Error) => {

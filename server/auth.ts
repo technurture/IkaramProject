@@ -104,12 +104,19 @@ export function setupAuth(app: Express, storage: IMongoStorage) {
         graduationYear: graduationYear ? parseInt(graduationYear) : undefined,
         role: 'user',
         isActive: true,
-        isApproved: true
+        isApproved: false // Require super admin approval for all new users
       });
 
-      req.login(user, (err) => {
-        if (err) return next(err);
-        res.status(201).json(user);
+      // Don't log them in automatically - they need approval first
+      res.status(201).json({
+        message: "Registration successful! Your account is pending approval by the super admin. You will receive access once approved.",
+        user: {
+          username: user.username,
+          email: user.email,
+          firstName: user.firstName,
+          lastName: user.lastName,
+          isApproved: user.isApproved
+        }
       });
     } catch (error) {
       res.status(500).json({ message: "Registration failed" });
