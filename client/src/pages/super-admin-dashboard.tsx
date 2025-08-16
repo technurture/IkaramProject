@@ -103,7 +103,7 @@ const staffFormSchema = z.object({
   email: z.string().email().optional(),
   username: z.string().optional(),
   // Staff details
-  position: z.string().min(1, "Position is required"),
+  position: z.string().optional(),
   department: z.string().optional(),
   bio: z.string().optional(),
   phoneNumber: z.string().optional(),
@@ -112,19 +112,13 @@ const staffFormSchema = z.object({
   makeAdmin: z.boolean().default(true),
   // Profile image
   profileImage: z.string().optional(),
-}).refine(
-  (data) => data.existingUserId || (data.firstName && data.lastName && data.email && data.username),
-  {
-    message: "Either select an existing user or provide new user details",
-    path: ["existingUserId"],
-  }
-);
+});
 
 const profileFormSchema = z.object({
-  firstName: z.string().min(1).max(50),
-  lastName: z.string().min(1).max(50),
-  email: z.string().email(),
-  username: z.string().min(3).max(50),
+  firstName: z.string().optional(),
+  lastName: z.string().optional(),
+  email: z.string().email().optional(),
+  username: z.string().optional(),
   bio: z.string().optional(),
   graduationYear: z.number().optional(),
   profileImage: z.string().optional(),
@@ -413,10 +407,10 @@ export default function SuperAdminDashboard() {
       bio: user?.bio || "",
       graduationYear: user?.graduationYear || undefined,
       profileImage: user?.profileImage || "",
-      position: user?.position || "",
-      department: user?.department || "",
-      phoneNumber: user?.phoneNumber || "",
-      officeLocation: user?.officeLocation || "",
+      position: "",
+      department: "",
+      phoneNumber: "",
+      officeLocation: "",
     },
   });
 
@@ -497,10 +491,10 @@ export default function SuperAdminDashboard() {
     // Trim whitespace from text fields
     const trimmedValues = {
       ...values,
-      firstName: values.firstName.trim(),
-      lastName: values.lastName.trim(),
-      email: values.email.trim(),
-      username: values.username.trim(),
+      firstName: values.firstName?.trim() || "",
+      lastName: values.lastName?.trim() || "",
+      email: values.email?.trim() || "",
+      username: values.username?.trim() || "",
       bio: values.bio?.trim(),
     };
     updateProfileMutation.mutate(trimmedValues);
@@ -552,7 +546,7 @@ export default function SuperAdminDashboard() {
       lastName: values.lastName?.trim(),
       email: values.email?.trim(),
       username: values.username?.trim(),
-      position: values.position.trim(),
+      position: values.position?.trim() || "",
       department: values.department?.trim(),
       phoneNumber: values.phoneNumber?.trim(),
       bio: values.bio?.trim(),

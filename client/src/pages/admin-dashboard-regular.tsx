@@ -80,10 +80,10 @@ const eventFormSchema = insertEventSchema.omit({ createdBy: true }).extend({
 
 
 const profileFormSchema = z.object({
-  firstName: z.string().min(1).max(50),
-  lastName: z.string().min(1).max(50),
-  email: z.string().email(),
-  username: z.string().min(3).max(50),
+  firstName: z.string().optional(),
+  lastName: z.string().optional(),
+  email: z.string().email().optional(),
+  username: z.string().optional(),
   bio: z.string().optional(),
   graduationYear: z.number().optional(),
   profileImage: z.string().optional(),
@@ -395,10 +395,10 @@ export default function RegularAdminDashboard() {
     // Trim whitespace from text fields
     const trimmedValues = {
       ...values,
-      firstName: values.firstName.trim(),
-      lastName: values.lastName.trim(),
-      email: values.email.trim(),
-      username: values.username.trim(),
+      firstName: values.firstName?.trim() || "",
+      lastName: values.lastName?.trim() || "",
+      email: values.email?.trim() || "",
+      username: values.username?.trim() || "",
       bio: values.bio?.trim(),
     };
     updateProfileMutation.mutate(trimmedValues);
