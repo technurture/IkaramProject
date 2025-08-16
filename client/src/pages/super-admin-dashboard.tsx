@@ -92,6 +92,8 @@ const staffFormSchema = z.object({
   bio: z.string().optional(),
   phoneNumber: z.string().optional(),
   officeLocation: z.string().optional(),
+  // Auto-admin option
+  makeAdmin: z.boolean().default(true),
 }).refine(
   (data) => data.existingUserId || (data.firstName && data.lastName && data.email && data.username),
   {
@@ -109,6 +111,18 @@ const profileFormSchema = z.object({
   graduationYear: z.number().optional(),
 });
 
+const passwordChangeSchema = z.object({
+  currentPassword: z.string().min(1, "Current password is required"),
+  newPassword: z.string().min(6, "New password must be at least 6 characters"),
+  confirmPassword: z.string().min(1, "Please confirm your new password"),
+}).refine(
+  (data) => data.newPassword === data.confirmPassword,
+  {
+    message: "New passwords don't match",
+    path: ["confirmPassword"],
+  }
+);
+
 export default function SuperAdminDashboard() {
   const { user } = useAuth();
   const { toast } = useToast();
@@ -119,6 +133,7 @@ export default function SuperAdminDashboard() {
   const [createStaffOpen, setCreateStaffOpen] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
+  const [changePasswordOpen, setChangePasswordOpen] = useState(false);
 
   // Redirect if not super admin
   if (!user || user.role !== 'super_admin') {
@@ -263,12 +278,22 @@ export default function SuperAdminDashboard() {
       const res = await apiRequest("POST", "/api/staff", data);
       return await res.json();
     },
-    onSuccess: () => {
-      toast({ title: "Staff member added successfully" });
+    onSuccess: (data) => {
+      if (data.defaultPassword) {
+        toast({ 
+          title: "Staff member added successfully", 
+          description: `Default password: ${data.defaultPassword}. Please share this with the new admin.`,
+          duration: 10000
+        });
+      } else {
+        toast({ title: "Staff member added successfully" });
+      }
       setCreateStaffOpen(false);
       queryClient.invalidateQueries({ queryKey: ["/api/staff"] });
       queryClient.invalidateQueries({ queryKey: ["/api/users/all"] });
       queryClient.invalidateQueries({ queryKey: ["/api/admin/stats"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/pending"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/all"] });
     },
     onError: (error: Error) => {
       toast({ title: "Failed to add staff member", description: error.message, variant: "destructive" });
@@ -323,6 +348,22 @@ export default function SuperAdminDashboard() {
     },
     onError: (error: Error) => {
       toast({ title: "Failed to delete admin", description: error.message, variant: "destructive" });
+    },
+  });
+
+  // Password change mutation
+  const changePasswordMutation = useMutation({
+    mutationFn: async (data: z.infer<typeof passwordChangeSchema>) => {
+      const res = await apiRequest("PUT", "/api/user/change-password", data);
+      return await res.json();
+    },
+    onSuccess: () => {
+      toast({ title: "Password changed successfully" });
+      setChangePasswordOpen(false);
+      passwordForm.reset();
+    },
+    onError: (error: Error) => {
+      toast({ title: "Failed to change password", description: error.message, variant: "destructive" });
     },
   });
 
@@ -393,6 +434,17 @@ export default function SuperAdminDashboard() {
       bio: "",
       phoneNumber: "",
       officeLocation: "",
+      makeAdmin: true,
+    },
+  });
+
+  // Password change form
+  const passwordForm = useForm<z.infer<typeof passwordChangeSchema>>({
+    resolver: zodResolver(passwordChangeSchema),
+    defaultValues: {
+      currentPassword: "",
+      newPassword: "",
+      confirmPassword: "",
     },
   });
 
@@ -464,6 +516,10 @@ export default function SuperAdminDashboard() {
     createStaffMutation.mutate(trimmedValues);
   };
 
+  const onChangePassword = (values: z.infer<typeof passwordChangeSchema>) => {
+    changePasswordMutation.mutate(values);
+  };
+
   return (
     <div className="min-h-screen bg-gray-50">
       <Navbar />
@@ -478,6 +534,10 @@ export default function SuperAdminDashboard() {
             <Button onClick={() => setProfileOpen(true)} variant="outline">
               <User className="h-4 w-4 mr-2" />
               Edit Profile
+            </Button>
+            <Button onClick={() => setChangePasswordOpen(true)} variant="outline">
+              <Settings className="h-4 w-4 mr-2" />
+              Change Password
             </Button>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
@@ -1506,6 +1566,35 @@ export default function SuperAdminDashboard() {
                     </FormItem>
                   )}
                 />
+
+                {!staffForm.watch("existingUserId") && (
+                  <div className="flex items-center space-x-2 p-4 bg-blue-50 rounded-lg">
+                    <FormField
+                      control={staffForm.control}
+                      name="makeAdmin"
+                      render={({ field }) => (
+                        <FormItem className="flex flex-row items-start space-x-3 space-y-0">
+                          <FormControl>
+                            <input
+                              type="checkbox"
+                              checked={field.value}
+                              onChange={field.onChange}
+                              className="mt-1"
+                            />
+                          </FormControl>
+                          <div className="space-y-1 leading-none">
+                            <FormLabel>
+                              Make this staff member an admin
+                            </FormLabel>
+                            <p className="text-sm text-muted-foreground">
+                              Staff members will automatically receive admin privileges and a default password to change on first login.
+                            </p>
+                          </div>
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+                )}
                 
                 <div className="flex justify-end space-x-2">
                   <Button type="button" variant="outline" onClick={() => setCreateStaffOpen(false)}>
@@ -1539,6 +1628,70 @@ export default function SuperAdminDashboard() {
                 </Button>
               </div>
             </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Change Password Dialog */}
+        <Dialog open={changePasswordOpen} onOpenChange={setChangePasswordOpen}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle>Change Password</DialogTitle>
+              <DialogDescription>Update your account password</DialogDescription>
+            </DialogHeader>
+            <Form {...passwordForm}>
+              <form onSubmit={passwordForm.handleSubmit(onChangePassword)} className="space-y-4">
+                <FormField
+                  control={passwordForm.control}
+                  name="currentPassword"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Current Password</FormLabel>
+                      <FormControl>
+                        <Input type="password" placeholder="Enter current password" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                
+                <FormField
+                  control={passwordForm.control}
+                  name="newPassword"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>New Password</FormLabel>
+                      <FormControl>
+                        <Input type="password" placeholder="Enter new password" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                
+                <FormField
+                  control={passwordForm.control}
+                  name="confirmPassword"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Confirm New Password</FormLabel>
+                      <FormControl>
+                        <Input type="password" placeholder="Confirm new password" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                
+                <div className="flex justify-end space-x-2">
+                  <Button type="button" variant="outline" onClick={() => setChangePasswordOpen(false)}>
+                    Cancel
+                  </Button>
+                  <Button type="submit" disabled={changePasswordMutation.isPending}>
+                    {changePasswordMutation.isPending ? "Updating..." : "Update Password"}
+                  </Button>
+                </div>
+              </form>
+            </Form>
           </DialogContent>
         </Dialog>
       </div>

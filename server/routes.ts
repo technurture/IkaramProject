@@ -310,19 +310,23 @@ export async function registerRoutes(app: Express, storage: IMongoStorage): Prom
         const defaultPassword = `Staff${Math.random().toString(36).slice(-8)}!`;
         const hashedPassword = await hashPassword(defaultPassword);
         
-        // Create user
+        // Create user with admin role if makeAdmin is true
+        const userRole = staffData.makeAdmin ? 'admin' : 'user';
         const newUser = await storage.createUser({
           firstName: staffData.firstName,
           lastName: staffData.lastName,
           email: staffData.email,
           username: staffData.username,
           password: hashedPassword,
-          role: 'user',
+          role: userRole,
           isActive: true,
           isApproved: true
         });
         
         userId = newUser._id.toString();
+        
+        // Store the default password to return to admin
+        req.body.defaultPassword = defaultPassword;
       }
       
       if (!userId) {
@@ -339,7 +343,16 @@ export async function registerRoutes(app: Express, storage: IMongoStorage): Prom
         isActive: true
       });
       
-      res.status(201).json(staff);
+      // Include default password in response if a new user was created
+      const response = {
+        staff,
+        ...(req.body.defaultPassword && { 
+          defaultPassword: req.body.defaultPassword,
+          message: `Staff member created successfully. Default password: ${req.body.defaultPassword}` 
+        })
+      };
+      
+      res.status(201).json(response);
     } catch (error) {
       console.error("Staff creation error:", error);
       res.status(500).json({ message: "Failed to create staff member" });
@@ -602,6 +615,36 @@ export async function registerRoutes(app: Express, storage: IMongoStorage): Prom
       res.json({ message: "Admin deleted successfully" });
     } catch (error) {
       res.status(500).json({ message: "Failed to delete admin" });
+    }
+  });
+
+  // Password change endpoint
+  app.put("/api/user/change-password", requireAuth, async (req, res) => {
+    try {
+      const { currentPassword, newPassword } = req.body;
+      const userId = req.user._id;
+
+      // Get current user
+      const user = await storage.getUser(userId);
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+
+      // Verify current password
+      const isValidPassword = await comparePasswords(currentPassword, user.password);
+      if (!isValidPassword) {
+        return res.status(400).json({ message: "Current password is incorrect" });
+      }
+
+      // Hash new password
+      const hashedNewPassword = await hashPassword(newPassword);
+
+      // Update password
+      await storage.updateUser(userId, { password: hashedNewPassword });
+
+      res.json({ message: "Password changed successfully" });
+    } catch (error) {
+      res.status(500).json({ message: "Failed to change password" });
     }
   });
 
