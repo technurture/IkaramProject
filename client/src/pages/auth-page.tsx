@@ -32,6 +32,18 @@ type RegisterData = z.infer<typeof registerSchema>;
 export default function AuthPage() {
   const [mode, setMode] = useState<"login" | "register">("login");
   const { user, loginMutation, registerMutation } = useAuth();
+  
+  // Simple registration form state
+  const [registerData, setRegisterData] = useState({
+    firstName: '',
+    lastName: '',
+    email: '',
+    username: '',
+    password: '',
+    graduationYear: ''
+  });
+  
+  const [registerErrors, setRegisterErrors] = useState<Record<string, string>>({});
 
   const loginForm = useForm<LoginData>({
     resolver: zodResolver(loginSchema),
@@ -69,6 +81,44 @@ export default function AuthPage() {
 
   const handleRegister = (data: RegisterData) => {
     registerMutation.mutate(data);
+  };
+  
+  const handleSimpleRegister = (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    // Simple validation
+    const errors: Record<string, string> = {};
+    
+    if (!registerData.firstName || registerData.firstName.length < 2) {
+      errors.firstName = 'First name must be at least 2 characters';
+    }
+    if (!registerData.lastName || registerData.lastName.length < 2) {
+      errors.lastName = 'Last name must be at least 2 characters';
+    }
+    if (!registerData.email || !/\S+@\S+\.\S+/.test(registerData.email)) {
+      errors.email = 'Please enter a valid email address';
+    }
+    if (!registerData.username || registerData.username.length < 3) {
+      errors.username = 'Username must be at least 3 characters';
+    }
+    if (!registerData.password || registerData.password.length < 6) {
+      errors.password = 'Password must be at least 6 characters';
+    }
+    
+    if (Object.keys(errors).length > 0) {
+      setRegisterErrors(errors);
+      return;
+    }
+    
+    setRegisterErrors({});
+    
+    // Convert graduation year to number if provided
+    const submitData = {
+      ...registerData,
+      graduationYear: registerData.graduationYear ? parseInt(registerData.graduationYear) : undefined
+    };
+    
+    registerMutation.mutate(submitData);
   };
 
   return (
@@ -168,120 +218,111 @@ export default function AuthPage() {
                 </form>
               </Form>
             ) : (
-              <Form {...registerForm}>
-                <form onSubmit={registerForm.handleSubmit(handleRegister)} className="space-y-4">
-                  <div className="grid grid-cols-2 gap-4">
-                    <FormField
-                      control={registerForm.control}
-                      name="firstName"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>First Name</FormLabel>
-                          <FormControl>
-                            <Input placeholder="John" {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
+              <form onSubmit={handleSimpleRegister} className="space-y-4">
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="firstName">First Name</Label>
+                    <Input 
+                      id="firstName"
+                      type="text"
+                      placeholder="John" 
+                      value={registerData.firstName}
+                      onChange={(e) => setRegisterData({...registerData, firstName: e.target.value})}
+                      className={registerErrors.firstName ? 'border-red-500' : ''}
                     />
-                    <FormField
-                      control={registerForm.control}
-                      name="lastName"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Last Name</FormLabel>
-                          <FormControl>
-                            <Input placeholder="Doe" {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
+                    {registerErrors.firstName && (
+                      <p className="text-sm text-red-500 mt-1">{registerErrors.firstName}</p>
+                    )}
                   </div>
-                  <FormField
-                    control={registerForm.control}
-                    name="email"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Email Address</FormLabel>
-                        <FormControl>
-                          <Input 
-                            type="text" 
-                            placeholder="your@email.com" 
-                            value={field.value || ''}
-                            onChange={(e) => {
-                              field.onChange(e.target.value);
-                            }}
-                            onBlur={field.onBlur}
-                            name="email"
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
+                  <div>
+                    <Label htmlFor="lastName">Last Name</Label>
+                    <Input 
+                      id="lastName"
+                      type="text"
+                      placeholder="Doe" 
+                      value={registerData.lastName}
+                      onChange={(e) => setRegisterData({...registerData, lastName: e.target.value})}
+                      className={registerErrors.lastName ? 'border-red-500' : ''}
+                    />
+                    {registerErrors.lastName && (
+                      <p className="text-sm text-red-500 mt-1">{registerErrors.lastName}</p>
                     )}
+                  </div>
+                </div>
+                
+                <div>
+                  <Label htmlFor="email">Email Address</Label>
+                  <Input 
+                    id="email"
+                    type="email"
+                    placeholder="your@email.com" 
+                    value={registerData.email}
+                    onChange={(e) => setRegisterData({...registerData, email: e.target.value})}
+                    className={registerErrors.email ? 'border-red-500' : ''}
                   />
-                  <FormField
-                    control={registerForm.control}
-                    name="username"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Username</FormLabel>
-                        <FormControl>
-                          <Input placeholder="johndoe" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
+                  {registerErrors.email && (
+                    <p className="text-sm text-red-500 mt-1">{registerErrors.email}</p>
+                  )}
+                </div>
+                
+                <div>
+                  <Label htmlFor="username">Username</Label>
+                  <Input 
+                    id="username"
+                    type="text"
+                    placeholder="johndoe" 
+                    value={registerData.username}
+                    onChange={(e) => setRegisterData({...registerData, username: e.target.value})}
+                    className={registerErrors.username ? 'border-red-500' : ''}
                   />
-                  <FormField
-                    control={registerForm.control}
-                    name="graduationYear"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Graduation Year (Optional)</FormLabel>
-                        <Select onValueChange={(value) => field.onChange(value ? parseInt(value) : undefined)}>
-                          <FormControl>
-                            <SelectTrigger>
-                              <SelectValue placeholder="Select Year" />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            {Array.from({ length: 30 }, (_, i) => {
-                              const year = new Date().getFullYear() - i;
-                              return (
-                                <SelectItem key={year} value={year.toString()}>
-                                  {year}
-                                </SelectItem>
-                              );
-                            })}
-                          </SelectContent>
-                        </Select>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={registerForm.control}
-                    name="password"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Password</FormLabel>
-                        <FormControl>
-                          <Input type="password" placeholder="••••••••" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <Button 
-                    type="submit" 
-                    className="w-full" 
-                    disabled={registerMutation.isPending}
+                  {registerErrors.username && (
+                    <p className="text-sm text-red-500 mt-1">{registerErrors.username}</p>
+                  )}
+                </div>
+                
+                <div>
+                  <Label htmlFor="graduationYear">Graduation Year (Optional)</Label>
+                  <select 
+                    id="graduationYear"
+                    value={registerData.graduationYear}
+                    onChange={(e) => setRegisterData({...registerData, graduationYear: e.target.value})}
+                    className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
                   >
-                    {registerMutation.isPending ? "Creating Account..." : "Create Account"}
-                  </Button>
-                </form>
-              </Form>
+                    <option value="">Select Year</option>
+                    {Array.from({ length: 30 }, (_, i) => {
+                      const year = new Date().getFullYear() - i;
+                      return (
+                        <option key={year} value={year.toString()}>
+                          {year}
+                        </option>
+                      );
+                    })}
+                  </select>
+                </div>
+                
+                <div>
+                  <Label htmlFor="password">Password</Label>
+                  <Input 
+                    id="password"
+                    type="password"
+                    placeholder="••••••••" 
+                    value={registerData.password}
+                    onChange={(e) => setRegisterData({...registerData, password: e.target.value})}
+                    className={registerErrors.password ? 'border-red-500' : ''}
+                  />
+                  {registerErrors.password && (
+                    <p className="text-sm text-red-500 mt-1">{registerErrors.password}</p>
+                  )}
+                </div>
+                
+                <Button 
+                  type="submit" 
+                  className="w-full" 
+                  disabled={registerMutation.isPending}
+                >
+                  {registerMutation.isPending ? "Creating Account..." : "Create Account"}
+                </Button>
+              </form>
             )}
           </CardContent>
         </Card>
