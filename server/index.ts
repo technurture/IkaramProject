@@ -1,6 +1,9 @@
 import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
+import { connectMongoDB } from './mongodb';
+import { MongoDBStorage } from './mongodb-storage';
+import { seedSuperAdmin } from './seed-super-admin';
 
 const app = express();
 app.use(express.json());
@@ -37,7 +40,16 @@ app.use((req, res, next) => {
 });
 
 (async () => {
-  const server = await registerRoutes(app);
+  // Connect to MongoDB
+  await connectMongoDB();
+  
+  // Initialize storage
+  const storage = new MongoDBStorage();
+  
+  // Seed super admin
+  await seedSuperAdmin();
+  
+  const server = await registerRoutes(app, storage);
 
   app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
     const status = err.status || err.statusCode || 500;

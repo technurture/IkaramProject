@@ -1,13 +1,13 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
-import { storage } from "./storage";
+import type { IMongoStorage } from "./mongodb-storage";
 import { setupAuth } from "./auth";
 import { upload, uploadToCloudinary, deleteFromCloudinary } from "./cloudinary";
-import { insertBlogSchema, insertCommentSchema, insertEventSchema, insertStaffSchema } from "@shared/schema";
+import { insertBlogSchema, insertCommentSchema, insertEventSchema, insertStaffSchema } from "@shared/mongodb-schema";
 
-export async function registerRoutes(app: Express): Promise<Server> {
-  // Setup authentication routes
-  setupAuth(app);
+export async function registerRoutes(app: Express, storage: IMongoStorage): Promise<Server> {
+  // Setup authentication routes with storage
+  setupAuth(app, storage);
 
   // Helper function to require authentication
   const requireAuth = (req: any, res: any, next: any) => {
@@ -19,8 +19,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Helper function to require admin role
   const requireAdmin = (req: any, res: any, next: any) => {
-    if (!req.isAuthenticated() || !req.user || req.user.role !== 'admin') {
+    if (!req.isAuthenticated() || !req.user || (req.user.role !== 'admin' && req.user.role !== 'super_admin')) {
       return res.status(403).json({ message: "Admin access required" });
+    }
+    next();
+  };
+
+  // Helper function to require super admin role
+  const requireSuperAdmin = (req: any, res: any, next: any) => {
+    if (!req.isAuthenticated() || !req.user || req.user.role !== 'super_admin') {
+      return res.status(403).json({ message: "Super admin access required" });
     }
     next();
   };
@@ -61,7 +69,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const blogData = insertBlogSchema.parse({
         ...req.body,
-        authorId: req.user.id
+        authorId: req.user._id
       });
       
       const blog = await storage.createBlog(blogData);
@@ -79,7 +87,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       // Only allow author or admin to update
-      if (blog.authorId !== req.user.id && req.user.role !== 'admin') {
+      if (blog.authorId !== req.user._id && req.user.role !== 'admin' && req.user.role !== 'super_admin') {
         return res.status(403).json({ message: "Not authorized to update this blog" });
       }
 
@@ -373,7 +381,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       // Only allow uploader or admin to delete
-      if (media.uploadedBy !== req.user.id && req.user.role !== 'admin') {
+      if (media.uploadedBy !== req.user._id && req.user.role !== 'admin' && req.user.role !== 'super_admin') {
         return res.status(403).json({ message: "Not authorized to delete this media" });
       }
 
@@ -390,6 +398,72 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
     } catch (error) {
       res.status(500).json({ message: "Failed to delete media" });
+    }
+  });
+
+  // Super Admin routes for managing admin approvals
+  app.get("/api/admin/pending", requireSuperAdmin, async (req, res) => {
+    try {
+      const pendingAdmins = await storage.getAllAdmins();
+      const pending = pendingAdmins.filter(admin => !admin.isApproved);
+      
+      // Remove passwords from response
+      const adminsWithoutPasswords = pending.map(({ password, ...admin }) => admin);
+      res.json(adminsWithoutPasswords);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch pending admins" });
+    }
+  });
+
+  app.get("/api/admin/all", requireSuperAdmin, async (req, res) => {
+    try {
+      const allAdmins = await storage.getAllAdmins();
+      
+      // Remove passwords from response
+      const adminsWithoutPasswords = allAdmins.map(({ password, ...admin }) => admin);
+      res.json(adminsWithoutPasswords);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch admins" });
+    }
+  });
+
+  app.put("/api/admin/:id/approve", requireSuperAdmin, async (req, res) => {
+    try {
+      const { isApproved } = req.body;
+      const updatedAdmin = await storage.updateUserApproval(req.params.id, isApproved);
+      
+      if (!updatedAdmin) {
+        return res.status(404).json({ message: "Admin not found" });
+      }
+
+      const { password, ...adminWithoutPassword } = updatedAdmin;
+      res.json({ 
+        message: `Admin ${isApproved ? 'approved' : 'rejected'} successfully`,
+        admin: adminWithoutPassword
+      });
+    } catch (error) {
+      res.status(500).json({ message: "Failed to update admin approval" });
+    }
+  });
+
+  app.put("/api/admin/:id/reactivate", requireSuperAdmin, async (req, res) => {
+    try {
+      const updatedAdmin = await storage.updateUser(req.params.id, { 
+        isActive: true, 
+        isApproved: true 
+      });
+      
+      if (!updatedAdmin) {
+        return res.status(404).json({ message: "Admin not found" });
+      }
+
+      const { password, ...adminWithoutPassword } = updatedAdmin;
+      res.json({ 
+        message: "Admin reactivated successfully",
+        admin: adminWithoutPassword
+      });
+    } catch (error) {
+      res.status(500).json({ message: "Failed to reactivate admin" });
     }
   });
 

@@ -27,21 +27,24 @@ Preferred communication style: Simple, everyday language.
 - **API Design**: RESTful API with role-based middleware for authorization
 
 ### Database Design
-- **Primary Database**: PostgreSQL with Neon serverless driver
-- **Schema Management**: Drizzle Kit for migrations and schema management
+- **Primary Database**: MongoDB with Mongoose ODM
+- **Schema Management**: Mongoose schemas with TypeScript interfaces
 - **Key Entities**:
-  - Users with role-based access (user, admin)
+  - Users with role-based access (user, admin, super_admin)
   - Blogs with categories, tags, and status management
   - Comments with hierarchical threading support
   - Events with registration tracking
   - Staff profiles with contact information
   - Media files with Cloudinary integration
+- **Super Admin System**: Built-in super admin approval system for managing other administrators
 
 ### Authentication & Authorization
-- **Session Management**: Express sessions with PostgreSQL store
+- **Session Management**: Express sessions with MongoDB store
 - **Password Security**: Scrypt hashing with salt for secure password storage
-- **Role-Based Access**: Admin and user roles with protected routes
+- **Role-Based Access**: User, admin, and super_admin roles with protected routes
+- **Admin Approval System**: Super admins can approve/reject/reactivate other administrators
 - **Middleware Protection**: Route-level authentication and authorization guards
+- **Super Admin**: Default super admin account (superadmin@ikaram.edu / SuperAdmin123!)
 
 ### Media Management
 - **Cloud Storage**: Cloudinary for image and video storage
@@ -52,9 +55,9 @@ Preferred communication style: Simple, everyday language.
 ## External Dependencies
 
 ### Core Infrastructure
-- **Database**: PostgreSQL (configured for Neon serverless)
+- **Database**: MongoDB (configured with environment variable MONGODB_URL)
 - **Cloud Storage**: Cloudinary for media files and asset management
-- **Session Store**: PostgreSQL-based session persistence
+- **Session Store**: MongoDB-based session persistence
 
 ### Frontend Libraries
 - **UI Framework**: React 18 with TypeScript
@@ -67,10 +70,10 @@ Preferred communication style: Simple, everyday language.
 
 ### Backend Libraries
 - **Web Framework**: Express.js with TypeScript support
-- **Database**: Drizzle ORM with Neon PostgreSQL driver
+- **Database**: MongoDB with Mongoose ODM
 - **Authentication**: Passport.js with local strategy
 - **File Upload**: Multer for multipart form handling
-- **Session Management**: express-session with connect-pg-simple
+- **Session Management**: express-session with connect-mongo
 - **Security**: Built-in crypto module for password hashing
 
 ### Development Tools
@@ -78,3 +81,35 @@ Preferred communication style: Simple, everyday language.
 - **TypeScript**: Full type safety across frontend and backend
 - **Code Quality**: ESBuild for production bundling
 - **Development**: Replit-specific plugins for enhanced development experience
+
+## Recent Changes (August 16, 2025)
+
+### Database Migration to MongoDB
+- Migrated from PostgreSQL/Drizzle to MongoDB/Mongoose for improved scalability
+- Updated all schema definitions with TypeScript interfaces
+- Configured secure MongoDB connection using MONGODB_URL environment variable
+- Implemented MongoDB session store for persistent user sessions
+
+### Super Admin Management System
+- Added super_admin role with elevated privileges
+- Implemented admin approval workflow (new admins require super admin approval)
+- Created default super admin account: superadmin@ikaram.edu / SuperAdmin123!
+- Added API endpoints for super admin to manage other administrators:
+  - GET /api/admin/pending - View pending admin approvals
+  - GET /api/admin/all - View all administrators
+  - PUT /api/admin/:id/approve - Approve/reject admin accounts
+  - PUT /api/admin/:id/reactivate - Reactivate deactivated admins
+
+### Security Enhancements
+- Database credentials now stored securely in environment variables
+- Enhanced role-based access control with three-tier system
+- Admin accounts require super admin approval before activation
+- Improved password hashing with scrypt algorithm
+
+### User Experience Improvements
+- Fixed hero section text visibility with better contrast
+- Updated navigation branding to show only "Ikaram"
+- Changed "Explore Stories" button to black for better visibility
+- Fixed footer logo display and updated branding to "TechNurture"
+- Added proper social media icons (Facebook, Twitter, LinkedIn, Instagram)
+- Improved contact page text visibility with dark text on light background
