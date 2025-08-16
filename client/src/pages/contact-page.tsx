@@ -68,10 +68,10 @@ export default function ContactPage() {
       <Navbar />
       
       {/* Hero Section */}
-      <section className="bg-gradient-to-r from-primary-800 to-primary-900 text-white py-16">
+      <section className="bg-gradient-to-r from-primary-600 to-primary-700 text-white py-16">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h1 className="text-4xl lg:text-5xl font-bold mb-6">Contact Us</h1>
-          <p className="text-xl text-primary-100 max-w-3xl mx-auto">
+          <h1 className="text-4xl lg:text-5xl font-bold mb-6 text-white drop-shadow-lg">Contact Us</h1>
+          <p className="text-xl text-gray-100 max-w-3xl mx-auto drop-shadow-md">
             We're here to help and would love to hear from you. Reach out to us with any questions, suggestions, or just to say hello.
           </p>
         </div>
