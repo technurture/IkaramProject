@@ -313,7 +313,7 @@ export default function AdminDashboard() {
                           {event.status}
                         </Badge>
                         <span className="text-sm text-gray-600">
-                          {event.registeredUsers?.length || 0} registered
+                          {event.registrationCount || 0} registered
                         </span>
                         <Button variant="ghost" size="sm">
                           <Edit className="h-4 w-4" />
