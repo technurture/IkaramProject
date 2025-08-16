@@ -526,6 +526,36 @@ export async function registerRoutes(app: Express, storage: IMongoStorage): Prom
     }
   });
 
+  app.put("/api/users/:id", requireAuth, async (req, res) => {
+    try {
+      // Only allow users to update their own profile or admins to update any profile
+      if (req.user!._id !== req.params.id && req.user!.role !== 'admin' && req.user!.role !== 'super_admin') {
+        return res.status(403).json({ message: "Not authorized to update this profile" });
+      }
+
+      const updates = {
+        firstName: req.body.firstName,
+        lastName: req.body.lastName,
+        email: req.body.email,
+        username: req.body.username,
+        bio: req.body.bio,
+        graduationYear: req.body.graduationYear,
+      };
+
+      const updatedUser = await storage.updateUser(req.params.id, updates);
+      
+      if (!updatedUser) {
+        return res.status(404).json({ message: "User not found" });
+      }
+
+      // Don't send password
+      const { password, ...userWithoutPassword } = updatedUser;
+      res.json(userWithoutPassword);
+    } catch (error) {
+      res.status(400).json({ message: "Failed to update user profile" });
+    }
+  });
+
   const httpServer = createServer(app);
 
   return httpServer;
