@@ -77,7 +77,28 @@ const eventFormSchema = insertEventSchema.omit({ createdBy: true }).extend({
 
 const userFormSchema = insertUserSchema.omit({ isActive: true, isApproved: true });
 
-const staffFormSchema = insertStaffSchema.omit({ isActive: true });
+// Enhanced staff form schema - either select existing user or create new
+const staffFormSchema = z.object({
+  // Option 1: Select existing user
+  existingUserId: z.string().optional(),
+  // Option 2: Create new user
+  firstName: z.string().optional(),
+  lastName: z.string().optional(),
+  email: z.string().email().optional(),
+  username: z.string().optional(),
+  // Staff details
+  position: z.string().min(1, "Position is required"),
+  department: z.string().optional(),
+  bio: z.string().optional(),
+  phoneNumber: z.string().optional(),
+  officeLocation: z.string().optional(),
+}).refine(
+  (data) => data.existingUserId || (data.firstName && data.lastName && data.email && data.username),
+  {
+    message: "Either select an existing user or provide new user details",
+    path: ["existingUserId"],
+  }
+);
 
 const profileFormSchema = z.object({
   firstName: z.string().min(1).max(50),
@@ -136,6 +157,15 @@ export default function SuperAdminDashboard() {
     queryFn: async () => {
       const response = await fetch("/api/admin/all");
       if (!response.ok) throw new Error("Failed to fetch admins");
+      return response.json();
+    },
+  });
+
+  const { data: allUsers } = useQuery<IUser[]>({
+    queryKey: ["/api/users/all"],
+    queryFn: async () => {
+      const response = await fetch("/api/users/all");
+      if (!response.ok) throw new Error("Failed to fetch users");
       return response.json();
     },
   });
@@ -220,6 +250,7 @@ export default function SuperAdminDashboard() {
       queryClient.invalidateQueries({ queryKey: ["/api/admin/pending"] });
       queryClient.invalidateQueries({ queryKey: ["/api/admin/all"] });
       queryClient.invalidateQueries({ queryKey: ["/api/admin/stats"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/users/all"] });
     },
     onError: (error: Error) => {
       toast({ title: "Failed to create admin", description: error.message, variant: "destructive" });
@@ -350,10 +381,16 @@ export default function SuperAdminDashboard() {
   const staffForm = useForm<z.infer<typeof staffFormSchema>>({
     resolver: zodResolver(staffFormSchema),
     defaultValues: {
-      userId: "",
+      existingUserId: "",
+      firstName: "",
+      lastName: "",
+      email: "",
+      username: "",
       position: "",
       department: "",
       bio: "",
+      phoneNumber: "",
+      officeLocation: "",
     },
   });
 
@@ -411,10 +448,15 @@ export default function SuperAdminDashboard() {
     // Trim whitespace from text fields
     const trimmedValues = {
       ...values,
+      firstName: values.firstName?.trim(),
+      lastName: values.lastName?.trim(),
+      email: values.email?.trim(),
+      username: values.username?.trim(),
       position: values.position.trim(),
       department: values.department?.trim(),
       phoneNumber: values.phoneNumber?.trim(),
       bio: values.bio?.trim(),
+      officeLocation: values.officeLocation?.trim(),
     };
     createStaffMutation.mutate(trimmedValues);
   };
@@ -1308,17 +1350,89 @@ export default function SuperAdminDashboard() {
               <form onSubmit={staffForm.handleSubmit(onCreateStaff)} className="space-y-4">
                 <FormField
                   control={staffForm.control}
-                  name="userId"
+                  name="existingUserId"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>User ID</FormLabel>
-                      <FormControl>
-                        <Input placeholder="Enter existing user ID" {...field} />
-                      </FormControl>
+                      <FormLabel>Select Existing User (Optional)</FormLabel>
+                      <Select onValueChange={field.onChange} value={field.value}>
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select a user or create new one below" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value="">Create New User</SelectItem>
+                          {allUsers?.map((user) => (
+                            <SelectItem key={user._id} value={user._id}>
+                              {user.firstName} {user.lastName} ({user.email})
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
                       <FormMessage />
                     </FormItem>
                   )}
                 />
+                
+                {!staffForm.watch("existingUserId") && (
+                  <>
+                    <div className="grid grid-cols-2 gap-4">
+                      <FormField
+                        control={staffForm.control}
+                        name="firstName"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>First Name</FormLabel>
+                            <FormControl>
+                              <Input placeholder="John" {...field} />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      <FormField
+                        control={staffForm.control}
+                        name="lastName"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Last Name</FormLabel>
+                            <FormControl>
+                              <Input placeholder="Doe" {...field} />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </div>
+                    <FormField
+                      control={staffForm.control}
+                      name="email"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Email</FormLabel>
+                          <FormControl>
+                            <Input type="email" placeholder="john.doe@example.com" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={staffForm.control}
+                      name="username"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Username</FormLabel>
+                          <FormControl>
+                            <Input placeholder="johndoe" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </>
+                )}
+
                 <FormField
                   control={staffForm.control}
                   name="position"
@@ -1332,19 +1446,50 @@ export default function SuperAdminDashboard() {
                     </FormItem>
                   )}
                 />
+                
+                <div className="grid grid-cols-2 gap-4">
+                  <FormField
+                    control={staffForm.control}
+                    name="department"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Department</FormLabel>
+                        <FormControl>
+                          <Input placeholder="Alumni Relations" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={staffForm.control}
+                    name="phoneNumber"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Phone Number</FormLabel>
+                        <FormControl>
+                          <Input placeholder="+1 234 567 8900" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+
                 <FormField
                   control={staffForm.control}
-                  name="department"
+                  name="officeLocation"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Department</FormLabel>
+                      <FormLabel>Office Location</FormLabel>
                       <FormControl>
-                        <Input placeholder="e.g., Alumni Relations" {...field} />
+                        <Input placeholder="Building A, Room 123" {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
                   )}
                 />
+
                 <FormField
                   control={staffForm.control}
                   name="bio"
@@ -1358,6 +1503,7 @@ export default function SuperAdminDashboard() {
                     </FormItem>
                   )}
                 />
+                
                 <div className="flex justify-end space-x-2">
                   <Button type="button" variant="outline" onClick={() => setCreateStaffOpen(false)}>
                     Cancel

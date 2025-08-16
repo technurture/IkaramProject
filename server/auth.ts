@@ -107,6 +107,20 @@ export function setupAuth(app: Express, storage: IMongoStorage) {
         isApproved: false // Require super admin approval for new admin accounts
       });
 
+      // Auto-create staff profile for new admin
+      try {
+        await storage.createStaff({
+          userId: user._id.toString(),
+          position: 'Administrator',
+          department: 'Administration',
+          bio: `New administrator member - ${firstName} ${lastName}`,
+          isActive: true
+        });
+      } catch (staffError) {
+        console.error("Failed to auto-create staff profile:", staffError);
+        // Continue anyway - user was created successfully
+      }
+
       // Don't log them in automatically - they need approval first
       res.status(201).json({
         message: "Admin registration successful! Your request for admin access is pending approval by the super admin. You will receive access once approved.",

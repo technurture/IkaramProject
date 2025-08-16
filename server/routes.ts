@@ -295,11 +295,54 @@ export async function registerRoutes(app: Express, storage: IMongoStorage): Prom
 
   app.post("/api/staff", requireAdmin, async (req, res) => {
     try {
-      const staffData = insertStaffSchema.parse(req.body);
-      const staff = await storage.createStaff(staffData);
+      const staffData = req.body;
+      let userId = staffData.existingUserId;
+      
+      // If no existing user selected, create a new user first
+      if (!userId && staffData.firstName && staffData.lastName && staffData.email && staffData.username) {
+        // Check if user already exists
+        const existingUser = await storage.getUserByEmail(staffData.email);
+        if (existingUser) {
+          return res.status(400).json({ message: "User with this email already exists" });
+        }
+
+        // Generate a default password for staff accounts
+        const defaultPassword = `Staff${Math.random().toString(36).slice(-8)}!`;
+        const hashedPassword = await hashPassword(defaultPassword);
+        
+        // Create user
+        const newUser = await storage.createUser({
+          firstName: staffData.firstName,
+          lastName: staffData.lastName,
+          email: staffData.email,
+          username: staffData.username,
+          password: hashedPassword,
+          role: 'user',
+          isActive: true,
+          isApproved: true
+        });
+        
+        userId = newUser._id.toString();
+      }
+      
+      if (!userId) {
+        return res.status(400).json({ message: "Either select an existing user or provide new user details" });
+      }
+      
+      const staff = await storage.createStaff({
+        userId,
+        position: staffData.position,
+        department: staffData.department,
+        bio: staffData.bio,
+        phoneNumber: staffData.phoneNumber,
+        officeLocation: staffData.officeLocation,
+        isActive: true
+      });
+      
       res.status(201).json(staff);
     } catch (error) {
-      res.status(400).json({ message: "Invalid staff data" });
+      console.error("Staff creation error:", error);
+      res.status(500).json({ message: "Failed to create staff member" });
     }
   });
 
@@ -480,6 +523,22 @@ export async function registerRoutes(app: Express, storage: IMongoStorage): Prom
       res.json(adminsWithoutPasswords);
     } catch (error) {
       res.status(500).json({ message: "Failed to fetch admins" });
+    }
+  });
+
+  app.get("/api/users/all", requireSuperAdmin, async (req, res) => {
+    try {
+      const allUsers = await storage.getAllUsers();
+      
+      // Convert to plain objects and remove passwords
+      const usersWithoutPasswords = allUsers.map(user => {
+        const plainUser = user.toObject();
+        const { password, ...userWithoutPassword } = plainUser;
+        return userWithoutPassword;
+      });
+      res.json(usersWithoutPasswords);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch users" });
     }
   });
 
