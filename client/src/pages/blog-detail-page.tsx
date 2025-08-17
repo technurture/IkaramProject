@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { useParams } from "wouter";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { BlogWithAuthor, CommentWithAuthor } from "@shared/schema";
@@ -387,7 +387,7 @@ export default function BlogDetailPage() {
     commentMutation.mutate(replyData);
   };
 
-  const CommentCard = ({ comment, isReply = false }: { comment: CommentWithAuthor; isReply?: boolean }) => (
+  const CommentCard = React.memo(({ comment, isReply = false }: { comment: CommentWithAuthor; isReply?: boolean }) => (
     <div className={`${isReply ? 'ml-8 mt-4' : 'mb-6'}`}>
       <Card>
         <CardContent className="p-4">
@@ -463,10 +463,10 @@ export default function BlogDetailPage() {
       </Card>
       
       {comment.replies?.map((reply) => (
-        <CommentCard key={reply.id} comment={reply} isReply />
+        <CommentCard key={reply._id || reply.id} comment={reply} isReply />
       ))}
     </div>
-  );
+  ));
 
   if (blogLoading) {
     return (
@@ -550,11 +550,11 @@ export default function BlogDetailPage() {
                   disabled={likeMutation.isPending}
                 >
                   <Heart className={`h-4 w-4 mr-1 ${isLiked ? 'fill-current' : ''}`} />
-                  {blog._count?.likes || 0}
+                  {(blog as any).likesCount || 0}
                 </Button>
                 <span className="flex items-center space-x-1 text-gray-500">
                   <MessageCircle className="h-4 w-4" />
-                  <span>{blog._count?.comments || 0}</span>
+                  <span>{comments?.length || 0}</span>
                 </span>
               </div>
             </div>
@@ -597,7 +597,7 @@ export default function BlogDetailPage() {
           {/* Comments Section */}
           <div className="mt-12">
             <h2 className="text-2xl font-bold text-gray-900 mb-6">
-              Comments ({blog._count?.comments || 0})
+              Comments ({comments?.length || 0})
             </h2>
             
             {/* Add Comment */}
@@ -657,7 +657,7 @@ export default function BlogDetailPage() {
             ) : comments && comments.length > 0 ? (
               <div>
                 {comments.map((comment) => (
-                  <CommentCard key={comment.id} comment={comment} />
+                  <CommentCard key={comment._id || comment.id} comment={comment} />
                 ))}
               </div>
             ) : (

@@ -137,10 +137,19 @@ export class MongoDBStorage implements IMongoStorage {
       .limit(limit)
       .populate('authorId', 'firstName lastName username profileImage');
     
-    return blogs.map(blog => ({
-      ...blog.toObject(),
-      author: blog.authorId as any
-    })) as any;
+    // Get likes count for each blog
+    const blogsWithLikes = await Promise.all(
+      blogs.map(async (blog) => {
+        const likesCount = await BlogLike.countDocuments({ blogId: blog._id });
+        return {
+          ...blog.toObject(),
+          author: blog.authorId as any,
+          likesCount
+        };
+      })
+    );
+    
+    return blogsWithLikes as any;
   }
 
   async getBlog(id: string): Promise<BlogWithAuthor | null> {
@@ -149,9 +158,13 @@ export class MongoDBStorage implements IMongoStorage {
     
     if (!blog) return null;
     
+    // Get likes count for this blog
+    const likesCount = await BlogLike.countDocuments({ blogId: id });
+    
     return {
       ...blog.toObject(),
-      author: blog.authorId as any
+      author: blog.authorId as any,
+      likesCount
     } as any;
   }
 
