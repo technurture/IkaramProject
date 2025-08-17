@@ -148,7 +148,7 @@ export default function SuperAdminDashboard() {
   const [createEventOpen, setCreateEventOpen] = useState(false);
   const [createUserOpen, setCreateUserOpen] = useState(false);
   const [createStaffOpen, setCreateStaffOpen] = useState(false);
-  const [settingsOpen, setSettingsOpen] = useState(false);
+
   const [profileOpen, setProfileOpen] = useState(false);
   const [changePasswordOpen, setChangePasswordOpen] = useState(false);
   const [editStaffOpen, setEditStaffOpen] = useState(false);
@@ -738,10 +738,7 @@ export default function SuperAdminDashboard() {
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
-            <Button variant="outline" onClick={() => setSettingsOpen(true)}>
-              <Settings className="h-4 w-4 mr-2" />
-              Settings
-            </Button>
+
           </div>
         </div>
 
@@ -2186,27 +2183,7 @@ export default function SuperAdminDashboard() {
           </ScrollableDialogContent>
         </ScrollableDialog>
 
-        {/* Settings Modal */}
-        <Dialog open={settingsOpen} onOpenChange={setSettingsOpen}>
-          <DialogContent className="max-w-md">
-            <DialogHeader>
-              <DialogTitle>Super Admin Settings</DialogTitle>
-              <DialogDescription>Configure system-wide settings and preferences.</DialogDescription>
-            </DialogHeader>
-            <div className="space-y-4">
-              <div className="text-center py-8">
-                <Settings className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                <h3 className="text-lg font-medium text-gray-900 mb-2">System Settings</h3>
-                <p className="text-gray-600">System configuration panel would be implemented here</p>
-              </div>
-              <div className="flex justify-end">
-                <Button onClick={() => setSettingsOpen(false)}>
-                  Close
-                </Button>
-              </div>
-            </div>
-          </DialogContent>
-        </Dialog>
+
 
         {/* Change Password Dialog */}
         <Dialog open={changePasswordOpen} onOpenChange={setChangePasswordOpen}>
