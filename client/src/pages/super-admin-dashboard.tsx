@@ -1552,9 +1552,10 @@ export default function SuperAdminDashboard() {
                     
                     <FileUpload
                       label="Attachments"
-                      description="Upload additional files, images, or documents"
+                      description="Upload multiple images, videos, or documents (up to 10 files, 25MB each)"
                       multiple={true}
-                      maxFiles={5}
+                      maxFiles={10}
+                      maxSize={25}
                       onUrlsChange={(urls) => blogForm.setValue('attachments', urls)}
                       data-testid="blog-attachments-upload"
                     />

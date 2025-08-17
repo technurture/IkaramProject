@@ -120,7 +120,7 @@ export async function registerRoutes(app: Express, storage: IMongoStorage): Prom
       res.status(201).json(blog);
     } catch (error) {
       console.error('Blog creation error:', error);
-      res.status(400).json({ message: "Invalid blog data", error: error.message });
+      res.status(400).json({ message: "Invalid blog data", error: error instanceof Error ? error.message : 'Unknown error' });
     }
   });
 
@@ -426,7 +426,7 @@ export async function registerRoutes(app: Express, storage: IMongoStorage): Prom
     }
   });
 
-  // Media upload route - supports multiple files
+  // Single media upload route
   app.post("/api/media/upload", requireAuth, upload.single('file'), async (req, res) => {
     try {
       if (!req.file) {
@@ -462,6 +462,68 @@ export async function registerRoutes(app: Express, storage: IMongoStorage): Prom
     } catch (error) {
       console.error('Upload error:', error);
       res.status(500).json({ message: "Upload failed" });
+    }
+  });
+
+  // Multiple media upload route
+  app.post("/api/media/upload-multiple", requireAuth, upload.array('files', 10), async (req, res) => {
+    try {
+      const files = req.files as Express.Multer.File[];
+      
+      if (!files || files.length === 0) {
+        return res.status(400).json({ message: "No files provided" });
+      }
+
+      const uploadResults = [];
+      
+      for (const file of files) {
+        try {
+          const cloudinaryResult = await uploadToCloudinary(
+            file.buffer,
+            `${Date.now()}-${file.originalname}`,
+            'alumni-platform'
+          );
+
+          const media = await storage.createMedia({
+            filename: cloudinaryResult.public_id,
+            originalName: file.originalname,
+            mimeType: file.mimetype,
+            size: file.size,
+            cloudinaryPublicId: cloudinaryResult.public_id,
+            cloudinaryUrl: cloudinaryResult.secure_url,
+            uploadedBy: req.user!._id,
+            path: cloudinaryResult.secure_url
+          });
+
+          uploadResults.push({
+            id: media._id,
+            url: cloudinaryResult.secure_url,
+            secure_url: cloudinaryResult.secure_url,
+            public_id: cloudinaryResult.public_id,
+            filename: file.originalname,
+            size: file.size,
+            type: file.mimetype,
+            success: true
+          });
+        } catch (fileError) {
+          console.error(`Upload error for file ${file.originalname}:`, fileError);
+          uploadResults.push({
+            filename: file.originalname,
+            error: 'Upload failed',
+            success: false
+          });
+        }
+      }
+
+      res.status(201).json({
+        message: `Uploaded ${uploadResults.filter(r => r.success).length} of ${files.length} files successfully`,
+        results: uploadResults,
+        successful: uploadResults.filter(r => r.success),
+        failed: uploadResults.filter(r => !r.success)
+      });
+    } catch (error) {
+      console.error('Multiple upload error:', error);
+      res.status(500).json({ message: "Multiple upload failed" });
     }
   });
 

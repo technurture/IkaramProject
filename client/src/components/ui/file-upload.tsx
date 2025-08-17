@@ -34,8 +34,8 @@ export function FileUpload({
   onUrlsChange,
   accept = "image/*,video/*,.pdf,.doc,.docx",
   multiple = true,
-  maxFiles = 5,
-  maxSize = 10, // 10MB default
+  maxFiles = 10,
+  maxSize = 25, // 25MB default
   className,
   label = "Upload Files",
   description = "Upload images, videos, or documents",
@@ -96,6 +96,29 @@ export function FileUpload({
     }
   };
 
+  const uploadMultipleFiles = async (files: File[]): Promise<Array<{url: string, filename: string, success: boolean}>> => {
+    const formData = new FormData();
+    files.forEach(file => {
+      formData.append('files', file);
+    });
+
+    try {
+      const response = await fetch('/api/media/upload-multiple', {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (!response.ok) {
+        throw new Error('Upload failed');
+      }
+
+      const result = await response.json();
+      return result.results || [];
+    } catch (error) {
+      throw new Error('Failed to upload files');
+    }
+  };
+
   const handleFileChange = async (files: FileList | null) => {
     if (!files || disabled) return;
 
@@ -124,10 +147,46 @@ export function FileUpload({
 
     setUploadedFiles(prev => [...prev, ...newFiles]);
 
-    // Upload valid files
-    for (let i = 0; i < newFiles.length; i++) {
-      const uploadedFile = newFiles[i];
-      if (uploadedFile.file && !uploadedFile.error) {
+    // Upload valid files - use multiple upload if more than one file
+    const filesToUpload = newFiles.filter(f => f.file && !f.error);
+    
+    if (filesToUpload.length > 1) {
+      // Use multiple upload endpoint
+      try {
+        const uploadResults = await uploadMultipleFiles(filesToUpload.map(f => f.file!));
+        
+        uploadResults.forEach((result, index) => {
+          const uploadedFile = filesToUpload[index];
+          setUploadedFiles(prev => prev.map(f => 
+            f === uploadedFile ? { 
+              ...f, 
+              url: result.success ? result.url : '', 
+              uploading: false,
+              error: result.success ? undefined : 'Upload failed'
+            } : f
+          ));
+        });
+      } catch (error) {
+        // Fallback to individual uploads if multiple upload fails
+        for (const uploadedFile of filesToUpload) {
+          if (uploadedFile.file) {
+            try {
+              const url = await uploadFile(uploadedFile.file);
+              setUploadedFiles(prev => prev.map(f => 
+                f === uploadedFile ? { ...f, url, uploading: false } : f
+              ));
+            } catch (error) {
+              setUploadedFiles(prev => prev.map(f => 
+                f === uploadedFile ? { ...f, uploading: false, error: 'Upload failed' } : f
+              ));
+            }
+          }
+        }
+      }
+    } else if (filesToUpload.length === 1) {
+      // Use single upload endpoint for single files
+      const uploadedFile = filesToUpload[0];
+      if (uploadedFile.file) {
         try {
           const url = await uploadFile(uploadedFile.file);
           setUploadedFiles(prev => prev.map(f => 
