@@ -15,9 +15,10 @@ import { useAuth } from "@/hooks/use-auth";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 
-// Image Gallery Component
+// Media Gallery Component
 const ImageGallery = ({ attachments }: { attachments: string[] }) => {
   const [selectedImage, setSelectedImage] = useState<number | null>(null);
+  const [selectedVideo, setSelectedVideo] = useState<number | null>(null);
   
   const images = attachments.filter(attachment => 
     attachment.match(/\.(jpg|jpeg|png|gif|webp)$/i)
@@ -51,11 +52,28 @@ const ImageGallery = ({ attachments }: { attachments: string[] }) => {
     }
   };
 
+  const nextVideo = () => {
+    if (selectedVideo !== null) {
+      setSelectedVideo((selectedVideo + 1) % videos.length);
+    }
+  };
+
+  const prevVideo = () => {
+    if (selectedVideo !== null) {
+      setSelectedVideo(selectedVideo === 0 ? videos.length - 1 : selectedVideo - 1);
+    }
+  };
+
   const handleKeyPress = (e: KeyboardEvent) => {
     if (selectedImage !== null) {
       if (e.key === 'ArrowRight') nextImage();
       if (e.key === 'ArrowLeft') prevImage();
       if (e.key === 'Escape') setSelectedImage(null);
+    }
+    if (selectedVideo !== null) {
+      if (e.key === 'ArrowRight') nextVideo();
+      if (e.key === 'ArrowLeft') prevVideo();
+      if (e.key === 'Escape') setSelectedVideo(null);
     }
   };
 
@@ -63,7 +81,7 @@ const ImageGallery = ({ attachments }: { attachments: string[] }) => {
   useEffect(() => {
     document.addEventListener('keydown', handleKeyPress);
     return () => document.removeEventListener('keydown', handleKeyPress);
-  }, [selectedImage]);
+  }, [selectedImage, selectedVideo]);
 
   return (
     <div className="space-y-6">
@@ -93,25 +111,23 @@ const ImageGallery = ({ attachments }: { attachments: string[] }) => {
       {videos.length > 0 && (
         <div>
           <h4 className="text-lg font-semibold text-gray-900 mb-3">Videos ({videos.length})</h4>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
             {videos.map((video, index) => (
-              <div key={index} className="border rounded-lg overflow-hidden">
+              <div 
+                key={index}
+                className="aspect-video border rounded-lg overflow-hidden cursor-pointer hover:shadow-lg transition-all duration-200 group relative"
+                onClick={() => setSelectedVideo(index)}
+              >
                 <video
                   src={video}
-                  className="w-full aspect-video"
-                  controls
+                  className="w-full h-full object-cover"
+                  muted
                   preload="metadata"
                 />
-                <div className="p-3 bg-gray-50">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => downloadFile(video, video.split('/').pop() || `video-${index + 1}`)}
-                    className="w-full"
-                  >
-                    <Download className="h-4 w-4 mr-2" />
-                    Download Video
-                  </Button>
+                <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-30 transition-all duration-200 flex items-center justify-center">
+                  <div className="w-12 h-12 bg-white bg-opacity-80 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                    <div className="w-0 h-0 border-l-4 border-l-gray-800 border-y-2 border-y-transparent ml-1"></div>
+                  </div>
                 </div>
               </div>
             ))}
@@ -207,6 +223,64 @@ const ImageGallery = ({ attachments }: { attachments: string[] }) => {
             {images.length > 1 && (
               <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 bg-black bg-opacity-50 text-white px-3 py-1 rounded">
                 {selectedImage + 1} / {images.length}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Video Modal */}
+      {selectedVideo !== null && (
+        <div className="fixed inset-0 bg-black bg-opacity-90 z-50 flex items-center justify-center p-4">
+          <div className="relative max-w-4xl max-h-full w-full h-full flex items-center justify-center">
+            {/* Close Button */}
+            <button
+              onClick={() => setSelectedVideo(null)}
+              className="absolute top-4 right-4 z-10 bg-black bg-opacity-50 text-white rounded-full p-2 hover:bg-opacity-70"
+            >
+              <X className="h-6 w-6" />
+            </button>
+            
+            {/* Download Button */}
+            <button
+              onClick={() => downloadFile(videos[selectedVideo], `video-${selectedVideo + 1}.mp4`)}
+              className="absolute top-4 right-16 z-10 bg-black bg-opacity-50 text-white rounded-full p-2 hover:bg-opacity-70"
+            >
+              <Download className="h-6 w-6" />
+            </button>
+
+            {/* Previous Button */}
+            {videos.length > 1 && (
+              <button
+                onClick={prevVideo}
+                className="absolute left-4 z-10 bg-black bg-opacity-50 text-white rounded-full p-2 hover:bg-opacity-70"
+              >
+                <ChevronLeft className="h-6 w-6" />
+              </button>
+            )}
+
+            {/* Next Button */}
+            {videos.length > 1 && (
+              <button
+                onClick={nextVideo}
+                className="absolute right-4 z-10 bg-black bg-opacity-50 text-white rounded-full p-2 hover:bg-opacity-70"
+              >
+                <ChevronRight className="h-6 w-6" />
+              </button>
+            )}
+
+            {/* Video */}
+            <video
+              src={videos[selectedVideo]}
+              className="max-w-full max-h-full"
+              controls
+              autoPlay
+            />
+
+            {/* Video Counter */}
+            {videos.length > 1 && (
+              <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 bg-black bg-opacity-50 text-white px-3 py-1 rounded">
+                {selectedVideo + 1} / {videos.length}
               </div>
             )}
           </div>
@@ -426,7 +500,9 @@ export default function BlogDetailPage() {
     );
   }
 
-  const isLiked = user && blog.likes.some(like => like.userId === user.id);
+  // For anonymous users, we can't track individual likes, so we don't show like state
+  // For authenticated users, check if they've liked this blog
+  const isLiked = user && (blog as any).likes?.some((like: any) => like.userId === user._id) || false;
 
   return (
     <div className="min-h-screen bg-gray-50">
