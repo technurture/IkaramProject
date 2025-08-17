@@ -1,11 +1,13 @@
 import { v2 as cloudinary } from 'cloudinary';
 import multer from 'multer';
 
-// Configure Cloudinary with direct credentials
+// Configure Cloudinary using environment variable
+if (!process.env.CLOUDINARY_URL) {
+  throw new Error('CLOUDINARY_URL environment variable is required');
+}
+
+// Cloudinary will automatically configure itself using CLOUDINARY_URL
 cloudinary.config({
-  cloud_name: 'dvgewacb7',
-  api_key: '238391684591371',
-  api_secret: '6vbkTWWobbPi1SvmuPpAwL5AUYA',
   secure: true
 });
 
