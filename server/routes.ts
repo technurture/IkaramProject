@@ -419,57 +419,40 @@ export async function registerRoutes(app: Express, storage: IMongoStorage): Prom
   });
 
   // Media upload route - supports multiple files
-  app.post("/api/media/upload", requireAuth, upload.array('files', 10), async (req, res) => {
+  app.post("/api/media/upload", requireAuth, upload.single('file'), async (req, res) => {
     try {
-      const files = req.files as Express.Multer.File[];
-      if (!files || files.length === 0) {
-        return res.status(400).json({ message: "No files uploaded" });
+      if (!req.file) {
+        return res.status(400).json({ message: "No file provided" });
       }
 
-      const uploadResults = [];
+      const cloudinaryResult = await uploadToCloudinary(
+        req.file.buffer,
+        `${Date.now()}-${req.file.originalname}`,
+        'alumni-platform'
+      );
 
-      for (const file of files) {
-        try {
-          // Upload to Cloudinary
-          const result = await uploadToCloudinary(file.buffer, file.originalname);
-          
-          // Save to database
-          const media = await storage.createMedia({
-            filename: result.public_id,
-            originalName: file.originalname,
-            mimeType: file.mimetype,
-            size: file.size,
-            path: result.secure_url,
-            cloudinaryId: result.public_id,
-            cloudinaryPublicId: result.public_id,
-            cloudinaryUrl: result.secure_url,
-            uploadedBy: req.user!._id
-          });
-
-          uploadResults.push({
-            id: media._id,
-            url: result.secure_url,
-            secure_url: result.secure_url,
-            public_id: result.public_id,
-            filename: file.originalname,
-            size: file.size,
-            type: file.mimetype
-          });
-        } catch (error) {
-          console.error('File upload error:', error);
-          uploadResults.push({
-            filename: file.originalname,
-            error: 'Upload failed'
-          });
-        }
-      }
+      const media = await storage.createMedia({
+        filename: cloudinaryResult.public_id,
+        originalName: req.file.originalname,
+        mimeType: req.file.mimetype,
+        size: req.file.size,
+        cloudinaryPublicId: cloudinaryResult.public_id,
+        cloudinaryUrl: cloudinaryResult.secure_url,
+        uploadedBy: req.user!._id,
+        path: cloudinaryResult.secure_url
+      });
 
       res.status(201).json({
-        files: uploadResults,
-        url: uploadResults[0]?.url, // For backwards compatibility
-        secure_url: uploadResults[0]?.secure_url
+        id: media._id,
+        url: cloudinaryResult.secure_url,
+        secure_url: cloudinaryResult.secure_url,
+        public_id: cloudinaryResult.public_id,
+        filename: req.file.originalname,
+        size: req.file.size,
+        type: req.file.mimetype
       });
     } catch (error) {
+      console.error('Upload error:', error);
       res.status(500).json({ message: "Upload failed" });
     }
   });
