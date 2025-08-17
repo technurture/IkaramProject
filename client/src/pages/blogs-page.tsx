@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { BlogWithAuthor } from "@shared/schema";
+import { BlogWithAuthor } from "@shared/mongodb-schema";
 import Navbar from "@/components/navbar";
 import Footer from "@/components/footer";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
@@ -100,7 +100,8 @@ export default function BlogsPage() {
         ) : (
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
             {blogs.map((blog) => (
-              <Link key={blog._id} href={`/blogs/${blog._id}`}>
+              <div key={blog._id} className="relative">
+                <Link href={`/blogs/${blog._id}`} className="block">
                 <Card className="overflow-hidden hover:shadow-xl transition-all duration-300 group cursor-pointer h-full">
                   {blog.featuredImage && (
                     <div className="h-48 overflow-hidden">
@@ -164,7 +165,22 @@ export default function BlogsPage() {
                     </div>
                   </CardFooter>
                 </Card>
-              </Link>
+                </Link>
+                {user?.role === 'admin' && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="absolute top-2 right-2 bg-white/90 hover:bg-white"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      window.location.href = `/admin#edit-blog-${blog._id}`;
+                    }}
+                  >
+                    Edit
+                  </Button>
+                )}
+              </div>
             ))}
           </div>
         )}

@@ -185,7 +185,13 @@ export default function EventsPage() {
                     
                     {user?.role === 'admin' && (
                       <div className="flex space-x-2">
-                        <Button variant="outline" size="sm">
+                        <Button 
+                          variant="outline" 
+                          size="sm"
+                          onClick={() => {
+                            window.location.href = `/admin#edit-event-${event._id}`;
+                          }}
+                        >
                           Edit Event
                         </Button>
                       </div>
