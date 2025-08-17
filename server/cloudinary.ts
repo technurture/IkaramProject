@@ -1,11 +1,18 @@
-import { v2 as cloudinary } from 'cloudinary';
 import multer from 'multer';
+
+// Fix corrupted CLOUDINARY_URL before importing cloudinary
+if (process.env.CLOUDINARY_URL && process.env.CLOUDINARY_URL.startsWith('loudinary://')) {
+  process.env.CLOUDINARY_URL = 'c' + process.env.CLOUDINARY_URL;
+}
+
+import { v2 as cloudinary } from 'cloudinary';
 
 // Configure Cloudinary
 cloudinary.config({
-  cloud_name: process.env.CLOUDINARY_CLOUD_NAME || process.env.VITE_CLOUDINARY_CLOUD_NAME,
-  api_key: process.env.CLOUDINARY_API_KEY || process.env.VITE_CLOUDINARY_API_KEY,
-  api_secret: process.env.CLOUDINARY_API_SECRET || process.env.VITE_CLOUDINARY_API_SECRET
+  cloud_name: 'dvgewacb7',
+  api_key: '238391684591371',
+  api_secret: '6vbkTWWobbPi1SvmuPpAwL5AUYA',
+  secure: true
 });
 
 // Multer configuration for memory storage
@@ -15,11 +22,17 @@ export const upload = multer({
     fileSize: 10 * 1024 * 1024 // 10MB limit
   },
   fileFilter: (req, file, cb) => {
-    const allowedTypes = ['image/jpeg', 'image/png', 'image/webp', 'video/mp4', 'video/mov', 'application/pdf'];
+    const allowedTypes = [
+      'image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/gif',
+      'video/mp4', 'video/mov', 'video/avi', 'video/quicktime',
+      'application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+      'application/vnd.ms-excel', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+      'text/plain', 'text/csv'
+    ];
     if (allowedTypes.includes(file.mimetype)) {
       cb(null, true);
     } else {
-      cb(new Error('File type not allowed'));
+      cb(new Error(`File type not allowed: ${file.mimetype}`));
     }
   }
 });
