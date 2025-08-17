@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { StaffWithUser } from "@shared/schema";
+import { StaffWithUser } from "@shared/mongodb-schema";
 import Navbar from "@/components/navbar";
 import Footer from "@/components/footer";
 import { Card, CardContent } from "@/components/ui/card";
@@ -73,7 +73,7 @@ export default function StaffPage() {
         ) : (
           <div className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
             {staff.map((member) => (
-              <Card key={member._id || member.id} className="hover:shadow-xl transition-shadow duration-300">
+              <Card key={member._id} className="hover:shadow-xl transition-shadow duration-300">
                 <CardContent className="p-6 text-center">
                   <div className="relative mb-6">
                     <Avatar className="w-32 h-32 mx-auto shadow-lg">
@@ -123,7 +123,7 @@ export default function StaffPage() {
                     )}
                   </div>
 
-                  {(user?.role === 'admin' || user?.role === 'super_admin') && (
+                  {(user?.role === 'admin' || user?.role === 'super_admin') && member.userId._id === user._id && (
                     <div className="mt-4 pt-4 border-t border-gray-200">
                       <Button 
                         variant="outline" 
@@ -137,7 +137,7 @@ export default function StaffPage() {
                           }
                         }}
                       >
-                        Edit Profile
+                        Edit My Profile
                       </Button>
                     </div>
                   )}

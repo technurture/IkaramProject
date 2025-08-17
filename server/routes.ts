@@ -748,6 +748,11 @@ export async function registerRoutes(app: Express, storage: IMongoStorage): Prom
         username: req.body.username,
         bio: req.body.bio,
         graduationYear: req.body.graduationYear,
+        profileImage: req.body.profileImage,
+        position: req.body.position,
+        department: req.body.department,
+        phoneNumber: req.body.phoneNumber,
+        officeLocation: req.body.officeLocation,
       };
 
       const updatedUser = await storage.updateUser(req.params.id, updates);
