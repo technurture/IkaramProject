@@ -208,6 +208,54 @@ const blogLikeSchema = new Schema<IBlogLike>({
 // Compound indexes for blog likes
 blogLikeSchema.index({ blogId: 1, userId: 1 }, { unique: true });
 
+// API Token Schema and Interface
+export interface IApiToken extends Document {
+  _id: string;
+  tokenId: string;
+  hashedToken: string;
+  userId: string;
+  name: string;
+  scopes: string[];
+  expiresAt: Date;
+  lastUsed?: Date;
+  isActive: boolean;
+  createdAt: Date;
+}
+
+const apiTokenSchema = new Schema<IApiToken>({
+  tokenId: { type: String, required: true, unique: true },
+  hashedToken: { type: String, required: true },
+  userId: { type: String, required: true, ref: 'User' },
+  name: { type: String, required: true },
+  scopes: [{ type: String }],
+  expiresAt: { type: Date, required: true },
+  lastUsed: { type: Date },
+  isActive: { type: Boolean, default: true },
+  createdAt: { type: Date, default: Date.now }
+});
+
+// Session Token Schema (for extended sessions)
+export interface ISessionToken extends Document {
+  _id: string;
+  hashedToken: string;
+  userId: string;
+  deviceInfo?: string;
+  ipAddress?: string;
+  expiresAt: Date;
+  isActive: boolean;
+  createdAt: Date;
+}
+
+const sessionTokenSchema = new Schema<ISessionToken>({
+  hashedToken: { type: String, required: true, unique: true },
+  userId: { type: String, required: true, ref: 'User' },
+  deviceInfo: { type: String },
+  ipAddress: { type: String },
+  expiresAt: { type: Date, required: true },
+  isActive: { type: Boolean, default: true },
+  createdAt: { type: Date, default: Date.now }
+});
+
 // Export models
 export const User = mongoose.model<IUser>('User', userSchema);
 export const Blog = mongoose.model<IBlog>('Blog', blogSchema);
@@ -217,6 +265,8 @@ export const EventRegistration = mongoose.model<IEventRegistration>('EventRegist
 export const Staff = mongoose.model<IStaff>('Staff', staffSchema);
 export const Media = mongoose.model<IMedia>('Media', mediaSchema);
 export const BlogLike = mongoose.model<IBlogLike>('BlogLike', blogLikeSchema);
+export const ApiToken = mongoose.model<IApiToken>('ApiToken', apiTokenSchema);
+export const SessionToken = mongoose.model<ISessionToken>('SessionToken', sessionTokenSchema);
 
 // Zod schemas for validation
 export const insertUserSchema = z.object({
