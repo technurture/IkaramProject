@@ -275,7 +275,7 @@ export function FileUpload({
             <p className="text-xs text-gray-500">{description}</p>
           )}
           <p className="text-xs text-gray-400">
-            Max {maxFiles} files, {maxSize}MB each
+            Max {maxFiles} files, {maxSize}MB each {multiple ? "(Multiple selection enabled)" : "(Single file only)"}
           </p>
         </div>
       </div>

@@ -1694,9 +1694,10 @@ export default function SuperAdminDashboard() {
                   
                   <FileUpload
                     label="Event Attachments"
-                    description="Upload event documents, flyers, or additional files"
+                    description="Upload multiple event documents, flyers, or additional files (up to 10 files, 25MB each)"
                     multiple={true}
-                    maxFiles={5}
+                    maxFiles={10}
+                    maxSize={25}
                     onUrlsChange={(urls) => eventForm.setValue('attachments', urls)}
                     data-testid="event-attachments-upload"
                   />
