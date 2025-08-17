@@ -936,7 +936,7 @@ export default function SuperAdminDashboard() {
                 <CardContent>
                   <div className="space-y-4">
                     {recentBlogs?.slice(0, 5).map((blog) => (
-                      <div key={blog.id} className="flex items-center justify-between py-2 border-b border-gray-100 last:border-0">
+                      <div key={blog._id} className="flex items-center justify-between py-2 border-b border-gray-100 last:border-0">
                         <div className="flex-1">
                           <p className="font-medium text-gray-900 truncate">{blog.title}</p>
                           <p className="text-sm text-gray-600">
@@ -965,7 +965,7 @@ export default function SuperAdminDashboard() {
                 <CardContent>
                   <div className="space-y-4">
                     {recentEvents?.slice(0, 5).map((event) => (
-                      <div key={event.id} className="flex items-center justify-between py-2 border-b border-gray-100 last:border-0">
+                      <div key={event._id} className="flex items-center justify-between py-2 border-b border-gray-100 last:border-0">
                         <div className="flex-1">
                           <p className="font-medium text-gray-900 truncate">{event.title}</p>
                           <p className="text-sm text-gray-600">
@@ -1276,7 +1276,7 @@ export default function SuperAdminDashboard() {
               <CardContent className="p-6">
                 <div className="space-y-4">
                   {recentBlogs?.map((blog) => (
-                    <div key={blog.id} className="flex items-center justify-between p-4 border border-gray-200 rounded-lg">
+                    <div key={blog._id} className="flex items-center justify-between p-4 border border-gray-200 rounded-lg">
                       <div className="flex-1">
                         <h3 className="font-medium text-gray-900">{blog.title}</h3>
                         <p className="text-sm text-gray-600">
@@ -1287,7 +1287,7 @@ export default function SuperAdminDashboard() {
                         <Badge variant={blog.status === 'published' ? 'default' : 'secondary'}>
                           {blog.status}
                         </Badge>
-                        <Button variant="ghost" size="sm">
+                        <Button variant="ghost" size="sm" onClick={() => openEditBlog(blog)}>
                           <Edit className="h-4 w-4" />
                         </Button>
                         <Button variant="ghost" size="sm">
@@ -1314,7 +1314,7 @@ export default function SuperAdminDashboard() {
               <CardContent className="p-6">
                 <div className="space-y-4">
                   {recentEvents?.map((event) => (
-                    <div key={event.id} className="flex items-center justify-between p-4 border border-gray-200 rounded-lg">
+                    <div key={event._id} className="flex items-center justify-between p-4 border border-gray-200 rounded-lg">
                       <div className="flex-1">
                         <h3 className="font-medium text-gray-900">{event.title}</h3>
                         <p className="text-sm text-gray-600">
@@ -1328,7 +1328,7 @@ export default function SuperAdminDashboard() {
                         <span className="text-sm text-gray-600">
                           {event.registrationCount || 0} registered
                         </span>
-                        <Button variant="ghost" size="sm">
+                        <Button variant="ghost" size="sm" onClick={() => openEditEvent(event)}>
                           <Edit className="h-4 w-4" />
                         </Button>
                         <Button variant="ghost" size="sm">
