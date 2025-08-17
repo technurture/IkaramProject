@@ -46,6 +46,7 @@ export interface IBlog extends Document {
   featuredImage?: string;
   status: 'draft' | 'published' | 'archived';
   tags: string[];
+  attachments: string[];
   createdAt: Date;
   updatedAt: Date;
 }
@@ -59,6 +60,7 @@ const blogSchema = new Schema<IBlog>({
   featuredImage: { type: String },
   status: { type: String, enum: ['draft', 'published', 'archived'], default: 'published' },
   tags: [{ type: String }],
+  attachments: [{ type: String }],
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now }
 });
@@ -237,7 +239,8 @@ export const insertBlogSchema = z.object({
   category: z.string().min(1),
   featuredImage: z.string().optional(),
   status: z.enum(['draft', 'published', 'archived']).default('published'),
-  tags: z.array(z.string()).default([])
+  tags: z.array(z.string()).default([]),
+  attachments: z.array(z.string()).default([])
 });
 
 export const insertCommentSchema = z.object({

@@ -111,7 +111,8 @@ export async function registerRoutes(app: Express, storage: IMongoStorage): Prom
       
       const blogData = insertBlogSchema.parse({
         ...filteredData,
-        authorId: req.user!._id
+        authorId: req.user!._id.toString(),
+        attachments: attachments || []
       });
       
       console.log('Validated blog data:', blogData);

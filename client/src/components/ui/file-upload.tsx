@@ -122,7 +122,7 @@ export function FileUpload({
   const handleFileChange = async (files: FileList | null) => {
     if (!files || disabled) return;
 
-    console.log(`Processing ${files.length} files:`, Array.from(files).map(f => ({ name: f.name, type: f.type, size: f.size })));
+
 
     const newFiles: UploadedFile[] = [];
     const validFiles: File[] = [];
@@ -131,7 +131,7 @@ export function FileUpload({
       const file = files[i];
       const error = validateFile(file);
       
-      console.log(`Processing file ${i + 1}: ${file.name}, type: ${file.type}, size: ${file.size}, error: ${error}`);
+
       
       const uploadedFile: UploadedFile = {
         file,
@@ -154,15 +154,12 @@ export function FileUpload({
     // Upload valid files - use multiple upload if more than one file
     const filesToUpload = newFiles.filter(f => f.file && !f.error);
     
-    console.log(`${filesToUpload.length} valid files to upload:`, filesToUpload.map(f => f.name));
-    
     if (filesToUpload.length > 1) {
       // Use multiple upload endpoint
-      console.log('Using multiple upload endpoint for', filesToUpload.length, 'files');
       try {
         const uploadResults = await uploadMultipleFiles(filesToUpload.map(f => f.file!));
         
-        console.log('Multiple upload results:', uploadResults);
+
         
         uploadResults.forEach((result, index) => {
           const uploadedFile = filesToUpload[index];
@@ -246,7 +243,6 @@ export function FileUpload({
 
   const openFileDialog = () => {
     if (fileInputRef.current) {
-      console.log('Opening file dialog, multiple:', multiple, 'maxFiles:', maxFiles);
       fileInputRef.current.click();
     }
   };
@@ -262,10 +258,7 @@ export function FileUpload({
   return (
     <div className={cn("space-y-4", className)}>
       {label && <Label className="text-sm font-medium">{label}</Label>}
-      {/* Debug info */}
-      <div className="text-xs text-red-500 bg-red-50 p-1 rounded">
-        DEBUG: multiple={String(multiple)}, maxFiles={maxFiles}, accept={accept}
-      </div>
+
       
       {/* Upload Area */}
       <div
@@ -299,11 +292,7 @@ export function FileUpload({
         type="file"
         accept={accept}
         multiple={multiple}
-        onChange={(e) => {
-          console.log('File input changed:', e.target.files?.length, 'files selected');
-          console.log('Multiple attribute:', multiple);
-          handleFileChange(e.target.files);
-        }}
+        onChange={(e) => handleFileChange(e.target.files)}
         className="hidden"
         disabled={disabled}
         data-testid="file-input"
