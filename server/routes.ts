@@ -2,7 +2,7 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import type { IMongoStorage } from "./mongodb-storage";
 import { setupAuth } from "./auth";
-import { upload, uploadToCloudinary, deleteFromCloudinary } from "./cloudinary";
+import { upload, uploadToCloudinary, deleteFromCloudinary } from "./cloudinary-config";
 import { User, insertBlogSchema, insertCommentSchema, insertEventSchema, insertStaffSchema } from "@shared/mongodb-schema";
 import { scrypt, randomBytes, timingSafeEqual } from "crypto";
 import { promisify } from "util";

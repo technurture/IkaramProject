@@ -1,13 +1,7 @@
+import { v2 as cloudinary } from 'cloudinary';
 import multer from 'multer';
 
-// Fix corrupted CLOUDINARY_URL before importing cloudinary
-if (process.env.CLOUDINARY_URL && process.env.CLOUDINARY_URL.startsWith('loudinary://')) {
-  process.env.CLOUDINARY_URL = 'c' + process.env.CLOUDINARY_URL;
-}
-
-import { v2 as cloudinary } from 'cloudinary';
-
-// Configure Cloudinary
+// Configure Cloudinary with direct credentials
 cloudinary.config({
   cloud_name: 'dvgewacb7',
   api_key: '238391684591371',

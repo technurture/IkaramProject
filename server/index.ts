@@ -1,3 +1,8 @@
+// Fix corrupted CLOUDINARY_URL environment variable before any imports
+if (process.env.CLOUDINARY_URL && !process.env.CLOUDINARY_URL.startsWith('cloudinary://')) {
+  delete process.env.CLOUDINARY_URL;
+}
+
 import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
