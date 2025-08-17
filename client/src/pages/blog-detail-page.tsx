@@ -15,36 +15,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 
-// Simple isolated input component to prevent re-rendering issues
-const IsolatedTextarea = ({ value, onChange, placeholder, className, ...props }: {
-  value: string;
-  onChange: (value: string) => void;
-  placeholder?: string;
-  className?: string;
-  [key: string]: any;
-}) => {
-  const [internalValue, setInternalValue] = useState(value);
 
-  useEffect(() => {
-    setInternalValue(value);
-  }, [value]);
-
-  const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    const newValue = e.target.value;
-    setInternalValue(newValue);
-    onChange(newValue);
-  };
-
-  return (
-    <textarea
-      value={internalValue}
-      onChange={handleChange}
-      placeholder={placeholder}
-      className={className}
-      {...props}
-    />
-  );
-};
 
 // Media Gallery Component
 const ImageGallery = ({ attachments }: { attachments: string[] }) => {
@@ -325,7 +296,6 @@ export default function BlogDetailPage() {
   const { id } = useParams<{ id: string }>();
   const [commentContent, setCommentContent] = useState("");
   const [replyingTo, setReplyingTo] = useState<string | null>(null);
-  const [replyContent, setReplyContent] = useState("");
   const [replyInputs, setReplyInputs] = useState<Record<string, string>>({});
 
   const { user } = useAuth();
@@ -491,10 +461,11 @@ export default function BlogDetailPage() {
           <div className="mt-4 ml-11">
             <Card>
               <CardContent className="p-4">
-                <IsolatedTextarea
+                <textarea
+                  key={`reply-input-${commentId}`}
                   placeholder="Write a reply..."
                   value={replyInputs[commentId] || ''}
-                  onChange={(value) => handleReplyInputChange(commentId, value)}
+                  onChange={(e) => handleReplyInputChange(commentId, e.target.value)}
                   className="flex min-h-[80px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 mb-2"
                   data-testid={`input-reply-${commentId}`}
                 />
@@ -689,10 +660,11 @@ export default function BlogDetailPage() {
                     </Avatar>
                   )}
                   <div className="flex-1">
-                    <IsolatedTextarea
+                    <textarea
+                      key="main-comment-input"
                       placeholder="Share your thoughts..."
                       value={commentContent}
-                      onChange={setCommentContent}
+                      onChange={(e) => setCommentContent(e.target.value)}
                       className="flex min-h-[80px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 mb-4"
                       data-testid="input-main-comment"
                     />
