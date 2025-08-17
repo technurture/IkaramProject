@@ -1551,8 +1551,9 @@ export default function SuperAdminDashboard() {
                     />
                     
                     <FileUpload
-                      label="Attachments"
-                      description="Upload multiple images, videos, or documents (up to 10 files, 25MB each)"
+                      label="Multiple Images & Files"
+                      description="Select multiple images, videos, or documents (hold Ctrl/Cmd while clicking to select multiple)"
+                      accept="image/*,video/*,.pdf,.doc,.docx,.txt"
                       multiple={true}
                       maxFiles={10}
                       maxSize={25}

@@ -237,6 +237,7 @@ export function FileUpload({
 
   const openFileDialog = () => {
     if (fileInputRef.current) {
+      console.log('Opening file dialog, multiple:', multiple, 'maxFiles:', maxFiles);
       fileInputRef.current.click();
     }
   };
@@ -252,6 +253,10 @@ export function FileUpload({
   return (
     <div className={cn("space-y-4", className)}>
       {label && <Label className="text-sm font-medium">{label}</Label>}
+      {/* Debug info */}
+      <div className="text-xs text-red-500 bg-red-50 p-1 rounded">
+        DEBUG: multiple={String(multiple)}, maxFiles={maxFiles}, accept={accept}
+      </div>
       
       {/* Upload Area */}
       <div
@@ -275,7 +280,7 @@ export function FileUpload({
             <p className="text-xs text-gray-500">{description}</p>
           )}
           <p className="text-xs text-gray-400">
-            Max {maxFiles} files, {maxSize}MB each {multiple ? "(Multiple selection enabled)" : "(Single file only)"}
+            Max {maxFiles} files, {maxSize}MB each {multiple ? "(Hold Ctrl/Cmd to select multiple)" : "(Single file only)"}
           </p>
         </div>
       </div>
@@ -285,7 +290,11 @@ export function FileUpload({
         type="file"
         accept={accept}
         multiple={multiple}
-        onChange={(e) => handleFileChange(e.target.files)}
+        onChange={(e) => {
+          console.log('File input changed:', e.target.files?.length, 'files selected');
+          console.log('Multiple attribute:', multiple);
+          handleFileChange(e.target.files);
+        }}
         className="hidden"
         disabled={disabled}
         data-testid="file-input"
