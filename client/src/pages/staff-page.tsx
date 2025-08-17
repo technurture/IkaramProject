@@ -73,7 +73,7 @@ export default function StaffPage() {
         ) : (
           <div className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
             {staff.map((member) => (
-              <Card key={member.id} className="hover:shadow-xl transition-shadow duration-300">
+              <Card key={member._id || member.id} className="hover:shadow-xl transition-shadow duration-300">
                 <CardContent className="p-6 text-center">
                   <div className="relative mb-6">
                     <Avatar className="w-32 h-32 mx-auto shadow-lg">
@@ -123,9 +123,20 @@ export default function StaffPage() {
                     )}
                   </div>
 
-                  {user?.role === 'admin' && (
+                  {(user?.role === 'admin' || user?.role === 'super_admin') && (
                     <div className="mt-4 pt-4 border-t border-gray-200">
-                      <Button variant="outline" size="sm" className="w-full">
+                      <Button 
+                        variant="outline" 
+                        size="sm" 
+                        className="w-full"
+                        onClick={() => {
+                          if (user?.role === 'super_admin') {
+                            window.location.href = '/super-admin';
+                          } else {
+                            window.location.href = '/admin';
+                          }
+                        }}
+                      >
                         Edit Profile
                       </Button>
                     </div>
