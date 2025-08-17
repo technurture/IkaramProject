@@ -69,7 +69,7 @@ const blogSchema = new Schema<IBlog>({
 export interface IComment extends Document {
   _id: string;
   content: string;
-  authorId: string;
+  authorId?: string; // Optional for anonymous comments
   blogId: string;
   parentId?: string;
   createdAt: Date;
@@ -78,7 +78,7 @@ export interface IComment extends Document {
 
 const commentSchema = new Schema<IComment>({
   content: { type: String, required: true },
-  authorId: { type: String, required: true, ref: 'User' },
+  authorId: { type: String, ref: 'User' }, // Optional for anonymous comments
   blogId: { type: String, required: true, ref: 'Blog' },
   parentId: { type: String, ref: 'Comment' },
   createdAt: { type: Date, default: Date.now },
@@ -245,7 +245,7 @@ export const insertBlogSchema = z.object({
 
 export const insertCommentSchema = z.object({
   content: z.string().min(1),
-  authorId: z.string(),
+  authorId: z.string().optional(), // Optional for anonymous comments
   blogId: z.string(),
   parentId: z.string().optional()
 });

@@ -170,9 +170,11 @@ export async function registerRoutes(app: Express, storage: IMongoStorage): Prom
   });
 
   // Blog likes
-  app.post("/api/blogs/:id/like", requireAuth, async (req, res) => {
+  app.post("/api/blogs/:id/like", async (req, res) => {
     try {
-      const liked = await storage.toggleBlogLike(req.params.id, req.user!._id);
+      // For anonymous liking, we'll use IP address as identifier or just increment count
+      const userId = req.user?._id || req.ip || 'anonymous';
+      const liked = await storage.toggleBlogLike(req.params.id, userId);
       res.json({ liked });
     } catch (error) {
       res.status(500).json({ message: "Failed to toggle like" });
@@ -189,11 +191,12 @@ export async function registerRoutes(app: Express, storage: IMongoStorage): Prom
     }
   });
 
-  app.post("/api/blogs/:id/comments", requireAuth, async (req, res) => {
+  app.post("/api/blogs/:id/comments", async (req, res) => {
     try {
+      // Allow anonymous commenting
       const commentData = insertCommentSchema.parse({
         ...req.body,
-        authorId: req.user!._id,
+        authorId: req.user?._id || undefined, // Optional for anonymous comments
         blogId: req.params.id
       });
       

@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Textarea } from "@/components/ui/textarea";
-import { Heart, MessageCircle, Clock, Send } from "lucide-react";
+import { Heart, MessageCircle, Clock, Send, User } from "lucide-react";
 import { format } from "date-fns";
 import { useAuth } from "@/hooks/use-auth";
 import { useToast } from "@/hooks/use-toast";
@@ -20,6 +20,7 @@ export default function BlogDetailPage() {
   const [commentContent, setCommentContent] = useState("");
   const [replyingTo, setReplyingTo] = useState<string | null>(null);
   const [replyContent, setReplyContent] = useState("");
+
   const { user } = useAuth();
   const { toast } = useToast();
 
@@ -59,7 +60,7 @@ export default function BlogDetailPage() {
   });
 
   const commentMutation = useMutation({
-    mutationFn: async (data: { content: string; parentId?: string }) => {
+    mutationFn: async (data: { content: string; parentId?: string; authorId?: string; authorName?: string; authorEmail?: string }) => {
       await apiRequest("POST", `/api/blogs/${id}/comments`, data);
     },
     onSuccess: () => {
@@ -67,6 +68,7 @@ export default function BlogDetailPage() {
       setCommentContent("");
       setReplyContent("");
       setReplyingTo(null);
+
       toast({
         title: "Success",
         description: "Comment posted successfully",
@@ -82,28 +84,21 @@ export default function BlogDetailPage() {
   });
 
   const handleLike = () => {
-    if (!user) {
-      toast({
-        title: "Authentication required",
-        description: "Please sign in to like posts",
-        variant: "destructive",
-      });
-      return;
-    }
+    // Allow anonymous liking
     likeMutation.mutate();
   };
 
   const handleComment = () => {
-    if (!user) {
-      toast({
-        title: "Authentication required",
-        description: "Please sign in to comment",
-        variant: "destructive",
-      });
-      return;
-    }
     if (!commentContent.trim()) return;
-    commentMutation.mutate({ content: commentContent });
+    
+    const commentData: any = { content: commentContent };
+    if (user) {
+      // Authenticated user
+      commentData.authorId = user._id;
+    }
+    // Anonymous users can comment without any additional info
+    
+    commentMutation.mutate(commentData);
   };
 
   const handleReply = (parentId: string) => {
@@ -125,15 +120,26 @@ export default function BlogDetailPage() {
         <CardContent className="p-4">
           <div className="flex items-start space-x-3">
             <Avatar className="h-8 w-8">
-              <AvatarImage src={comment.author.profileImage || undefined} />
-              <AvatarFallback>
-                {comment.author.firstName[0]}{comment.author.lastName[0]}
-              </AvatarFallback>
+              {comment.author ? (
+                <>
+                  <AvatarImage src={comment.author.profileImage || undefined} />
+                  <AvatarFallback>
+                    {comment.author.firstName[0]}{comment.author.lastName[0]}
+                  </AvatarFallback>
+                </>
+              ) : (
+                <AvatarFallback>
+                  <User className="h-4 w-4" />
+                </AvatarFallback>
+              )}
             </Avatar>
             <div className="flex-1">
               <div className="flex items-center space-x-2 mb-1">
                 <span className="font-medium text-gray-900">
-                  {comment.author.firstName} {comment.author.lastName}
+                  {comment.author ? 
+                    `${comment.author.firstName} ${comment.author.lastName}` : 
+                    'Anonymous'
+                  }
                 </span>
                 <span className="text-gray-500 text-sm">
                   {format(new Date(comment.createdAt), 'MMM dd, yyyy \'at\' h:mm a')}
@@ -291,7 +297,7 @@ export default function BlogDetailPage() {
           )}
           
           {/* Blog Content */}
-          <Card className="mb-12">
+          <Card className="mb-8">
             <CardContent className="p-8">
               <div className="prose prose-lg max-w-none">
                 {blog.content.split('\n').map((paragraph, index) => (
@@ -302,6 +308,65 @@ export default function BlogDetailPage() {
               </div>
             </CardContent>
           </Card>
+
+          {/* Blog Attachments */}
+          {blog.attachments && blog.attachments.length > 0 && (
+            <Card className="mb-12">
+              <CardContent className="p-8">
+                <h3 className="text-xl font-bold text-gray-900 mb-4">Attachments</h3>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {blog.attachments.map((attachment, index) => {
+                    const isImage = attachment.match(/\.(jpg|jpeg|png|gif|webp)$/i);
+                    const isVideo = attachment.match(/\.(mp4|webm|ogg)$/i);
+                    const filename = attachment.split('/').pop() || `Attachment ${index + 1}`;
+                    
+                    return (
+                      <div key={index} className="border rounded-lg overflow-hidden hover:shadow-md transition-shadow">
+                        {isImage ? (
+                          <div className="aspect-video">
+                            <img
+                              src={attachment}
+                              alt={filename}
+                              className="w-full h-full object-cover cursor-pointer"
+                              onClick={() => window.open(attachment, '_blank')}
+                            />
+                          </div>
+                        ) : isVideo ? (
+                          <div className="aspect-video">
+                            <video
+                              src={attachment}
+                              className="w-full h-full object-cover"
+                              controls
+                            />
+                          </div>
+                        ) : (
+                          <div className="aspect-video bg-gray-100 flex items-center justify-center">
+                            <div className="text-center">
+                              <div className="text-2xl mb-2">📄</div>
+                              <p className="text-sm text-gray-600">Document</p>
+                            </div>
+                          </div>
+                        )}
+                        <div className="p-3">
+                          <p className="text-sm font-medium text-gray-900 truncate" title={filename}>
+                            {filename}
+                          </p>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="mt-2 w-full"
+                            onClick={() => window.open(attachment, '_blank')}
+                          >
+                            View File
+                          </Button>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </CardContent>
+            </Card>
+          )}
           
           {/* Comments Section */}
           <div className="mt-12">
@@ -310,35 +375,41 @@ export default function BlogDetailPage() {
             </h2>
             
             {/* Add Comment */}
-            {user && (
-              <Card className="mb-8">
-                <CardContent className="p-6">
-                  <div className="flex items-start space-x-4">
+            <Card className="mb-8">
+              <CardContent className="p-6">
+                <div className="flex items-start space-x-4">
+                  {user ? (
                     <Avatar className="h-10 w-10">
                       <AvatarImage src={user.profileImage || undefined} />
                       <AvatarFallback>
                         {user.firstName[0]}{user.lastName[0]}
                       </AvatarFallback>
                     </Avatar>
-                    <div className="flex-1">
-                      <Textarea
-                        placeholder="Share your thoughts..."
-                        value={commentContent}
-                        onChange={(e) => setCommentContent(e.target.value)}
-                        className="mb-4"
-                      />
-                      <Button
-                        onClick={handleComment}
-                        disabled={commentMutation.isPending || !commentContent.trim()}
-                      >
-                        <Send className="h-4 w-4 mr-1" />
-                        Post Comment
-                      </Button>
-                    </div>
+                  ) : (
+                    <Avatar className="h-10 w-10">
+                      <AvatarFallback>
+                        <User className="h-5 w-5" />
+                      </AvatarFallback>
+                    </Avatar>
+                  )}
+                  <div className="flex-1">
+                    <Textarea
+                      placeholder="Share your thoughts..."
+                      value={commentContent}
+                      onChange={(e) => setCommentContent(e.target.value)}
+                      className="mb-4"
+                    />
+                    <Button
+                      onClick={handleComment}
+                      disabled={commentMutation.isPending || !commentContent.trim()}
+                    >
+                      <Send className="h-4 w-4 mr-1" />
+                      Post Comment
+                    </Button>
                   </div>
-                </CardContent>
-              </Card>
-            )}
+                </div>
+              </CardContent>
+            </Card>
             
             {/* Comments List */}
             {commentsLoading ? (
