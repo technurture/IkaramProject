@@ -299,5 +299,12 @@ export type InsertMedia = z.infer<typeof insertMediaSchema>;
 export type UserWithProfile = IUser;
 export type BlogWithAuthor = any;
 export type CommentWithAuthor = any;
-export type EventWithDetails = any;
+export type EventWithDetails = IEvent & {
+  registrationCount: number;
+  creator: {
+    firstName: string;
+    lastName: string;
+    username: string;
+  };
+};
 export type StaffWithUser = any;

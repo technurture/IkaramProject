@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
-import { EventWithDetails } from "@shared/schema";
+import { EventWithDetails } from "@shared/mongodb-schema";
 import Navbar from "@/components/navbar";
 import Footer from "@/components/footer";
 import { Card } from "@/components/ui/card";
@@ -113,7 +113,7 @@ export default function EventsPage() {
         ) : (
           <div className="grid lg:grid-cols-2 gap-8">
             {events.map((event) => (
-              <Card key={event.id} className="overflow-hidden hover:shadow-xl transition-shadow duration-300">
+              <Card key={event._id} className="overflow-hidden hover:shadow-xl transition-shadow duration-300">
                 <div className="md:flex">
                   {event.featuredImage && (
                     <div className="md:w-1/3">
@@ -163,7 +163,7 @@ export default function EventsPage() {
                       <div className="flex items-center text-gray-600">
                         <Users className="h-4 w-4 mr-2" />
                         <span>
-                          {event._count.registrations} attending
+                          {event.registrationCount || 0} attending
                           {event.maxAttendees && ` / ${event.maxAttendees} max`}
                         </span>
                       </div>
@@ -173,7 +173,7 @@ export default function EventsPage() {
                       {event.status === 'upcoming' && (
                         <Button
                           className="bg-secondary-600 hover:bg-secondary-700"
-                          onClick={() => handleRegister(event.id)}
+                          onClick={() => handleRegister(event._id)}
                           disabled={registerMutation.isPending}
                         >
                           {event.isVirtual ? 'Join Virtual Event' : 'Register Now'}

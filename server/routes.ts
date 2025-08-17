@@ -247,17 +247,9 @@ export async function registerRoutes(app: Express, storage: IMongoStorage): Prom
 
   app.post("/api/events", requireAdmin, async (req, res) => {
     try {
-      console.log('Creating event with user:', req.user);
-      console.log('User ID type:', typeof req.user!._id);
-      console.log('User ID value:', req.user!._id);
-      console.log('Request body:', req.body);
-      
-      const createdById = String(req.user!._id);
-      console.log('Converted createdBy:', createdById, typeof createdById);
-      
       const eventData = insertEventSchema.parse({
         ...req.body,
-        createdBy: createdById
+        createdBy: String(req.user!._id)
       });
       
       const event = await storage.createEvent(eventData);
