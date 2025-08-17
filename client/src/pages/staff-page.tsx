@@ -123,24 +123,7 @@ export default function StaffPage() {
                     )}
                   </div>
 
-                  {(user?.role === 'admin' || user?.role === 'super_admin') && member.userId._id === user._id && (
-                    <div className="mt-4 pt-4 border-t border-gray-200">
-                      <Button 
-                        variant="outline" 
-                        size="sm" 
-                        className="w-full"
-                        onClick={() => {
-                          if (user?.role === 'super_admin') {
-                            window.location.href = '/super-admin';
-                          } else {
-                            window.location.href = '/admin';
-                          }
-                        }}
-                      >
-                        Edit My Profile
-                      </Button>
-                    </div>
-                  )}
+
                 </CardContent>
               </Card>
             ))}
