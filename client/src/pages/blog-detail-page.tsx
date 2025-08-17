@@ -14,6 +14,7 @@ import { format } from "date-fns";
 import { useAuth } from "@/hooks/use-auth";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest, queryClient } from "@/lib/queryClient";
+import { CommentSection } from "@/components/comment-section";
 
 
 
@@ -294,9 +295,6 @@ const ImageGallery = ({ attachments }: { attachments: string[] }) => {
 
 export default function BlogDetailPage() {
   const { id } = useParams<{ id: string }>();
-  const [commentContent, setCommentContent] = useState("");
-  const [replyingTo, setReplyingTo] = useState<string | null>(null);
-  const [replyInputs, setReplyInputs] = useState<Record<string, string>>({});
 
   const { user } = useAuth();
   const { toast } = useToast();
@@ -336,29 +334,7 @@ export default function BlogDetailPage() {
     },
   });
 
-  const commentMutation = useMutation({
-    mutationFn: async (data: { content: string; parentId?: string; authorId?: string; authorName?: string; authorEmail?: string }) => {
-      await apiRequest("POST", `/api/blogs/${id}/comments`, data);
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/blogs", id, "comments"] });
-      setCommentContent("");
-      setReplyInputs({});
-      setReplyingTo(null);
 
-      toast({
-        title: "Success",
-        description: "Comment posted successfully",
-      });
-    },
-    onError: () => {
-      toast({
-        title: "Error",
-        description: "Failed to post comment",
-        variant: "destructive",
-      });
-    },
-  });
 
   const handleLike = () => {
     // Allow anonymous liking
@@ -636,86 +612,11 @@ export default function BlogDetailPage() {
           )}
           
           {/* Comments Section */}
-          <div className="mt-12">
-            <h2 className="text-2xl font-bold text-gray-900 mb-6">
-              Comments ({comments?.length || 0})
-            </h2>
-            
-            {/* Add Comment */}
-            <Card className="mb-8">
-              <CardContent className="p-6">
-                <div className="flex items-start space-x-4">
-                  {user ? (
-                    <Avatar className="h-10 w-10">
-                      <AvatarImage src={user.profileImage || undefined} />
-                      <AvatarFallback>
-                        {user.firstName[0]}{user.lastName[0]}
-                      </AvatarFallback>
-                    </Avatar>
-                  ) : (
-                    <Avatar className="h-10 w-10">
-                      <AvatarFallback>
-                        <User className="h-5 w-5" />
-                      </AvatarFallback>
-                    </Avatar>
-                  )}
-                  <div className="flex-1">
-                    <textarea
-                      key="main-comment-input"
-                      placeholder="Share your thoughts..."
-                      value={commentContent}
-                      onChange={(e) => setCommentContent(e.target.value)}
-                      className="flex min-h-[80px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 mb-4"
-                      data-testid="input-main-comment"
-                    />
-                    <Button
-                      onClick={handleComment}
-                      disabled={commentMutation.isPending || !commentContent.trim()}
-                      data-testid="button-post-comment"
-                    >
-                      <Send className="h-4 w-4 mr-1" />
-                      Post Comment
-                    </Button>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-            
-            {/* Comments List */}
-            {commentsLoading ? (
-              <div className="space-y-4">
-                {[...Array(3)].map((_, i) => (
-                  <Card key={i} className="animate-pulse">
-                    <CardContent className="p-4">
-                      <div className="flex items-start space-x-3">
-                        <div className="h-8 w-8 bg-gray-200 rounded-full"></div>
-                        <div className="flex-1">
-                          <div className="h-4 bg-gray-200 rounded mb-2"></div>
-                          <div className="h-4 bg-gray-200 rounded"></div>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
-            ) : comments && comments.length > 0 ? (
-              <div>
-                {comments.map((comment) => (
-                  <CommentCard key={comment.id} comment={comment} />
-                ))}
-              </div>
-            ) : (
-              <Card>
-                <CardContent className="p-8 text-center">
-                  <MessageCircle className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                  <h3 className="text-lg font-medium text-gray-900 mb-2">No comments yet</h3>
-                  <p className="text-gray-600">
-                    {user ? "Be the first to share your thoughts!" : "Sign in to join the conversation."}
-                  </p>
-                </CardContent>
-              </Card>
-            )}
-          </div>
+          <CommentSection 
+            blogId={id!}
+            comments={comments}
+            commentsLoading={commentsLoading}
+          />
         </div>
       </div>
       
