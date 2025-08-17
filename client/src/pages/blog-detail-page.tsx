@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useParams } from "wouter";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { BlogWithAuthor, CommentWithAuthor } from "@shared/schema";
@@ -9,11 +9,212 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Textarea } from "@/components/ui/textarea";
-import { Heart, MessageCircle, Clock, Send, User } from "lucide-react";
+import { Heart, MessageCircle, Clock, Send, User, Download, X, ChevronLeft, ChevronRight } from "lucide-react";
 import { format } from "date-fns";
 import { useAuth } from "@/hooks/use-auth";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest, queryClient } from "@/lib/queryClient";
+
+// Image Gallery Component
+const ImageGallery = ({ attachments }: { attachments: string[] }) => {
+  const [selectedImage, setSelectedImage] = useState<number | null>(null);
+  
+  const images = attachments.filter(attachment => 
+    attachment.match(/\.(jpg|jpeg|png|gif|webp)$/i)
+  );
+  const videos = attachments.filter(attachment => 
+    attachment.match(/\.(mp4|webm|ogg)$/i)
+  );
+  const documents = attachments.filter(attachment => 
+    !attachment.match(/\.(jpg|jpeg|png|gif|webp|mp4|webm|ogg)$/i)
+  );
+
+  const downloadFile = (url: string, filename: string) => {
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = filename;
+    link.target = '_blank';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+  const nextImage = () => {
+    if (selectedImage !== null) {
+      setSelectedImage((selectedImage + 1) % images.length);
+    }
+  };
+
+  const prevImage = () => {
+    if (selectedImage !== null) {
+      setSelectedImage(selectedImage === 0 ? images.length - 1 : selectedImage - 1);
+    }
+  };
+
+  const handleKeyPress = (e: KeyboardEvent) => {
+    if (selectedImage !== null) {
+      if (e.key === 'ArrowRight') nextImage();
+      if (e.key === 'ArrowLeft') prevImage();
+      if (e.key === 'Escape') setSelectedImage(null);
+    }
+  };
+
+  // Add keyboard event listeners
+  useEffect(() => {
+    document.addEventListener('keydown', handleKeyPress);
+    return () => document.removeEventListener('keydown', handleKeyPress);
+  }, [selectedImage]);
+
+  return (
+    <div className="space-y-6">
+      {/* Images Grid */}
+      {images.length > 0 && (
+        <div>
+          <h4 className="text-lg font-semibold text-gray-900 mb-3">Images ({images.length})</h4>
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
+            {images.map((image, index) => (
+              <div 
+                key={index}
+                className="aspect-square border rounded-lg overflow-hidden cursor-pointer hover:shadow-lg transition-all duration-200 group"
+                onClick={() => setSelectedImage(index)}
+              >
+                <img
+                  src={image}
+                  alt={`Image ${index + 1}`}
+                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200"
+                />
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Videos Grid */}
+      {videos.length > 0 && (
+        <div>
+          <h4 className="text-lg font-semibold text-gray-900 mb-3">Videos ({videos.length})</h4>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {videos.map((video, index) => (
+              <div key={index} className="border rounded-lg overflow-hidden">
+                <video
+                  src={video}
+                  className="w-full aspect-video"
+                  controls
+                  preload="metadata"
+                />
+                <div className="p-3 bg-gray-50">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => downloadFile(video, video.split('/').pop() || `video-${index + 1}`)}
+                    className="w-full"
+                  >
+                    <Download className="h-4 w-4 mr-2" />
+                    Download Video
+                  </Button>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Documents List */}
+      {documents.length > 0 && (
+        <div>
+          <h4 className="text-lg font-semibold text-gray-900 mb-3">Documents ({documents.length})</h4>
+          <div className="space-y-2">
+            {documents.map((document, index) => {
+              const filename = document.split('/').pop() || `document-${index + 1}`;
+              return (
+                <div key={index} className="flex items-center justify-between p-3 border rounded-lg bg-gray-50">
+                  <div className="flex items-center space-x-3">
+                    <div className="text-2xl">📄</div>
+                    <span className="font-medium text-gray-900">{filename}</span>
+                  </div>
+                  <div className="flex space-x-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => window.open(document, '_blank')}
+                    >
+                      View
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => downloadFile(document, filename)}
+                    >
+                      <Download className="h-4 w-4 mr-1" />
+                      Download
+                    </Button>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      {/* Image Modal */}
+      {selectedImage !== null && (
+        <div className="fixed inset-0 bg-black bg-opacity-90 z-50 flex items-center justify-center p-4">
+          <div className="relative max-w-4xl max-h-full w-full h-full flex items-center justify-center">
+            {/* Close Button */}
+            <button
+              onClick={() => setSelectedImage(null)}
+              className="absolute top-4 right-4 z-10 bg-black bg-opacity-50 text-white rounded-full p-2 hover:bg-opacity-70"
+            >
+              <X className="h-6 w-6" />
+            </button>
+            
+            {/* Download Button */}
+            <button
+              onClick={() => downloadFile(images[selectedImage], `image-${selectedImage + 1}.jpg`)}
+              className="absolute top-4 right-16 z-10 bg-black bg-opacity-50 text-white rounded-full p-2 hover:bg-opacity-70"
+            >
+              <Download className="h-6 w-6" />
+            </button>
+
+            {/* Previous Button */}
+            {images.length > 1 && (
+              <button
+                onClick={prevImage}
+                className="absolute left-4 z-10 bg-black bg-opacity-50 text-white rounded-full p-2 hover:bg-opacity-70"
+              >
+                <ChevronLeft className="h-6 w-6" />
+              </button>
+            )}
+
+            {/* Next Button */}
+            {images.length > 1 && (
+              <button
+                onClick={nextImage}
+                className="absolute right-4 z-10 bg-black bg-opacity-50 text-white rounded-full p-2 hover:bg-opacity-70"
+              >
+                <ChevronRight className="h-6 w-6" />
+              </button>
+            )}
+
+            {/* Image */}
+            <img
+              src={images[selectedImage]}
+              alt={`Image ${selectedImage + 1}`}
+              className="max-w-full max-h-full object-contain"
+            />
+
+            {/* Image Counter */}
+            {images.length > 1 && (
+              <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 bg-black bg-opacity-50 text-white px-3 py-1 rounded">
+                {selectedImage + 1} / {images.length}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
 
 export default function BlogDetailPage() {
   const { id } = useParams<{ id: string }>();
@@ -102,16 +303,14 @@ export default function BlogDetailPage() {
   };
 
   const handleReply = (parentId: string) => {
-    if (!user) {
-      toast({
-        title: "Authentication required",
-        description: "Please sign in to reply",
-        variant: "destructive",
-      });
-      return;
-    }
     if (!replyContent.trim()) return;
-    commentMutation.mutate({ content: replyContent, parentId });
+    
+    const replyData: any = { content: replyContent, parentId };
+    if (user) {
+      replyData.authorId = user._id;
+    }
+    
+    commentMutation.mutate(replyData);
   };
 
   const CommentCard = ({ comment, isReply = false }: { comment: CommentWithAuthor; isReply?: boolean }) => (
@@ -310,60 +509,11 @@ export default function BlogDetailPage() {
           </Card>
 
           {/* Blog Attachments */}
-          {blog.attachments && blog.attachments.length > 0 && (
+          {(blog as any).attachments && (blog as any).attachments.length > 0 && (
             <Card className="mb-12">
               <CardContent className="p-8">
-                <h3 className="text-xl font-bold text-gray-900 mb-4">Attachments</h3>
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {blog.attachments.map((attachment, index) => {
-                    const isImage = attachment.match(/\.(jpg|jpeg|png|gif|webp)$/i);
-                    const isVideo = attachment.match(/\.(mp4|webm|ogg)$/i);
-                    const filename = attachment.split('/').pop() || `Attachment ${index + 1}`;
-                    
-                    return (
-                      <div key={index} className="border rounded-lg overflow-hidden hover:shadow-md transition-shadow">
-                        {isImage ? (
-                          <div className="aspect-video">
-                            <img
-                              src={attachment}
-                              alt={filename}
-                              className="w-full h-full object-cover cursor-pointer"
-                              onClick={() => window.open(attachment, '_blank')}
-                            />
-                          </div>
-                        ) : isVideo ? (
-                          <div className="aspect-video">
-                            <video
-                              src={attachment}
-                              className="w-full h-full object-cover"
-                              controls
-                            />
-                          </div>
-                        ) : (
-                          <div className="aspect-video bg-gray-100 flex items-center justify-center">
-                            <div className="text-center">
-                              <div className="text-2xl mb-2">📄</div>
-                              <p className="text-sm text-gray-600">Document</p>
-                            </div>
-                          </div>
-                        )}
-                        <div className="p-3">
-                          <p className="text-sm font-medium text-gray-900 truncate" title={filename}>
-                            {filename}
-                          </p>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            className="mt-2 w-full"
-                            onClick={() => window.open(attachment, '_blank')}
-                          >
-                            View File
-                          </Button>
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
+                <h3 className="text-xl font-bold text-gray-900 mb-4">Media Gallery</h3>
+                <ImageGallery attachments={(blog as any).attachments} />
               </CardContent>
             </Card>
           )}
