@@ -164,7 +164,7 @@ export default function RegularAdminDashboard() {
   const userBlogs = allBlogs?.filter(blog => blog.author._id === user?._id) || [];
   const userEvents = allEvents?.filter(event => {
     // Handle both cases: createdBy as string or as object with _id
-    const createdById = typeof event.createdBy === 'string' ? event.createdBy : event.createdBy?._id;
+    const createdById = typeof event.createdBy === 'string' ? event.createdBy : (event.createdBy as any)?._id;
     return createdById === user?._id;
   }) || [];
   const recentBlogs = userBlogs.slice(0, 5);
