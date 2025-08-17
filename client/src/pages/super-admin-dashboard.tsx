@@ -151,6 +151,8 @@ export default function SuperAdminDashboard() {
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
   const [changePasswordOpen, setChangePasswordOpen] = useState(false);
+  const [editStaffOpen, setEditStaffOpen] = useState(false);
+  const [selectedStaff, setSelectedStaff] = useState<any>(null);
   const [uploadingImage, setUploadingImage] = useState(false);
   const [uploadingBlogMedia, setUploadingBlogMedia] = useState(false);
   const [uploadingEventMedia, setUploadingEventMedia] = useState(false);
@@ -386,6 +388,24 @@ export default function SuperAdminDashboard() {
     },
   });
 
+  // Edit staff mutation
+  const editStaffMutation = useMutation({
+    mutationFn: async (data: z.infer<typeof staffFormSchema>) => {
+      const res = await apiRequest("PUT", `/api/staff/${selectedStaff._id}`, data);
+      return await res.json();
+    },
+    onSuccess: () => {
+      toast({ title: "Staff member updated successfully" });
+      setEditStaffOpen(false);
+      setSelectedStaff(null);
+      queryClient.invalidateQueries({ queryKey: ["/api/staff"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/users/all"] });
+    },
+    onError: (error: Error) => {
+      toast({ title: "Failed to update staff member", description: error.message, variant: "destructive" });
+    },
+  });
+
   // Password change mutation
   const changePasswordMutation = useMutation({
     mutationFn: async (data: z.infer<typeof passwordChangeSchema>) => {
@@ -483,6 +503,19 @@ export default function SuperAdminDashboard() {
     },
   });
 
+  // Edit staff form
+  const editStaffForm = useForm<z.infer<typeof staffFormSchema>>({
+    resolver: zodResolver(staffFormSchema),
+    defaultValues: {
+      position: "",
+      department: "",
+      bio: "",
+      phoneNumber: "",
+      officeLocation: "",
+      profileImage: "",
+    },
+  });
+
   // Password change form
   const passwordForm = useForm<z.infer<typeof passwordChangeSchema>>({
     resolver: zodResolver(passwordChangeSchema),
@@ -559,6 +592,19 @@ export default function SuperAdminDashboard() {
       officeLocation: values.officeLocation?.trim(),
     };
     createStaffMutation.mutate(trimmedValues);
+  };
+
+  const onEditStaff = (values: z.infer<typeof staffFormSchema>) => {
+    // Trim whitespace from text fields
+    const trimmedValues = {
+      ...values,
+      position: values.position?.trim() || "",
+      department: values.department?.trim() || "",
+      bio: values.bio?.trim() || "",
+      phoneNumber: values.phoneNumber?.trim() || "",
+      officeLocation: values.officeLocation?.trim() || "",
+    };
+    editStaffMutation.mutate(trimmedValues);
   };
 
   const onChangePassword = (values: z.infer<typeof passwordChangeSchema>) => {
@@ -1070,7 +1116,22 @@ export default function SuperAdminDashboard() {
                       <div className="flex items-center justify-between">
                         <Badge variant="outline">{staff.department}</Badge>
                         <div className="flex items-center space-x-1">
-                          <Button variant="ghost" size="sm">
+                          <Button 
+                            variant="ghost" 
+                            size="sm"
+                            onClick={() => {
+                              setSelectedStaff(staff);
+                              editStaffForm.reset({
+                                position: staff.position || "",
+                                department: staff.department || "",
+                                bio: staff.bio || "",
+                                phoneNumber: staff.phoneNumber || "",
+                                officeLocation: staff.officeLocation || "",
+                                profileImage: staff.profileImage || "",
+                              });
+                              setEditStaffOpen(true);
+                            }}
+                          >
                             <Edit className="h-3 w-3" />
                           </Button>
                           <Button variant="ghost" size="sm">
@@ -1999,6 +2060,127 @@ export default function SuperAdminDashboard() {
               </Button>
               <Button type="submit" onClick={staffForm.handleSubmit(onCreateStaff)} disabled={createStaffMutation.isPending}>
                 {createStaffMutation.isPending ? "Adding..." : "Add Staff Member"}
+              </Button>
+            </ScrollableDialogFooter>
+          </ScrollableDialogContent>
+        </ScrollableDialog>
+
+        {/* Edit Staff Modal */}
+        <ScrollableDialog open={editStaffOpen} onOpenChange={setEditStaffOpen}>
+          <ScrollableDialogContent className="max-w-lg">
+            <ScrollableDialogHeader>
+              <ScrollableDialogTitle>Edit Staff Member</ScrollableDialogTitle>
+              <ScrollableDialogDescription>
+                Update staff member information for {selectedStaff?.user?.firstName} {selectedStaff?.user?.lastName}.
+              </ScrollableDialogDescription>
+            </ScrollableDialogHeader>
+            <ScrollableDialogBody>
+              <Form {...editStaffForm}>
+                <form onSubmit={editStaffForm.handleSubmit(onEditStaff)} className="space-y-4">
+                  <FormField
+                    control={editStaffForm.control}
+                    name="position"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Position</FormLabel>
+                        <FormControl>
+                          <Input placeholder="System Administrator" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  
+                  <FormField
+                    control={editStaffForm.control}
+                    name="department"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Department</FormLabel>
+                        <FormControl>
+                          <Input placeholder="Information Technology" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={editStaffForm.control}
+                    name="bio"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Bio</FormLabel>
+                        <FormControl>
+                          <Textarea 
+                            placeholder="Brief description about the staff member..."
+                            className="min-h-[100px]"
+                            {...field} 
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={editStaffForm.control}
+                    name="phoneNumber"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Phone Number</FormLabel>
+                        <FormControl>
+                          <Input placeholder="+1-555-0100" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={editStaffForm.control}
+                    name="officeLocation"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Office Location</FormLabel>
+                        <FormControl>
+                          <Input placeholder="Admin Building, Room 101" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <div className="space-y-2">
+                    <Label>Profile Image</Label>
+                    <FileUpload
+                      label="Upload Profile Image"
+                      description="Upload a profile picture for the staff member"
+                      accept="image/*"
+                      multiple={false}
+                      maxFiles={1}
+                      onUrlsChange={(urls) => editStaffForm.setValue('profileImage', urls[0] || '')}
+                      data-testid="edit-staff-profile-image-upload"
+                    />
+                  </div>
+                </form>
+              </Form>
+            </ScrollableDialogBody>
+            <ScrollableDialogFooter>
+              <Button 
+                type="button" 
+                variant="outline" 
+                onClick={() => setEditStaffOpen(false)}
+                disabled={editStaffMutation.isPending}
+              >
+                Cancel
+              </Button>
+              <Button 
+                type="submit" 
+                onClick={editStaffForm.handleSubmit(onEditStaff)}
+                disabled={editStaffMutation.isPending}
+              >
+                {editStaffMutation.isPending ? "Updating..." : "Update Staff Member"}
               </Button>
             </ScrollableDialogFooter>
           </ScrollableDialogContent>
