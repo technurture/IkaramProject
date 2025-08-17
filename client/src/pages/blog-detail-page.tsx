@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { useParams } from "wouter";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { BlogWithAuthor, CommentWithAuthor } from "@shared/schema";
@@ -363,7 +363,7 @@ export default function BlogDetailPage() {
     likeMutation.mutate();
   };
 
-  const handleComment = () => {
+  const handleComment = useCallback(() => {
     if (!commentContent.trim()) return;
     
     const commentData: any = { content: commentContent };
@@ -374,9 +374,9 @@ export default function BlogDetailPage() {
     // Anonymous users can comment without any additional info
     
     commentMutation.mutate(commentData);
-  };
+  }, [commentContent, user, commentMutation]);
 
-  const handleReply = (parentId: string) => {
+  const handleReply = useCallback((parentId: string) => {
     if (!replyContent.trim()) return;
     
     const replyData: any = { content: replyContent, parentId };
@@ -385,88 +385,101 @@ export default function BlogDetailPage() {
     }
     
     commentMutation.mutate(replyData);
-  };
+  }, [replyContent, user, commentMutation]);
 
-  const CommentCard = React.memo(({ comment, isReply = false }: { comment: CommentWithAuthor; isReply?: boolean }) => (
-    <div className={`${isReply ? 'ml-8 mt-4' : 'mb-6'}`}>
-      <Card>
-        <CardContent className="p-4">
-          <div className="flex items-start space-x-3">
-            <Avatar className="h-8 w-8">
-              {comment.author ? (
-                <>
-                  <AvatarImage src={comment.author.profileImage || undefined} />
+  const CommentCard = React.memo(({ comment, isReply = false }: { comment: CommentWithAuthor; isReply?: boolean }) => {
+    const commentId = comment._id || comment.id;
+    
+    return (
+      <div key={commentId} className={`${isReply ? 'ml-8 mt-4' : 'mb-6'}`}>
+        <Card>
+          <CardContent className="p-4">
+            <div className="flex items-start space-x-3">
+              <Avatar className="h-8 w-8">
+                {comment.author ? (
+                  <>
+                    <AvatarImage src={comment.author.profileImage || undefined} />
+                    <AvatarFallback>
+                      {comment.author.firstName[0]}{comment.author.lastName[0]}
+                    </AvatarFallback>
+                  </>
+                ) : (
                   <AvatarFallback>
-                    {comment.author.firstName[0]}{comment.author.lastName[0]}
+                    <User className="h-4 w-4" />
                   </AvatarFallback>
-                </>
-              ) : (
-                <AvatarFallback>
-                  <User className="h-4 w-4" />
-                </AvatarFallback>
-              )}
-            </Avatar>
-            <div className="flex-1">
-              <div className="flex items-center space-x-2 mb-1">
-                <span className="font-medium text-gray-900">
-                  {comment.author ? 
-                    `${comment.author.firstName} ${comment.author.lastName}` : 
-                    'Anonymous'
-                  }
-                </span>
-                <span className="text-gray-500 text-sm">
-                  {format(new Date(comment.createdAt), 'MMM dd, yyyy \'at\' h:mm a')}
-                </span>
-              </div>
-              <p className="text-gray-700 mb-2">{comment.content}</p>
-              {!isReply && (
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => setReplyingTo(replyingTo === comment.id ? null : comment.id)}
-                >
-                  <MessageCircle className="h-4 w-4 mr-1" />
-                  Reply
-                </Button>
-              )}
-            </div>
-          </div>
-          
-          {replyingTo === comment.id && (
-            <div className="mt-4 ml-11">
-              <Textarea
-                placeholder="Write a reply..."
-                value={replyContent}
-                onChange={(e) => setReplyContent(e.target.value)}
-                className="mb-2"
-              />
-              <div className="flex space-x-2">
-                <Button
-                  size="sm"
-                  onClick={() => handleReply(comment.id)}
-                  disabled={commentMutation.isPending}
-                >
-                  <Send className="h-4 w-4 mr-1" />
-                  Reply
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => setReplyingTo(null)}
-                >
-                  Cancel
-                </Button>
+                )}
+              </Avatar>
+              <div className="flex-1">
+                <div className="flex items-center space-x-2 mb-1">
+                  <span className="font-medium text-gray-900">
+                    {comment.author ? 
+                      `${comment.author.firstName} ${comment.author.lastName}` : 
+                      'Anonymous'
+                    }
+                  </span>
+                  <span className="text-gray-500 text-sm">
+                    {format(new Date(comment.createdAt), 'MMM dd, yyyy \'at\' h:mm a')}
+                  </span>
+                </div>
+                <p className="text-gray-700 mb-2">{comment.content}</p>
+                {!isReply && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setReplyingTo(replyingTo === commentId ? null : commentId)}
+                  >
+                    <MessageCircle className="h-4 w-4 mr-1" />
+                    Reply
+                  </Button>
+                )}
               </div>
             </div>
-          )}
-        </CardContent>
-      </Card>
-      
-      {comment.replies?.map((reply) => (
-        <CommentCard key={reply._id || reply.id} comment={reply} isReply />
-      ))}
-    </div>
-  ));
+            
+            {replyingTo === commentId && (
+              <div key={`reply-form-${commentId}`} className="mt-4 ml-11">
+                <Textarea
+                  key={`reply-textarea-${commentId}`}
+                  placeholder="Write a reply..."
+                  value={replyContent}
+                  onChange={(e) => setReplyContent(e.target.value)}
+                  className="mb-2"
+                  autoFocus
+                />
+                <div className="flex space-x-2">
+                  <Button
+                    size="sm"
+                    onClick={() => handleReply(commentId)}
+                    disabled={commentMutation.isPending}
+                  >
+                    <Send className="h-4 w-4 mr-1" />
+                    Reply
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setReplyingTo(null)}
+                  >
+                    Cancel
+                  </Button>
+                </div>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+        
+        {comment.replies?.map((reply) => (
+          <CommentCard key={reply._id || reply.id} comment={reply} isReply />
+        ))}
+      </div>
+    );
+  }, (prevProps, nextProps) => {
+    // Custom comparison function to prevent unnecessary re-renders
+    return (
+      prevProps.comment._id === nextProps.comment._id &&
+      prevProps.comment.content === nextProps.comment.content &&
+      prevProps.isReply === nextProps.isReply
+    );
+  });
 
   if (blogLoading) {
     return (
@@ -620,14 +633,17 @@ export default function BlogDetailPage() {
                   )}
                   <div className="flex-1">
                     <Textarea
+                      key="main-comment-textarea"
                       placeholder="Share your thoughts..."
                       value={commentContent}
                       onChange={(e) => setCommentContent(e.target.value)}
                       className="mb-4"
+                      data-testid="input-main-comment"
                     />
                     <Button
                       onClick={handleComment}
                       disabled={commentMutation.isPending || !commentContent.trim()}
+                      data-testid="button-post-comment"
                     >
                       <Send className="h-4 w-4 mr-1" />
                       Post Comment
