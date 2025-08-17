@@ -56,7 +56,7 @@ export default function FeaturedBlogs() {
 
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
           {blogs.map((blog) => (
-            <Link key={blog.id} href={`/blogs/${blog.id}`}>
+            <Link key={blog._id} href={`/blogs/${blog._id}`}>
               <Card className="overflow-hidden hover:shadow-xl transition-all duration-300 group cursor-pointer h-full">
                 {blog.featuredImage && (
                   <div className="h-48 sm:h-56 overflow-hidden">
