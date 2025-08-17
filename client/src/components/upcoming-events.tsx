@@ -55,7 +55,7 @@ export default function UpcomingEvents() {
           </p>
         </div>
 
-        <div className="grid lg:grid-cols-2 gap-6 lg:gap-8">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6 lg:gap-8">
           {events.map((event) => (
             <Card key={event._id} className="overflow-hidden hover:shadow-xl transition-shadow duration-300">
               <div className="md:flex">
@@ -68,38 +68,39 @@ export default function UpcomingEvents() {
                     />
                   </div>
                 )}
-                <div className={`${event.featuredImage ? 'md:w-2/3' : 'w-full'} p-4 sm:p-6`}>
-                  <div className="flex items-center justify-between mb-4">
-                    <Badge variant="outline">
+                <div className={`${event.featuredImage ? 'md:w-2/3' : 'w-full'} p-4 md:p-6`}>
+                  <div className="flex items-center justify-between mb-3 md:mb-4">
+                    <Badge variant="outline" className="text-xs">
                       {event.category}
                     </Badge>
-                    <span className="text-gray-500 text-sm">
-                      {format(new Date(event.startDate), 'MMM dd, yyyy')}
-                    </span>
+                    <Badge variant="default" className="text-xs">
+                      upcoming
+                    </Badge>
                   </div>
                   
-                  <h3 className="text-xl font-bold text-gray-900 mb-3">
+                  <h3 className="text-lg md:text-xl font-bold text-gray-900 mb-2 md:mb-3 line-clamp-2">
                     {event.title}
                   </h3>
                   
-                  <p className="text-gray-700 mb-4 line-clamp-3">
-                    {event.description}
+                  <p className="text-sm md:text-base text-gray-700 mb-3 md:mb-4 line-clamp-2 md:line-clamp-3">
+                    {event.description.length > 100 ? event.description.substring(0, 100) + '...' : event.description}
                   </p>
                   
-                  <div className="space-y-2 mb-4">
-                    <div className="flex items-center text-gray-700">
-                      <Calendar className="h-4 w-4 mr-2" />
-                      <span>{format(new Date(event.startDate), 'EEEE, MMMM dd, yyyy \'at\' h:mm a')}</span>
+                  <div className="space-y-1 md:space-y-2 mb-3 md:mb-4 text-sm md:text-base">
+                    <div className="flex items-center text-gray-600">
+                      <Calendar className="h-3 w-3 md:h-4 md:w-4 mr-2 flex-shrink-0" />
+                      <span className="truncate">{format(new Date(event.startDate), 'MMM dd, yyyy \'at\' h:mm a')}</span>
                     </div>
-                    <div className="flex items-center text-gray-700">
-                      <MapPin className="h-4 w-4 mr-2" />
-                      <span>{event.location}</span>
-                    </div>
-
+                    {event.location && (
+                      <div className="flex items-center text-gray-600">
+                        <MapPin className="h-3 w-3 md:h-4 md:w-4 mr-2 flex-shrink-0" />
+                        <span className="truncate">{event.location}</span>
+                      </div>
+                    )}
                   </div>
                   
                   <Link href="/events">
-                    <Button className="bg-secondary-600 hover:bg-secondary-700">
+                    <Button size="sm" className="w-full sm:w-auto">
                       View Details
                     </Button>
                   </Link>

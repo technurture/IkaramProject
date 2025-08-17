@@ -83,7 +83,7 @@ export default function EventsPage() {
 
         {/* Events Grid */}
         {isLoading ? (
-          <div className="grid lg:grid-cols-2 gap-8">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6 lg:gap-8">
             {[...Array(4)].map((_, i) => (
               <Card key={i} className="animate-pulse">
                 <div className="md:flex">
@@ -112,35 +112,35 @@ export default function EventsPage() {
             )}
           </div>
         ) : (
-          <div className="grid lg:grid-cols-2 gap-8">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6 lg:gap-8">
             {events.map((event) => (
-              <Card key={event._id} className="overflow-hidden hover:shadow-xl transition-shadow duration-300">
-                <div className="md:flex">
+              <Card key={event._id} className="overflow-hidden hover:shadow-lg transition-shadow duration-300">
+                <div className="flex flex-col md:flex-row">
                   {event.featuredImage && (
                     <div className="md:w-1/3">
                       <img 
                         src={event.featuredImage} 
                         alt={event.title}
-                        className="w-full h-48 md:h-full object-cover"
+                        className="w-full h-32 md:h-full object-cover"
                       />
                     </div>
                   )}
-                  <div className={`${event.featuredImage ? 'md:w-2/3' : 'w-full'} p-6`}>
-                    <div className="flex items-center justify-between mb-4">
-                      <Badge variant="outline">
+                  <div className={`${event.featuredImage ? 'md:w-2/3' : 'w-full'} p-4 md:p-6`}>
+                    <div className="flex flex-wrap items-center gap-2 mb-3">
+                      <Badge variant="outline" className="text-xs">
                         {event.category}
                       </Badge>
-                      <Badge variant={event.status === 'upcoming' ? 'default' : 'secondary'}>
+                      <Badge variant={event.status === 'upcoming' ? 'default' : 'secondary'} className="text-xs">
                         {event.status}
                       </Badge>
                     </div>
                     
-                    <h3 className="text-xl font-bold text-gray-900 mb-3">
+                    <h3 className="text-base md:text-lg font-bold text-gray-900 mb-2 line-clamp-1">
                       {event.title}
                     </h3>
                     
-                    <p className="text-gray-600 mb-4 line-clamp-3">
-                      {event.description}
+                    <p className="text-sm text-gray-600 mb-3 line-clamp-2">
+                      {event.description.length > 80 ? event.description.substring(0, 80) + '...' : event.description}
                     </p>
                     
                     {/* Event Attachments */}
@@ -151,25 +151,26 @@ export default function EventsPage() {
                       </div>
                     )}
                     
-                    <div className="space-y-2 mb-4">
+                    <div className="space-y-1 md:space-y-2 mb-3 md:mb-4 text-sm md:text-base">
                       <div className="flex items-center text-gray-600">
-                        <Calendar className="h-4 w-4 mr-2" />
-                        <span>
-                          {format(new Date(event.startDate), 'EEEE, MMMM dd, yyyy')}
+                        <Calendar className="h-3 w-3 md:h-4 md:w-4 mr-2 flex-shrink-0" />
+                        <span className="truncate">
+                          {format(new Date(event.startDate), 'MMM dd, yyyy')}
                         </span>
                       </div>
                       <div className="flex items-center text-gray-600">
-                        <Clock className="h-4 w-4 mr-2" />
-                        <span>
+                        <Clock className="h-3 w-3 md:h-4 md:w-4 mr-2 flex-shrink-0" />
+                        <span className="truncate">
                           {format(new Date(event.startDate), 'h:mm a')}
                           {event.endDate && ` - ${format(new Date(event.endDate), 'h:mm a')}`}
                         </span>
                       </div>
-                      <div className="flex items-center text-gray-600">
-                        <MapPin className="h-4 w-4 mr-2" />
-                        <span>{event.location}</span>
-                      </div>
-
+                      {event.location && (
+                        <div className="flex items-center text-gray-600">
+                          <MapPin className="h-3 w-3 md:h-4 md:w-4 mr-2 flex-shrink-0" />
+                          <span className="truncate">{event.location}</span>
+                        </div>
+                      )}
                     </div>
                     
                     {user?.role === 'admin' && (
