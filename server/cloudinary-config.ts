@@ -3,13 +3,15 @@ import multer from 'multer';
 
 // Configure Cloudinary using environment variable
 if (!process.env.CLOUDINARY_URL) {
-  throw new Error('CLOUDINARY_URL environment variable is required');
+  console.warn('CLOUDINARY_URL environment variable is not set. File upload features will be disabled.');
 }
 
 // Cloudinary will automatically configure itself using CLOUDINARY_URL
-cloudinary.config({
-  secure: true
-});
+if (process.env.CLOUDINARY_URL) {
+  cloudinary.config({
+    secure: true
+  });
+}
 
 // Multer configuration for memory storage
 export const upload = multer({
@@ -46,6 +48,10 @@ export async function uploadToCloudinary(
   filename: string, 
   folder: string = 'alumni-platform'
 ): Promise<CloudinaryUploadResult> {
+  if (!process.env.CLOUDINARY_URL) {
+    throw new Error('CLOUDINARY_URL is not configured. Please contact administrator to enable file uploads.');
+  }
+  
   return new Promise((resolve, reject) => {
     cloudinary.uploader.upload_stream(
       {
@@ -73,6 +79,11 @@ export async function uploadToCloudinary(
 }
 
 export async function deleteFromCloudinary(publicId: string): Promise<void> {
+  if (!process.env.CLOUDINARY_URL) {
+    console.warn('CLOUDINARY_URL is not configured. Skipping file deletion.');
+    return;
+  }
+  
   try {
     await cloudinary.uploader.destroy(publicId);
   } catch (error) {
