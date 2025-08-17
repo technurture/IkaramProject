@@ -1761,6 +1761,30 @@ export default function SuperAdminDashboard() {
                     )}
                   />
                 </div>
+                  
+                  {/* File Upload Section */}
+                  <div className="space-y-4">
+                    <FileUpload
+                      label="Featured Image"
+                      description="Upload a featured image for this blog post"
+                      accept="image/*"
+                      multiple={false}
+                      maxFiles={1}
+                      onUrlsChange={(urls) => blogForm.setValue('featuredImage', urls[0] || '')}
+                      data-testid="blog-featured-image-upload"
+                    />
+                    
+                    <FileUpload
+                      label="Multiple Images & Files"
+                      description="Select multiple images, videos, or documents (hold Ctrl/Cmd while clicking to select multiple)"
+                      accept="image/*,video/*,.pdf,.doc,.docx,.txt"
+                      multiple={true}
+                      maxFiles={10}
+                      maxSize={25}
+                      onUrlsChange={(urls) => blogForm.setValue('attachments', urls)}
+                      data-testid="blog-attachments-upload"
+                    />
+                  </div>
                 </form>
               </Form>
             </ScrollableDialogBody>
@@ -2009,6 +2033,29 @@ export default function SuperAdminDashboard() {
                     )}
                   />
                 </div>
+                  
+                  {/* File Upload Section */}
+                  <div className="space-y-4">
+                    <FileUpload
+                      label="Featured Image"
+                      description="Upload a featured image for this event"
+                      accept="image/*"
+                      multiple={false}
+                      maxFiles={1}
+                      onUrlsChange={(urls) => eventForm.setValue('featuredImage', urls[0] || '')}
+                      data-testid="event-featured-image-upload"
+                    />
+                    
+                    <FileUpload
+                      label="Event Attachments"
+                      description="Upload multiple event documents, flyers, or additional files (up to 10 files, 25MB each)"
+                      multiple={true}
+                      maxFiles={10}
+                      maxSize={25}
+                      onUrlsChange={(urls) => eventForm.setValue('attachments', urls)}
+                      data-testid="event-attachments-upload"
+                    />
+                  </div>
                 </form>
               </Form>
             </ScrollableDialogBody>
