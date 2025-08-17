@@ -23,7 +23,8 @@ import { useToast } from "@/hooks/use-toast";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 
 interface CommentWithAuthor {
-  id: string;
+  id?: string;
+  _id?: string;
   content: string;
   author?: {
     firstName: string;
@@ -102,11 +103,12 @@ const Comment = React.memo(({
   
   const handleReplySubmit = useCallback(() => {
     if (replyContent.trim()) {
-      onReply(comment.id, replyContent);
+      const commentId = comment.id || comment._id || '';
+      onReply(commentId, replyContent);
       setReplyContent("");
       setShowReplyForm(false);
     }
-  }, [comment.id, replyContent, onReply]);
+  }, [comment.id, comment._id, replyContent, onReply]);
 
   const handleReplyContentChange = useCallback((content: string) => {
     setReplyContent(content);
@@ -118,37 +120,40 @@ const Comment = React.memo(({
   }, [showReplyForm]);
 
   return (
-    <div className={`comment-item ${isReply ? 'ml-8 mt-4' : 'mb-6'}`} data-comment-id={comment.id}>
-      <Card>
+    <div className={`comment-item ${isReply ? 'ml-8 mt-4' : 'mb-6'}`} data-comment-id={comment.id || comment._id || 'anonymous'}>
+      <Card className={isReply ? 'border-l-4 border-l-blue-200 bg-blue-50/30' : ''}>
         <CardContent className="p-4">
           <div className="flex items-start space-x-3">
-            <Avatar className="h-8 w-8">
+            <Avatar className={isReply ? 'h-6 w-6' : 'h-8 w-8'}>
               {comment.author ? (
                 <>
                   <AvatarImage src={comment.author.profileImage || undefined} />
-                  <AvatarFallback>
+                  <AvatarFallback className={isReply ? 'text-xs' : ''}>
                     {comment.author.firstName[0]}{comment.author.lastName[0]}
                   </AvatarFallback>
                 </>
               ) : (
-                <AvatarFallback>
-                  <User className="h-4 w-4" />
+                <AvatarFallback className={isReply ? 'text-xs' : ''}>
+                  <User className={isReply ? 'h-3 w-3' : 'h-4 w-4'} />
                 </AvatarFallback>
               )}
             </Avatar>
             <div className="flex-1">
               <div className="flex items-center space-x-2 mb-1">
-                <span className="font-medium text-gray-900">
+                {isReply && (
+                  <span className="text-xs text-blue-600 font-medium">↳ Reply:</span>
+                )}
+                <span className={`font-medium text-gray-900 ${isReply ? 'text-sm' : ''}`}>
                   {comment.author ? 
                     `${comment.author.firstName} ${comment.author.lastName}` : 
                     'Anonymous'
                   }
                 </span>
-                <span className="text-gray-500 text-sm">
+                <span className={`text-gray-500 ${isReply ? 'text-xs' : 'text-sm'}`}>
                   {format(new Date(comment.createdAt), 'MMM dd, yyyy \'at\' h:mm a')}
                 </span>
               </div>
-              <p className="text-gray-700 mb-2">{comment.content}</p>
+              <p className={`text-gray-700 mb-2 ${isReply ? 'text-sm' : ''}`}>{comment.content}</p>
               {!isReply && (
                 <Button
                   variant="ghost"
@@ -170,7 +175,7 @@ const Comment = React.memo(({
           <Card>
             <CardContent className="p-4">
               <CommentInput
-                id={`reply-${comment.id}`}
+                id={`reply-${comment.id || comment._id || 'anonymous'}`}
                 value={replyContent}
                 onChange={handleReplyContentChange}
                 onSubmit={handleReplySubmit}
@@ -193,9 +198,9 @@ const Comment = React.memo(({
       {/* Replies */}
       {comment.replies && comment.replies.length > 0 && (
         <div className="replies-section">
-          {comment.replies.map((reply) => (
+          {comment.replies.map((reply, index) => (
             <Comment 
-              key={`reply-${reply.id}`} 
+              key={reply.id || reply._id || `reply-${index}`}
               comment={reply} 
               isReply={true}
               onReply={onReply}
@@ -321,9 +326,9 @@ export const CommentSection: React.FC<CommentSectionProps> = ({
         </div>
       ) : comments && comments.length > 0 ? (
         <div className="comments-list">
-          {comments.map((comment) => (
+          {comments.map((comment, index) => (
             <Comment 
-              key={`comment-${comment.id}`} 
+              key={comment.id || comment._id || `comment-${index}`}
               comment={comment} 
               onReply={handleReply}
             />
