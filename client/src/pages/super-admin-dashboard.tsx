@@ -145,7 +145,11 @@ export default function SuperAdminDashboard() {
   const { toast } = useToast();
   const [activeTab, setActiveTab] = useState("overview");
   const [createBlogOpen, setCreateBlogOpen] = useState(false);
+  const [editBlogOpen, setEditBlogOpen] = useState(false);
+  const [selectedBlogId, setSelectedBlogId] = useState<string | null>(null);
   const [createEventOpen, setCreateEventOpen] = useState(false);
+  const [editEventOpen, setEditEventOpen] = useState(false);
+  const [selectedEventId, setSelectedEventId] = useState<string | null>(null);
   const [createUserOpen, setCreateUserOpen] = useState(false);
   const [createStaffOpen, setCreateStaffOpen] = useState(false);
 
@@ -287,6 +291,46 @@ export default function SuperAdminDashboard() {
     },
     onError: (error: Error) => {
       toast({ title: "Failed to create event", description: error.message, variant: "destructive" });
+    },
+  });
+
+  // Blog edit mutation
+  const editBlogMutation = useMutation({
+    mutationFn: async (data: z.infer<typeof blogFormSchema>) => {
+      const res = await apiRequest("PUT", `/api/blogs/${selectedBlogId}`, data);
+      return await res.json();
+    },
+    onSuccess: () => {
+      toast({ title: "Blog updated successfully" });
+      setEditBlogOpen(false);
+      setSelectedBlogId(null);
+      queryClient.invalidateQueries({ queryKey: ["/api/blogs"] });
+    },
+    onError: (error: Error) => {
+      toast({ title: "Failed to update blog", description: error.message, variant: "destructive" });
+    },
+  });
+
+  // Event edit mutation
+  const editEventMutation = useMutation({
+    mutationFn: async (data: z.infer<typeof eventFormSchema>) => {
+      const eventData = {
+        ...data,
+        startDate: new Date(data.startDate),
+        endDate: data.endDate ? new Date(data.endDate) : undefined,
+        registrationDeadline: data.registrationDeadline ? new Date(data.registrationDeadline) : undefined,
+      };
+      const res = await apiRequest("PUT", `/api/events/${selectedEventId}`, eventData);
+      return await res.json();
+    },
+    onSuccess: () => {
+      toast({ title: "Event updated successfully" });
+      setEditEventOpen(false);
+      setSelectedEventId(null);
+      queryClient.invalidateQueries({ queryKey: ["/api/events"] });
+    },
+    onError: (error: Error) => {
+      toast({ title: "Failed to update event", description: error.message, variant: "destructive" });
     },
   });
 
@@ -560,6 +604,62 @@ export default function SuperAdminDashboard() {
       location: values.location?.trim(),
     };
     createEventMutation.mutate(trimmedValues);
+  };
+
+  const onEditBlog = (values: z.infer<typeof blogFormSchema>) => {
+    // Trim whitespace from text fields
+    const trimmedValues = {
+      ...values,
+      title: values.title.trim(),
+      content: values.content.trim(),
+      excerpt: values.excerpt?.trim(),
+      tags: values.tags?.map((tag: string) => tag.trim()),
+    };
+    editBlogMutation.mutate(trimmedValues);
+  };
+
+  const onEditEvent = (values: z.infer<typeof eventFormSchema>) => {
+    // Trim whitespace from text fields
+    const trimmedValues = {
+      ...values,
+      title: values.title.trim(),
+      description: values.description.trim(),
+      location: values.location?.trim(),
+    };
+    editEventMutation.mutate(trimmedValues);
+  };
+
+  // Function to open edit dialogs and populate forms
+  const openEditBlog = (blog: BlogWithAuthor) => {
+    setSelectedBlogId(blog._id);
+    blogForm.reset({
+      title: blog.title,
+      content: blog.content,
+      excerpt: blog.excerpt || "",
+      category: blog.category,
+      status: blog.status,
+      tags: blog.tags || [],
+      featuredImage: blog.featuredImage || "",
+      attachments: blog.attachments || [],
+    });
+    setEditBlogOpen(true);
+  };
+
+  const openEditEvent = (event: EventWithDetails) => {
+    setSelectedEventId(event._id);
+    eventForm.reset({
+      title: event.title,
+      description: event.description,
+      startDate: new Date(event.startDate).toISOString().slice(0, 16),
+      endDate: event.endDate ? new Date(event.endDate).toISOString().slice(0, 16) : "",
+      location: event.location,
+      category: event.category,
+      isVirtual: event.isVirtual,
+      status: event.status,
+      featuredImage: event.featuredImage || "",
+      attachments: event.attachments || [],
+    });
+    setEditEventOpen(true);
   };
 
   const onCreateUser = (values: z.infer<typeof userFormSchema>) => {
@@ -1002,7 +1102,7 @@ export default function SuperAdminDashboard() {
               <CardContent>
                 <div className="space-y-4">
                   {recentBlogs?.map((blog) => (
-                    <div key={blog.id} className="flex items-center justify-between p-4 border rounded-lg">
+                    <div key={blog._id} className="flex items-center justify-between p-4 border rounded-lg">
                       <div className="flex-1">
                         <h3 className="font-medium text-gray-900">{blog.title}</h3>
                         <p className="text-sm text-gray-600 truncate">{blog.excerpt}</p>
@@ -1014,7 +1114,7 @@ export default function SuperAdminDashboard() {
                         </div>
                       </div>
                       <div className="flex items-center space-x-2">
-                        <Button variant="ghost" size="sm">
+                        <Button variant="ghost" size="sm" onClick={() => openEditBlog(blog)}>
                           <Edit className="h-4 w-4" />
                         </Button>
                         <Button variant="ghost" size="sm">
@@ -1050,7 +1150,7 @@ export default function SuperAdminDashboard() {
               <CardContent>
                 <div className="space-y-4">
                   {recentEvents?.map((event) => (
-                    <div key={event.id} className="flex items-center justify-between p-4 border rounded-lg">
+                    <div key={event._id} className="flex items-center justify-between p-4 border rounded-lg">
                       <div className="flex-1">
                         <h3 className="font-medium text-gray-900">{event.title}</h3>
                         <p className="text-sm text-gray-600 truncate">{event.description}</p>
@@ -1062,7 +1162,7 @@ export default function SuperAdminDashboard() {
                         </div>
                       </div>
                       <div className="flex items-center space-x-2">
-                        <Button variant="ghost" size="sm">
+                        <Button variant="ghost" size="sm" onClick={() => openEditEvent(event)}>
                           <Edit className="h-4 w-4" />
                         </Button>
                         <Button variant="ghost" size="sm">
@@ -1575,6 +1675,106 @@ export default function SuperAdminDashboard() {
           </ScrollableDialogContent>
         </ScrollableDialog>
 
+        {/* Edit Blog Modal */}
+        <ScrollableDialog open={editBlogOpen} onOpenChange={setEditBlogOpen}>
+          <ScrollableDialogContent className="max-w-2xl">
+            <ScrollableDialogHeader>
+              <ScrollableDialogTitle>Edit Blog Post</ScrollableDialogTitle>
+              <ScrollableDialogDescription>Update your blog post content and settings.</ScrollableDialogDescription>
+            </ScrollableDialogHeader>
+            <ScrollableDialogBody>
+              <Form {...blogForm}>
+                <form onSubmit={blogForm.handleSubmit(onEditBlog)} className="space-y-4">
+                <FormField
+                  control={blogForm.control}
+                  name="title"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Title</FormLabel>
+                      <FormControl>
+                        <Input placeholder="Enter blog title" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={blogForm.control}
+                  name="excerpt"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Excerpt</FormLabel>
+                      <FormControl>
+                        <Textarea placeholder="Brief description of the blog post" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={blogForm.control}
+                  name="content"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Content</FormLabel>
+                      <FormControl>
+                        <Textarea placeholder="Write your blog content here..." className="min-h-[200px]" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <div className="grid grid-cols-2 gap-4">
+                  <FormField
+                    control={blogForm.control}
+                    name="category"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Category</FormLabel>
+                        <FormControl>
+                          <Input placeholder="e.g., Alumni Stories" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={blogForm.control}
+                    name="status"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Status</FormLabel>
+                        <Select onValueChange={field.onChange} value={field.value}>
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select status" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            <SelectItem value="draft">Draft</SelectItem>
+                            <SelectItem value="published">Published</SelectItem>
+                            <SelectItem value="archived">Archived</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+                </form>
+              </Form>
+            </ScrollableDialogBody>
+            <ScrollableDialogFooter>
+              <Button type="button" variant="outline" onClick={() => setEditBlogOpen(false)}>
+                Cancel
+              </Button>
+              <Button type="submit" onClick={blogForm.handleSubmit(onEditBlog)} disabled={editBlogMutation.isPending}>
+                {editBlogMutation.isPending ? "Updating..." : "Update Blog"}
+              </Button>
+            </ScrollableDialogFooter>
+          </ScrollableDialogContent>
+        </ScrollableDialog>
+
         {/* Create Event Modal */}
         <ScrollableDialog open={createEventOpen} onOpenChange={setCreateEventOpen}>
           <ScrollableDialogContent className="max-w-2xl">
@@ -1712,6 +1912,112 @@ export default function SuperAdminDashboard() {
               </Button>
               <Button type="submit" onClick={eventForm.handleSubmit(onCreateEvent)} disabled={createEventMutation.isPending}>
                 {createEventMutation.isPending ? "Creating..." : "Create Event"}
+              </Button>
+            </ScrollableDialogFooter>
+          </ScrollableDialogContent>
+        </ScrollableDialog>
+
+        {/* Edit Event Modal */}
+        <ScrollableDialog open={editEventOpen} onOpenChange={setEditEventOpen}>
+          <ScrollableDialogContent className="max-w-2xl">
+            <ScrollableDialogHeader>
+              <ScrollableDialogTitle>Edit Event</ScrollableDialogTitle>
+              <ScrollableDialogDescription>Update event details and settings.</ScrollableDialogDescription>
+            </ScrollableDialogHeader>
+            <ScrollableDialogBody>
+              <Form {...eventForm}>
+                <form onSubmit={eventForm.handleSubmit(onEditEvent)} className="space-y-4">
+                <FormField
+                  control={eventForm.control}
+                  name="title"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Event Title</FormLabel>
+                      <FormControl>
+                        <Input placeholder="Enter event title" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={eventForm.control}
+                  name="description"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Description</FormLabel>
+                      <FormControl>
+                        <Textarea placeholder="Event description" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <div className="grid grid-cols-2 gap-4">
+                  <FormField
+                    control={eventForm.control}
+                    name="startDate"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Start Date</FormLabel>
+                        <FormControl>
+                          <Input type="datetime-local" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={eventForm.control}
+                    name="endDate"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>End Date (Optional)</FormLabel>
+                        <FormControl>
+                          <Input type="datetime-local" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <FormField
+                    control={eventForm.control}
+                    name="location"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Location</FormLabel>
+                        <FormControl>
+                          <Input placeholder="Event venue or online link" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={eventForm.control}
+                    name="category"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Category</FormLabel>
+                        <FormControl>
+                          <Input placeholder="e.g., Networking" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+                </form>
+              </Form>
+            </ScrollableDialogBody>
+            <ScrollableDialogFooter>
+              <Button type="button" variant="outline" onClick={() => setEditEventOpen(false)}>
+                Cancel
+              </Button>
+              <Button type="submit" onClick={eventForm.handleSubmit(onEditEvent)} disabled={editEventMutation.isPending}>
+                {editEventMutation.isPending ? "Updating..." : "Update Event"}
               </Button>
             </ScrollableDialogFooter>
           </ScrollableDialogContent>
