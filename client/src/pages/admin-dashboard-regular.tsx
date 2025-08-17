@@ -677,7 +677,7 @@ export default function RegularAdminDashboard() {
                 <CardContent>
                   <div className="space-y-4">
                     {recentBlogs?.slice(0, 5).map((blog) => (
-                      <div key={blog.id} className="flex items-center justify-between py-2 border-b border-gray-100 last:border-0">
+                      <div key={blog._id} className="flex items-center justify-between py-2 border-b border-gray-100 last:border-0">
                         <div className="flex-1">
                           <p className="font-medium text-gray-900 truncate">{blog.title}</p>
                           <p className="text-sm text-gray-600">
@@ -706,7 +706,7 @@ export default function RegularAdminDashboard() {
                 <CardContent>
                   <div className="space-y-4">
                     {recentEvents?.slice(0, 5).map((event) => (
-                      <div key={event.id} className="flex items-center justify-between py-2 border-b border-gray-100 last:border-0">
+                      <div key={event._id} className="flex items-center justify-between py-2 border-b border-gray-100 last:border-0">
                         <div className="flex-1">
                           <p className="font-medium text-gray-900 truncate">{event.title}</p>
                           <p className="text-sm text-gray-600">
@@ -946,12 +946,13 @@ export default function RegularAdminDashboard() {
         </Tabs>
 
         {/* Profile Edit Modal */}
-        <Dialog open={profileOpen} onOpenChange={setProfileOpen}>
-          <DialogContent className="max-w-lg">
-            <DialogHeader>
-              <DialogTitle>Edit Profile</DialogTitle>
-              <DialogDescription>Update your personal information and account details.</DialogDescription>
-            </DialogHeader>
+        <ScrollableDialog open={profileOpen} onOpenChange={setProfileOpen}>
+          <ScrollableDialogContent className="max-w-lg">
+            <ScrollableDialogHeader>
+              <ScrollableDialogTitle>Edit Profile</ScrollableDialogTitle>
+              <ScrollableDialogDescription>Update your personal information and account details.</ScrollableDialogDescription>
+            </ScrollableDialogHeader>
+            <ScrollableDialogBody>
             <Form {...profileForm}>
               <form onSubmit={profileForm.handleSubmit(onUpdateProfile)} className="space-y-4">
                 <div className="grid grid-cols-2 gap-4">
@@ -1092,8 +1093,9 @@ export default function RegularAdminDashboard() {
                 </div>
               </form>
             </Form>
-          </DialogContent>
-        </Dialog>
+            </ScrollableDialogBody>
+          </ScrollableDialogContent>
+        </ScrollableDialog>
 
         {/* Create Blog Modal */}
         <ScrollableDialog open={createBlogOpen} onOpenChange={setCreateBlogOpen}>
