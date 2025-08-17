@@ -791,23 +791,33 @@ export default function SuperAdminDashboard() {
       <Navbar />
       
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="flex justify-between items-center mb-8">
+        <div className="flex flex-col md:flex-row md:justify-between md:items-center mb-6 md:mb-8 space-y-4 md:space-y-0">
           <div>
-            <h1 className="text-3xl font-bold text-primary-700">Super Admin Dashboard</h1>
-            <p className="text-gray-600">Full system administration and management</p>
+            <h1 className="text-2xl md:text-3xl font-bold text-green-700">Super Admin Dashboard</h1>
+            <p className="text-gray-600 text-sm md:text-base">Full system administration and management</p>
           </div>
-          <div className="flex space-x-4">
-            <Button onClick={() => setProfileOpen(true)} variant="outline">
+          <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2 md:space-x-4">
+            <Button 
+              onClick={() => setProfileOpen(true)} 
+              variant="outline"
+              size="sm"
+              className="w-full sm:w-auto"
+            >
               <User className="h-4 w-4 mr-2" />
               Edit Profile
             </Button>
-            <Button onClick={() => setChangePasswordOpen(true)} variant="outline">
+            <Button 
+              onClick={() => setChangePasswordOpen(true)} 
+              variant="outline"
+              size="sm"
+              className="w-full sm:w-auto"
+            >
               <Settings className="h-4 w-4 mr-2" />
               Change Password
             </Button>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button>
+                <Button size="sm" className="w-full sm:w-auto">
                   <Plus className="h-4 w-4 mr-2" />
                   Quick Actions
                   <ChevronDown className="h-4 w-4 ml-2" />
@@ -838,23 +848,22 @@ export default function SuperAdminDashboard() {
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
-
           </div>
         </div>
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-6">
-            <TabsTrigger value="overview">Overview</TabsTrigger>
-            <TabsTrigger value="admin">Admin Management</TabsTrigger>
-            <TabsTrigger value="users">Admins</TabsTrigger>
-            <TabsTrigger value="content">Content</TabsTrigger>
-            <TabsTrigger value="events">Events</TabsTrigger>
-            <TabsTrigger value="staff">Staff</TabsTrigger>
+          <TabsList className="grid w-full grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-1">
+            <TabsTrigger value="overview" className="text-xs md:text-sm">Overview</TabsTrigger>
+            <TabsTrigger value="admin" className="text-xs md:text-sm">Admin</TabsTrigger>
+            <TabsTrigger value="users" className="text-xs md:text-sm">Users</TabsTrigger>
+            <TabsTrigger value="content" className="text-xs md:text-sm">Content</TabsTrigger>
+            <TabsTrigger value="events" className="text-xs md:text-sm">Events</TabsTrigger>
+            <TabsTrigger value="staff" className="text-xs md:text-sm">Staff</TabsTrigger>
           </TabsList>
 
           <TabsContent value="overview" className="space-y-6">
             {/* Stats Overview */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
               <Card className="border-l-4 border-l-primary-500">
                 <CardContent className="p-6">
                   <div className="flex items-center justify-between">

@@ -568,23 +568,33 @@ export default function RegularAdminDashboard() {
       <Navbar />
       
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="flex justify-between items-center mb-8">
+        <div className="flex flex-col md:flex-row md:justify-between md:items-center mb-6 md:mb-8 space-y-4 md:space-y-0">
           <div>
-            <h1 className="text-3xl font-bold text-blue-700">Admin Dashboard</h1>
-            <p className="text-gray-600">Manage content, events, and community</p>
+            <h1 className="text-2xl md:text-3xl font-bold text-blue-700">Admin Dashboard</h1>
+            <p className="text-gray-600 text-sm md:text-base">Manage content, events, and community</p>
           </div>
-          <div className="flex space-x-4">
-            <Button onClick={() => setProfileOpen(true)} variant="outline">
+          <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2 md:space-x-4">
+            <Button 
+              onClick={() => setProfileOpen(true)} 
+              variant="outline"
+              size="sm"
+              className="w-full sm:w-auto"
+            >
               <User className="h-4 w-4 mr-2" />
               Edit Profile
             </Button>
-            <Button onClick={() => setChangePasswordOpen(true)} variant="outline">
+            <Button 
+              onClick={() => setChangePasswordOpen(true)} 
+              variant="outline"
+              size="sm"
+              className="w-full sm:w-auto"
+            >
               <Settings className="h-4 w-4 mr-2" />
               Change Password
             </Button>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button>
+                <Button size="sm" className="w-full sm:w-auto">
                   <Plus className="h-4 w-4 mr-2" />
                   Quick Actions
                   <ChevronDown className="h-4 w-4 ml-2" />
@@ -601,22 +611,21 @@ export default function RegularAdminDashboard() {
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
-
           </div>
         </div>
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-5">
-            <TabsTrigger value="overview">Overview</TabsTrigger>
-            <TabsTrigger value="my-blogs">My Blogs</TabsTrigger>
-            <TabsTrigger value="my-events">My Events</TabsTrigger>
-            <TabsTrigger value="admins">Admins</TabsTrigger>
-            <TabsTrigger value="profile">Profile</TabsTrigger>
+          <TabsList className="grid w-full grid-cols-2 md:grid-cols-5 gap-1">
+            <TabsTrigger value="overview" className="text-xs md:text-sm">Overview</TabsTrigger>
+            <TabsTrigger value="my-blogs" className="text-xs md:text-sm">My Blogs</TabsTrigger>
+            <TabsTrigger value="my-events" className="text-xs md:text-sm">My Events</TabsTrigger>
+            <TabsTrigger value="admins" className="text-xs md:text-sm">Admins</TabsTrigger>
+            <TabsTrigger value="profile" className="text-xs md:text-sm">Profile</TabsTrigger>
           </TabsList>
 
           <TabsContent value="overview" className="space-y-6">
             {/* Stats Overview */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
               <Card className="border-l-4 border-l-blue-500">
                 <CardContent className="p-6">
                   <div className="flex items-center justify-between">

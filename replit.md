@@ -1,230 +1,67 @@
 # Alumni Community Platform
 
 ## Overview
-
-This is a full-stack alumni community platform built with React, Express, and PostgreSQL. The platform enables alumni to share stories through blogs, register for events, connect with staff members, and engage with the community through comments and interactions. It features user authentication, role-based access control, media management through Cloudinary, and a comprehensive admin dashboard.
+This project is a full-stack alumni community platform designed to foster engagement and connection among alumni. It enables users to share stories via blogs, register for events, connect with staff, and interact through comments. Key capabilities include robust user authentication, role-based access control, media management via Cloudinary, and a comprehensive admin dashboard. The platform aims to be a central hub for alumni interactions, enhancing community ties and facilitating communication.
 
 ## User Preferences
-
 Preferred communication style: Simple, everyday language.
 
 ## System Architecture
 
-### Frontend Architecture
-- **Framework**: React with TypeScript using Vite as the build tool
-- **UI Components**: Radix UI primitives with shadcn/ui components for consistent design
-- **Styling**: Tailwind CSS with custom CSS variables for theming
-- **State Management**: TanStack Query (React Query) for server state management
-- **Routing**: Wouter for lightweight client-side routing
-- **Forms**: React Hook Form with Zod validation for type-safe form handling
+### Frontend
+- **Framework**: React with TypeScript (Vite).
+- **UI/UX**: Radix UI primitives with shadcn/ui components; Tailwind CSS for styling.
+- **State Management**: TanStack Query for server state.
+- **Routing**: Wouter.
+- **Forms**: React Hook Form with Zod validation.
+- **Responsiveness**: Comprehensive mobile-first responsive design across all pages and admin dashboards.
 
-### Backend Architecture
-- **Framework**: Express.js with TypeScript
-- **Database ORM**: Drizzle ORM for type-safe database operations
-- **Authentication**: Passport.js with local strategy using session-based authentication
-- **Session Storage**: PostgreSQL session store for persistent sessions
-- **File Upload**: Multer for handling multipart/form-data uploads
-- **API Design**: RESTful API with role-based middleware for authorization
+### Backend
+- **Framework**: Express.js with TypeScript.
+- **Database ORM**: Drizzle ORM (though Mongoose is used for MongoDB interactions).
+- **Authentication**: Passport.js with local strategy and session-based authentication (PostgreSQL session store, though MongoDB is used for persistence).
+- **File Upload**: Multer for `multipart/form-data`.
+- **API Design**: RESTful API with role-based middleware.
 
 ### Database Design
-- **Primary Database**: MongoDB with Mongoose ODM
-- **Schema Management**: Mongoose schemas with TypeScript interfaces
-- **Key Entities**:
-  - Users with role-based access (user, admin, super_admin)
-  - Blogs with categories, tags, and status management
-  - Comments with hierarchical threading support
-  - Events with registration tracking
-  - Staff profiles with contact information
-  - Media files with Cloudinary integration
-- **Super Admin System**: Built-in super admin approval system for managing other administrators
+- **Primary Database**: MongoDB Atlas with Mongoose ODM.
+- **Key Entities**: Users (with roles: user, admin, super_admin), Blogs, Comments, Events (now announcement-style), Staff profiles, Media files.
+- **Super Admin System**: Built-in approval system for managing administrators.
 
 ### Authentication & Authorization
-- **Session Management**: Express sessions with MongoDB store
-- **Password Security**: Scrypt hashing with salt for secure password storage
-- **Role-Based Access**: User, admin, and super_admin roles with protected routes
-- **Admin Approval System**: Super admins can approve/reject/reactivate other administrators
-- **Middleware Protection**: Route-level authentication and authorization guards
-- **Super Admin**: Default super admin account (superadmin@ikaram.edu / SuperAdmin123!)
+- **Session Management**: Express sessions with MongoDB store.
+- **Password Security**: Scrypt hashing.
+- **Role-Based Access**: User, admin, and super_admin roles with protected routes and a three-tier system.
+- **Admin Approval System**: Super admins manage (approve/reject/reactivate) other administrators.
+- **Password Management**: Functionality for all admin users to change passwords.
 
 ### Media Management
-- **Cloud Storage**: Cloudinary for image and video storage
-- **File Processing**: Automatic optimization and format conversion
-- **Upload Handling**: Memory-based multer storage with file type validation
-- **Asset Organization**: Folder-based organization in Cloudinary
+- **Cloud Storage**: Cloudinary for image and video storage.
+- **Features**: Automatic optimization, format conversion, folder-based organization, drag-and-drop upload, real-time progress, and an advanced MediaGallery component with viewing, swiping, and download capabilities.
+
+### Event System
+- Events function as announcement-style posts without registration or attendance tracking.
+- Includes a comprehensive attachment display system with an interactive image gallery.
 
 ## External Dependencies
 
 ### Core Infrastructure
-- **Database**: MongoDB (configured with environment variable MONGODB_URL)
-- **Cloud Storage**: Cloudinary for media files and asset management
-- **Session Store**: MongoDB-based session persistence
+- **Database**: MongoDB Atlas.
+- **Cloud Storage**: Cloudinary.
+- **Session Store**: MongoDB (for session persistence).
 
 ### Frontend Libraries
-- **UI Framework**: React 18 with TypeScript
-- **Component Library**: Radix UI primitives with shadcn/ui styling
-- **Query Management**: TanStack Query for server state
-- **Form Management**: React Hook Form with Hookform Resolvers
-- **Validation**: Zod for runtime type checking and validation
-- **Styling**: Tailwind CSS with class-variance-authority
-- **Date Handling**: date-fns for date formatting and manipulation
+- **UI Framework**: React 18 with TypeScript.
+- **Component Library**: Radix UI and shadcn/ui.
+- **Query Management**: TanStack Query.
+- **Form Management**: React Hook Form, Hookform Resolvers, Zod.
+- **Styling**: Tailwind CSS, class-variance-authority.
+- **Date Handling**: date-fns.
 
 ### Backend Libraries
-- **Web Framework**: Express.js with TypeScript support
-- **Database**: MongoDB with Mongoose ODM
-- **Authentication**: Passport.js with local strategy
-- **File Upload**: Multer for multipart form handling
-- **Session Management**: express-session with connect-mongo
-- **Security**: Built-in crypto module for password hashing
-
-### Development Tools
-- **Build Tool**: Vite for fast development and optimized builds
-- **TypeScript**: Full type safety across frontend and backend
-- **Code Quality**: ESBuild for production bundling
-- **Development**: Replit-specific plugins for enhanced development experience
-
-## Recent Changes (August 16, 2025)
-
-### Migration to Replit Environment (Completed)
-- Successfully migrated from Replit Agent to standard Replit environment
-- Maintained MongoDB configuration for data persistence and scalability
-- Updated all imports and dependencies to use MongoDB/Mongoose schemas
-- Fixed TypeScript compilation errors and authentication flow
-- Configured Cloudinary for comprehensive media storage (images, videos, files)
-- Implemented secure environment variable management for all external services
-
-### Database Architecture
-- **Primary Database**: MongoDB Atlas with secure connection string
-- **Schema Management**: Mongoose ODM with TypeScript interfaces
-- **Session Storage**: MongoDB-based session persistence
-- **Connection**: mongodb+srv://technurture619:EljLBiQMpurchBD1@ikaram.13ysrj8.mongodb.net/
-
-### Media Storage Integration
-- **Cloud Provider**: Cloudinary for optimized media delivery
-- **Connection**: cloudinary://238391684591371:6vbkTWWobbPi1SvmuPpAwL5AUYA@dvgewacb7
-- **Supported Formats**: Images, videos, documents, and general file uploads
-- **Features**: Automatic optimization, format conversion, and CDN delivery
-- **Security**: Role-based upload permissions and secure deletion
-
-### Super Admin Management System
-- Added super_admin role with elevated privileges
-- Implemented admin approval workflow (new admins require super admin approval)
-- **Default Super Admin Account**: superadmin@ikaram.edu / SuperAdmin123!
-- Added API endpoints for super admin to manage other administrators:
-  - GET /api/admin/pending - View pending admin approvals
-  - GET /api/admin/all - View all administrators
-  - PUT /api/admin/:id/approve - Approve/reject admin accounts
-  - PUT /api/admin/:id/reactivate - Reactivate deactivated admins
-
-### UI/UX Improvements
-- Fixed login page logo display (supports both PNG and JPEG formats)
-- Added navigation back to home from login page
-- Proper logo fallback mechanism implemented
-
-### Security Enhancements
-- Database credentials stored securely in environment variables
-- Enhanced role-based access control with three-tier system (user, admin, super_admin)
-- Admin accounts require super admin approval before activation
-- Secure password hashing with scrypt algorithm
-- Session-based authentication with MongoDB persistence
-
-### Development Environment
-- **Server**: Express.js with TypeScript running on port 5000
-- **Frontend**: Vite development server with hot module replacement
-- **API Status**: All endpoints functional (blogs, events, staff, media, auth, admin management)
-- **Database**: Connected and seeded with super admin account
-- **Admin Management**: Super admin approval system fully functional
-- **Migration Status**: Complete and ready for development
-
-### Staff-to-Admin Automation System (August 16, 2025)
-- Implemented automatic admin promotion for staff members with configurable checkbox option
-- Staff members now receive admin privileges by default with auto-generated secure passwords
-- Default password format: "Staff" + random 8-character string + "!" for enhanced security
-- Admin creation success message displays default password for sharing with new admin
-- Enhanced staff creation form with two approaches:
-  - Select existing user from dropdown with real-time user fetching
-  - Create completely new user with full profile details
-- Fixed SelectItem component error in staff creation dropdown
-- Added comprehensive cache invalidation for real-time dashboard updates
-
-### Password Management System (August 16, 2025)
-- Added password change functionality for all admin users (super admin and regular admin)
-- New API endpoint: PUT /api/user/change-password with current password validation
-- Password change dialogs available in both super admin and regular admin dashboards
-- Secure password validation with current password verification before update
-- Enhanced user experience with clear error messages and success notifications
-- Password requirements: minimum 6 characters with confirmation field matching
-
-### Enhanced Admin Management (August 16, 2025)
-- Real-time dashboard updates across all admin operations (approve, reject, delete, reactivate)
-- Improved staff creation workflow with proper cache invalidation
-- Enhanced admin deletion and reactivation features
-- Super admin protection prevents deletion of super admin account
-- Comprehensive error handling and user feedback for all operations
-
-### Migration Completion (August 17, 2025)
-- Successfully migrated from Replit Agent to standard Replit environment
-- Fixed admin approval functionality with proper Mongoose document serialization
-- Added missing getPendingAdmins function to storage layer
-- Resolved frontend routing issues for admin dashboard access
-- All core features now working: authentication, admin management, content creation
-- Project is production-ready with proper error handling and security measures
-- Made all fields optional in edit profile and add staff forms for enhanced user experience
-- Fixed TypeScript compilation errors and form validation schemas
-- Configured Cloudinary integration with proper environment variable setup
-- Fixed upload endpoint field name mismatches for seamless file uploads
-- Verified file upload functionality with images, videos, and documents
-- Fixed event creation validation to handle date strings from frontend forms
-- Fixed MongoDB ObjectId to string conversion for event creation
-- Fixed frontend TypeScript errors and event display functionality
-- Properly defined EventWithDetails type with registrationCount property
-- Enhanced error logging for better debugging experience
-- Event creation, display, and registration fully functional
-- Complete migration finished - all functionality working perfectly
-
-### Event System Conversion to Announcement-Style (August 17, 2025)
-- Successfully removed registration functionality from events per user request
-- Events now function as announcement-style posts without registration or attendance tracking
-- Added comprehensive attachment display system with image gallery format
-- Attachments from Cloudinary now properly display in events page with clickable preview
-- Removed "Register Now" buttons and attendance count displays
-- Updated both main events page and homepage upcoming events component
-- Fixed all TypeScript errors and component key warnings
-- Event attachments working perfectly - users can upload and view images with events
-
-### Comment Input Fix (August 17, 2025)
-- Fixed critical comment input focus issue where characters were appearing backward
-- Replaced custom Textarea components with native HTML textarea elements
-- Implemented separate state management for reply inputs to prevent re-rendering conflicts
-- Added proper callback functions with useCallback to stabilize component rendering
-- Removed problematic React.memo that was causing component instability
-- Fixed TypeScript errors with comment ID handling
-- All comment and reply inputs now maintain proper focus and character order
-
-### Comprehensive Upload and Form Improvements (August 16, 2025)
-- Created comprehensive FileUpload component with Cloudinary integration
-- Supports images, videos, and documents with drag-and-drop functionality
-- Added real-time upload progress and error handling
-- Implemented scrollable dialog components for better form UX
-- Enhanced all admin forms with scrollable containers to prevent form cut-off
-- Added comprehensive admin visibility improvements with AdminTable component
-- Implemented complete CRUD operations across all features
-- Fixed all React key warnings and LSP compilation errors
-- Enhanced upload capabilities with multiple file support and validation
-- Added profile image upload functionality to edit profile modal
-- Made edit profile modal scrollable with proper dialog components
-- Added Position, Department, Phone Number, and Office Location fields to edit profile
-- Fixed staff card key warnings and all form schema compatibility
-- Enhanced super admin seeding to automatically create staff profile
-- Super admin now appears in staff section with proper organizational details
-- Migration fully completed with all user requirements implemented
-
-### Advanced Media Gallery Implementation (August 17, 2025)
-- Created comprehensive MediaGallery component with full-featured image and video viewing
-- Features include: click-to-view, swipe navigation, download functionality for all media types
-- Supports both images and videos with custom video controls (play/pause, mute/unmute)
-- Keyboard navigation support (arrow keys for navigation, escape to close)
-- Responsive design with thumbnail grid layout and full-screen modal viewer
-- Integrated with Cloudinary for optimized media delivery
-- Replaced simple attachment displays in both blog and event pages with interactive gallery
-- Media gallery shows file counter and supports batch downloads
-- Auto-detects media types and provides appropriate viewing experience
+- **Web Framework**: Express.js with TypeScript.
+- **Database**: MongoDB with Mongoose ODM.
+- **Authentication**: Passport.js.
+- **File Upload**: Multer.
+- **Session Management**: `express-session` with `connect-mongo`.
+- **Security**: Node.js `crypto` module.
