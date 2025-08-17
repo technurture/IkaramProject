@@ -26,13 +26,15 @@ interface CommentWithAuthor {
   id?: string;
   _id?: string;
   content: string;
+  authorId?: string;
+  parentId?: string;
   author?: {
     firstName: string;
     lastName: string;
     profileImage?: string;
   };
   createdAt: string;
-  replies?: CommentWithAuthor[];
+  replies: CommentWithAuthor[];
 }
 
 interface CommentSectionProps {
@@ -127,14 +129,14 @@ const Comment = React.memo(({
   }, [showReplies]);
 
   const hasReplies = comment.replies && comment.replies.length > 0;
-  const indentationLevel = Math.min(depth * 2, 6); // Max 6 levels deep
+  const marginLeft = depth > 0 ? `ml-${Math.min(depth * 4, 12)}` : '';
 
   return (
     <div 
-      className={`comment-item ${depth > 0 ? `ml-${indentationLevel} mt-3` : 'mb-6'}`} 
+      className={`comment-item ${marginLeft} ${depth > 0 ? 'mt-3' : 'mb-6'}`} 
       data-comment-id={comment.id || comment._id || 'anonymous'}
     >
-      <Card className={depth > 0 ? `border-l-4 border-l-blue-200 bg-blue-50/20` : 'border border-gray-200'}>
+      <Card className={depth > 0 ? 'border-l-4 border-l-blue-400 bg-blue-50/30 shadow-sm' : 'border border-gray-200 shadow-sm'}>
         <CardContent className="p-4">
           <div className="flex items-start space-x-3">
             <Avatar className={depth > 0 ? 'h-6 w-6' : 'h-8 w-8'}>
@@ -154,11 +156,12 @@ const Comment = React.memo(({
             <div className="flex-1">
               <div className="flex items-center space-x-2 mb-1">
                 {depth > 0 && (
-                  <span className="text-xs text-blue-600 font-medium">
-                    {'└─'.repeat(Math.min(depth, 3))} Reply:
-                  </span>
+                  <div className="flex items-center text-xs text-blue-600 font-medium">
+                    <span>{'└'.repeat(Math.min(depth, 3))} </span>
+                    <span className="ml-1">Reply</span>
+                  </div>
                 )}
-                <span className={`font-medium text-gray-900 ${depth > 0 ? 'text-sm' : ''}`}>
+                <span className={`font-semibold text-gray-900 ${depth > 0 ? 'text-sm' : ''}`}>
                   {comment.author ? 
                     `${comment.author.firstName} ${comment.author.lastName}` : 
                     'Anonymous'
@@ -175,7 +178,7 @@ const Comment = React.memo(({
                   variant="ghost"
                   size="sm"
                   onClick={toggleReplyForm}
-                  className="text-xs"
+                  className="text-xs hover:bg-blue-50"
                 >
                   <MessageCircle className="h-3 w-3 mr-1" />
                   Reply
@@ -186,10 +189,12 @@ const Comment = React.memo(({
                     variant="ghost"
                     size="sm"
                     onClick={toggleRepliesVisibility}
-                    className="text-xs text-blue-600"
+                    className="text-xs text-blue-600 hover:bg-blue-50"
                   >
                     {showReplies ? '▼' : '▶'} 
-                    {comment.replies!.length} {comment.replies!.length === 1 ? 'reply' : 'replies'}
+                    <span className="ml-1">
+                      {comment.replies.length} {comment.replies.length === 1 ? 'reply' : 'replies'}
+                    </span>
                   </Button>
                 )}
               </div>
@@ -200,8 +205,8 @@ const Comment = React.memo(({
       
       {/* Reply Form */}
       {showReplyForm && (
-        <div className={`mt-3 ${depth > 0 ? `ml-${indentationLevel + 2}` : 'ml-11'}`}>
-          <Card className="border-dashed border-gray-300">
+        <div className={`mt-3 ${depth > 0 ? 'ml-4' : 'ml-11'}`}>
+          <Card className="border-2 border-dashed border-blue-300 bg-blue-50/20">
             <CardContent className="p-3">
               <CommentInput
                 id={`reply-${comment.id || comment._id || 'anonymous'}`}
@@ -215,7 +220,7 @@ const Comment = React.memo(({
                 variant="ghost"
                 size="sm"
                 onClick={toggleReplyForm}
-                className="ml-2"
+                className="ml-2 text-xs"
               >
                 Cancel
               </Button>
@@ -227,7 +232,7 @@ const Comment = React.memo(({
       {/* Nested Replies - Collapsible */}
       {hasReplies && showReplies && (
         <div className="replies-section mt-2">
-          {comment.replies!.map((reply, index) => (
+          {comment.replies.map((reply, index) => (
             <Comment 
               key={reply.id || reply._id || `reply-${index}`}
               comment={reply} 

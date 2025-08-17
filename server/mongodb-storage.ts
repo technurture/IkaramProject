@@ -217,14 +217,44 @@ export class MongoDBStorage implements IMongoStorage {
 
   // Comment methods
   async getCommentsByBlog(blogId: string): Promise<CommentWithAuthor[]> {
-    const comments = await Comment.find({ blogId })
-      .sort({ createdAt: -1 })
+    const allComments = await Comment.find({ blogId })
+      .sort({ createdAt: 1 }) // Sort chronologically to build tree properly
       .populate('authorId', 'firstName lastName username profileImage');
     
-    return comments.map(comment => ({
+    // Convert to plain objects with author field
+    const commentsWithAuthor = allComments.map(comment => ({
       ...comment.toObject(),
-      author: comment.authorId as any
+      author: comment.authorId as any,
+      replies: [] as CommentWithAuthor[]
     }));
+    
+    // Build threaded structure
+    const commentMap = new Map<string, CommentWithAuthor>();
+    const rootComments: CommentWithAuthor[] = [];
+    
+    // First pass: create a map of all comments
+    commentsWithAuthor.forEach(comment => {
+      commentMap.set(comment._id.toString(), comment);
+    });
+    
+    // Second pass: build the tree structure
+    commentsWithAuthor.forEach(comment => {
+      if (comment.parentId) {
+        // This is a reply - add to parent's replies array
+        const parent = commentMap.get(comment.parentId.toString());
+        if (parent) {
+          parent.replies.push(comment);
+        }
+      } else {
+        // This is a root comment
+        rootComments.push(comment);
+      }
+    });
+    
+    // Sort root comments by creation date (newest first)
+    return rootComments.sort((a, b) => 
+      new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+    );
   }
 
   async createComment(comment: InsertComment): Promise<IComment> {
