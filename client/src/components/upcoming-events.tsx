@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { EventWithDetails } from "@shared/schema";
+import { EventWithDetails } from "@shared/mongodb-schema";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -57,7 +57,7 @@ export default function UpcomingEvents() {
 
         <div className="grid lg:grid-cols-2 gap-6 lg:gap-8">
           {events.map((event) => (
-            <Card key={event.id} className="overflow-hidden hover:shadow-xl transition-shadow duration-300">
+            <Card key={event._id} className="overflow-hidden hover:shadow-xl transition-shadow duration-300">
               <div className="md:flex">
                 {event.featuredImage && (
                   <div className="md:w-1/3">
@@ -95,15 +95,12 @@ export default function UpcomingEvents() {
                       <MapPin className="h-4 w-4 mr-2" />
                       <span>{event.location}</span>
                     </div>
-                    <div className="flex items-center text-gray-700">
-                      <Users className="h-4 w-4 mr-2" />
-                      <span>{event._count.registrations} attending</span>
-                    </div>
+
                   </div>
                   
-                  <Link href={`/events/${event.id}`}>
+                  <Link href="/events">
                     <Button className="bg-secondary-600 hover:bg-secondary-700">
-                      {event.isVirtual ? 'Join Virtual Event' : 'Register Now'}
+                      View Details
                     </Button>
                   </Link>
                 </div>

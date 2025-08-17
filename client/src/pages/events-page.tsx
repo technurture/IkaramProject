@@ -142,6 +142,26 @@ export default function EventsPage() {
                       {event.description}
                     </p>
                     
+                    {/* Event Attachments */}
+                    {event.attachments && event.attachments.length > 0 && (
+                      <div className="mb-4">
+                        <h4 className="text-sm font-semibold text-gray-900 mb-2">Attachments</h4>
+                        <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                          {event.attachments.map((attachment, index) => (
+                            <div key={index} className="relative group">
+                              <img
+                                src={attachment}
+                                alt={`Event attachment ${index + 1}`}
+                                className="w-full h-20 object-cover rounded-lg border-2 border-gray-200 hover:border-blue-300 transition-colors cursor-pointer"
+                                onClick={() => window.open(attachment, '_blank')}
+                              />
+                              <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-opacity rounded-lg"></div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                    
                     <div className="space-y-2 mb-4">
                       <div className="flex items-center text-gray-600">
                         <Calendar className="h-4 w-4 mr-2" />
@@ -160,31 +180,16 @@ export default function EventsPage() {
                         <MapPin className="h-4 w-4 mr-2" />
                         <span>{event.location}</span>
                       </div>
-                      <div className="flex items-center text-gray-600">
-                        <Users className="h-4 w-4 mr-2" />
-                        <span>
-                          {event.registrationCount || 0} attending
-                          {event.maxAttendees && ` / ${event.maxAttendees} max`}
-                        </span>
-                      </div>
+
                     </div>
                     
-                    <div className="flex space-x-2">
-                      {event.status === 'upcoming' && (
-                        <Button
-                          className="bg-secondary-600 hover:bg-secondary-700"
-                          onClick={() => handleRegister(event._id)}
-                          disabled={registerMutation.isPending}
-                        >
-                          {event.isVirtual ? 'Join Virtual Event' : 'Register Now'}
-                        </Button>
-                      )}
-                      {user?.role === 'admin' && (
+                    {user?.role === 'admin' && (
+                      <div className="flex space-x-2">
                         <Button variant="outline" size="sm">
                           Edit Event
                         </Button>
-                      )}
-                    </div>
+                      </div>
+                    )}
                   </div>
                 </div>
               </Card>

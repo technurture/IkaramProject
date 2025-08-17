@@ -99,6 +99,7 @@ export interface IEvent extends Document {
   maxAttendees?: number;
   registrationDeadline?: Date;
   status: 'upcoming' | 'ongoing' | 'completed' | 'cancelled';
+  attachments: string[];
   createdBy: string;
   createdAt: Date;
   updatedAt: Date;
@@ -116,6 +117,7 @@ const eventSchema = new Schema<IEvent>({
   maxAttendees: { type: Number },
   registrationDeadline: { type: Date },
   status: { type: String, enum: ['upcoming', 'ongoing', 'completed', 'cancelled'], default: 'upcoming' },
+  attachments: [{ type: String }],
   createdBy: { type: String, required: true, ref: 'User' },
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now }
@@ -262,6 +264,7 @@ export const insertEventSchema = z.object({
   maxAttendees: z.number().positive().optional(),
   registrationDeadline: z.union([z.date(), z.string()]).transform((val) => typeof val === 'string' ? new Date(val) : val).optional(),
   status: z.enum(['upcoming', 'ongoing', 'completed', 'cancelled']).default('upcoming'),
+  attachments: z.array(z.string()).default([]),
   createdBy: z.string()
 });
 
