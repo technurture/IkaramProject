@@ -455,11 +455,11 @@ export default function BlogDetailPage() {
             
             {replyingTo === commentId && (
               <div className="mt-4 ml-11">
-                <Textarea
+                <textarea
                   placeholder="Write a reply..."
                   value={replyInputs[commentId] || ''}
                   onChange={(e) => handleReplyInputChange(commentId, e.target.value)}
-                  className="mb-2"
+                  className="flex min-h-[80px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 mb-2"
                   autoFocus
                   data-testid={`input-reply-${commentId}`}
                 />
@@ -645,12 +645,11 @@ export default function BlogDetailPage() {
                     </Avatar>
                   )}
                   <div className="flex-1">
-                    <Textarea
-                      key="main-comment-textarea"
+                    <textarea
                       placeholder="Share your thoughts..."
                       value={commentContent}
                       onChange={(e) => setCommentContent(e.target.value)}
-                      className="mb-4"
+                      className="flex min-h-[80px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 mb-4"
                       data-testid="input-main-comment"
                     />
                     <Button

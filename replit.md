@@ -174,6 +174,15 @@ Preferred communication style: Simple, everyday language.
 - Fixed upload endpoint field name mismatches for seamless file uploads
 - Verified file upload functionality with images, videos, and documents
 
+### Comment Input Fix (August 17, 2025)
+- Fixed critical comment input focus issue where characters were appearing backward
+- Replaced custom Textarea components with native HTML textarea elements
+- Implemented separate state management for reply inputs to prevent re-rendering conflicts
+- Added proper callback functions with useCallback to stabilize component rendering
+- Removed problematic React.memo that was causing component instability
+- Fixed TypeScript errors with comment ID handling
+- All comment and reply inputs now maintain proper focus and character order
+
 ### Comprehensive Upload and Form Improvements (August 16, 2025)
 - Created comprehensive FileUpload component with Cloudinary integration
 - Supports images, videos, and documents with drag-and-drop functionality
