@@ -104,15 +104,23 @@ export async function registerRoutes(app: Express, storage: IMongoStorage): Prom
 
   app.post("/api/blogs", requireAuth, async (req, res) => {
     try {
+      console.log('Received blog data:', req.body);
+      
+      // Filter out extra fields and prepare data for validation
+      const { startDate, attachments, ...filteredData } = req.body;
+      
       const blogData = insertBlogSchema.parse({
-        ...req.body,
+        ...filteredData,
         authorId: req.user!._id
       });
+      
+      console.log('Validated blog data:', blogData);
       
       const blog = await storage.createBlog(blogData);
       res.status(201).json(blog);
     } catch (error) {
-      res.status(400).json({ message: "Invalid blog data" });
+      console.error('Blog creation error:', error);
+      res.status(400).json({ message: "Invalid blog data", error: error.message });
     }
   });
 
