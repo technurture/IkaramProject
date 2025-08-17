@@ -154,11 +154,11 @@ export default function BlogsPage() {
                       <div className="flex items-center space-x-4 text-gray-500">
                         <span className="flex items-center space-x-1">
                           <Heart className="h-4 w-4" />
-                          <span>{blog._count.likes}</span>
+                          <span>{blog._count?.likes || 0}</span>
                         </span>
                         <span className="flex items-center space-x-1">
                           <MessageCircle className="h-4 w-4" />
-                          <span>{blog._count.comments}</span>
+                          <span>{blog._count?.comments || 0}</span>
                         </span>
                       </div>
                     </div>
