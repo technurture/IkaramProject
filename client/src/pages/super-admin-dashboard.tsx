@@ -1109,20 +1109,20 @@ export default function SuperAdminDashboard() {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="space-y-4">
+                <div className="space-y-4 max-h-96 overflow-y-auto">
                   {recentBlogs?.map((blog) => (
                     <div key={blog._id} className="flex items-center justify-between p-4 border rounded-lg">
-                      <div className="flex-1">
-                        <h3 className="font-medium text-gray-900">{blog.title}</h3>
-                        <p className="text-sm text-gray-600 truncate">{blog.excerpt}</p>
+                      <div className="flex-1 min-w-0 pr-4">
+                        <h3 className="font-medium text-gray-900 truncate">{blog.title}</h3>
+                        <p className="text-sm text-gray-600 line-clamp-2">{blog.excerpt}</p>
                         <div className="flex items-center space-x-2 mt-2">
                           <Badge variant="outline">{blog.status}</Badge>
-                          <span className="text-xs text-gray-500">
+                          <span className="text-xs text-gray-500 truncate">
                             by {blog.author.firstName} {blog.author.lastName}
                           </span>
                         </div>
                       </div>
-                      <div className="flex items-center space-x-2">
+                      <div className="flex items-center space-x-2 flex-shrink-0">
                         <Button variant="ghost" size="sm" onClick={() => openEditBlog(blog)}>
                           <Edit className="h-4 w-4" />
                         </Button>
@@ -1157,12 +1157,12 @@ export default function SuperAdminDashboard() {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="space-y-4">
+                <div className="space-y-4 max-h-96 overflow-y-auto">
                   {recentEvents?.map((event) => (
                     <div key={event._id} className="flex items-center justify-between p-4 border rounded-lg">
-                      <div className="flex-1">
-                        <h3 className="font-medium text-gray-900">{event.title}</h3>
-                        <p className="text-sm text-gray-600 truncate">{event.description}</p>
+                      <div className="flex-1 min-w-0 pr-4">
+                        <h3 className="font-medium text-gray-900 truncate">{event.title}</h3>
+                        <p className="text-sm text-gray-600 line-clamp-2">{event.description}</p>
                         <div className="flex items-center space-x-2 mt-2">
                           <Badge variant="outline">{event.status}</Badge>
                           <span className="text-xs text-gray-500">
@@ -1170,7 +1170,7 @@ export default function SuperAdminDashboard() {
                           </span>
                         </div>
                       </div>
-                      <div className="flex items-center space-x-2">
+                      <div className="flex items-center space-x-2 flex-shrink-0">
                         <Button variant="ghost" size="sm" onClick={() => openEditEvent(event)}>
                           <Edit className="h-4 w-4" />
                         </Button>
@@ -1283,16 +1283,16 @@ export default function SuperAdminDashboard() {
             
             <Card>
               <CardContent className="p-6">
-                <div className="space-y-4">
+                <div className="space-y-4 max-h-96 overflow-y-auto">
                   {recentBlogs?.map((blog) => (
                     <div key={blog._id} className="flex items-center justify-between p-4 border border-gray-200 rounded-lg">
-                      <div className="flex-1">
-                        <h3 className="font-medium text-gray-900">{blog.title}</h3>
-                        <p className="text-sm text-gray-600">
+                      <div className="flex-1 min-w-0 pr-4">
+                        <h3 className="font-medium text-gray-900 truncate">{blog.title}</h3>
+                        <p className="text-sm text-gray-600 line-clamp-1">
                           by {blog.author.firstName} {blog.author.lastName} • {blog.category}
                         </p>
                       </div>
-                      <div className="flex items-center space-x-2">
+                      <div className="flex items-center space-x-2 flex-shrink-0">
                         <Badge variant={blog.status === 'published' ? 'default' : 'secondary'}>
                           {blog.status}
                         </Badge>
@@ -1321,20 +1321,20 @@ export default function SuperAdminDashboard() {
             
             <Card>
               <CardContent className="p-6">
-                <div className="space-y-4">
+                <div className="space-y-4 max-h-96 overflow-y-auto">
                   {recentEvents?.map((event) => (
                     <div key={event._id} className="flex items-center justify-between p-4 border border-gray-200 rounded-lg">
-                      <div className="flex-1">
-                        <h3 className="font-medium text-gray-900">{event.title}</h3>
-                        <p className="text-sm text-gray-600">
+                      <div className="flex-1 min-w-0 pr-4">
+                        <h3 className="font-medium text-gray-900 truncate">{event.title}</h3>
+                        <p className="text-sm text-gray-600 line-clamp-1">
                           {new Date(event.startDate).toLocaleDateString()} • {event.location}
                         </p>
                       </div>
-                      <div className="flex items-center space-x-2">
+                      <div className="flex items-center space-x-2 flex-shrink-0">
                         <Badge variant={event.status === 'upcoming' ? 'default' : 'secondary'}>
                           {event.status}
                         </Badge>
-                        <span className="text-sm text-gray-600">
+                        <span className="text-sm text-gray-600 whitespace-nowrap">
                           {event.registrationCount || 0} registered
                         </span>
                         <Button variant="ghost" size="sm" onClick={() => openEditEvent(event)}>
