@@ -295,6 +295,7 @@ export default function BlogDetailPage() {
   const [commentContent, setCommentContent] = useState("");
   const [replyingTo, setReplyingTo] = useState<string | null>(null);
   const [replyContent, setReplyContent] = useState("");
+  const [replyInputs, setReplyInputs] = useState<Record<string, string>>({});
 
   const { user } = useAuth();
   const { toast } = useToast();
@@ -341,7 +342,7 @@ export default function BlogDetailPage() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/blogs", id, "comments"] });
       setCommentContent("");
-      setReplyContent("");
+      setReplyInputs({});
       setReplyingTo(null);
 
       toast({
@@ -376,22 +377,39 @@ export default function BlogDetailPage() {
     commentMutation.mutate(commentData);
   }, [commentContent, user, commentMutation]);
 
+  const handleReplyInputChange = useCallback((commentId: string, value: string) => {
+    setReplyInputs(prev => ({
+      ...prev,
+      [commentId]: value
+    }));
+  }, []);
+
   const handleReply = useCallback((parentId: string) => {
-    if (!replyContent.trim()) return;
+    const content = replyInputs[parentId];
+    if (!content?.trim()) return;
     
-    const replyData: any = { content: replyContent, parentId };
+    const replyData: any = { content, parentId };
     if (user) {
       replyData.authorId = user._id;
     }
     
     commentMutation.mutate(replyData);
-  }, [replyContent, user, commentMutation]);
+  }, [replyInputs, user, commentMutation]);
 
-  const CommentCard = React.memo(({ comment, isReply = false }: { comment: CommentWithAuthor; isReply?: boolean }) => {
-    const commentId = comment._id || comment.id;
+  const handleCancelReply = useCallback((commentId: string) => {
+    setReplyingTo(null);
+    setReplyInputs(prev => {
+      const newInputs = { ...prev };
+      delete newInputs[commentId];
+      return newInputs;
+    });
+  }, []);
+
+  const CommentCard = ({ comment, isReply = false }: { comment: CommentWithAuthor; isReply?: boolean }) => {
+    const commentId = comment.id;
     
     return (
-      <div key={commentId} className={`${isReply ? 'ml-8 mt-4' : 'mb-6'}`}>
+      <div className={`${isReply ? 'ml-8 mt-4' : 'mb-6'}`}>
         <Card>
           <CardContent className="p-4">
             <div className="flex items-start space-x-3">
@@ -436,20 +454,21 @@ export default function BlogDetailPage() {
             </div>
             
             {replyingTo === commentId && (
-              <div key={`reply-form-${commentId}`} className="mt-4 ml-11">
+              <div className="mt-4 ml-11">
                 <Textarea
-                  key={`reply-textarea-${commentId}`}
                   placeholder="Write a reply..."
-                  value={replyContent}
-                  onChange={(e) => setReplyContent(e.target.value)}
+                  value={replyInputs[commentId] || ''}
+                  onChange={(e) => handleReplyInputChange(commentId, e.target.value)}
                   className="mb-2"
                   autoFocus
+                  data-testid={`input-reply-${commentId}`}
                 />
                 <div className="flex space-x-2">
                   <Button
                     size="sm"
                     onClick={() => handleReply(commentId)}
-                    disabled={commentMutation.isPending}
+                    disabled={commentMutation.isPending || !replyInputs[commentId]?.trim()}
+                    data-testid={`button-reply-${commentId}`}
                   >
                     <Send className="h-4 w-4 mr-1" />
                     Reply
@@ -457,7 +476,8 @@ export default function BlogDetailPage() {
                   <Button
                     variant="ghost"
                     size="sm"
-                    onClick={() => setReplyingTo(null)}
+                    onClick={() => handleCancelReply(commentId)}
+                    data-testid={`button-cancel-reply-${commentId}`}
                   >
                     Cancel
                   </Button>
@@ -468,18 +488,11 @@ export default function BlogDetailPage() {
         </Card>
         
         {comment.replies?.map((reply) => (
-          <CommentCard key={reply._id || reply.id} comment={reply} isReply />
+          <CommentCard key={reply.id} comment={reply} isReply />
         ))}
       </div>
     );
-  }, (prevProps, nextProps) => {
-    // Custom comparison function to prevent unnecessary re-renders
-    return (
-      prevProps.comment._id === nextProps.comment._id &&
-      prevProps.comment.content === nextProps.comment.content &&
-      prevProps.isReply === nextProps.isReply
-    );
-  });
+  };
 
   if (blogLoading) {
     return (
@@ -673,7 +686,7 @@ export default function BlogDetailPage() {
             ) : comments && comments.length > 0 ? (
               <div>
                 {comments.map((comment) => (
-                  <CommentCard key={comment._id || comment.id} comment={comment} />
+                  <CommentCard key={comment.id} comment={comment} />
                 ))}
               </div>
             ) : (
