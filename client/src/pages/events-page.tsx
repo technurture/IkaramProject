@@ -12,6 +12,7 @@ import { format } from "date-fns";
 import { useAuth } from "@/hooks/use-auth";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest, queryClient } from "@/lib/queryClient";
+import { MediaGallery } from "@/components/ui/media-gallery";
 
 export default function EventsPage() {
   const { user } = useAuth();
@@ -145,20 +146,8 @@ export default function EventsPage() {
                     {/* Event Attachments */}
                     {event.attachments && event.attachments.length > 0 && (
                       <div className="mb-4">
-                        <h4 className="text-sm font-semibold text-gray-900 mb-2">Attachments</h4>
-                        <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-                          {event.attachments.map((attachment, index) => (
-                            <div key={index} className="relative group">
-                              <img
-                                src={attachment}
-                                alt={`Event attachment ${index + 1}`}
-                                className="w-full h-20 object-cover rounded-lg border-2 border-gray-200 hover:border-blue-300 transition-colors cursor-pointer"
-                                onClick={() => window.open(attachment, '_blank')}
-                              />
-                              <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-opacity rounded-lg"></div>
-                            </div>
-                          ))}
-                        </div>
+                        <h4 className="text-sm font-semibold text-gray-900 mb-2">Media Gallery</h4>
+                        <MediaGallery items={event.attachments} />
                       </div>
                     )}
                     

@@ -15,6 +15,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { CommentSection } from "@/components/comment-section";
+import { MediaGallery } from "@/components/ui/media-gallery";
 
 
 
@@ -462,7 +463,7 @@ export default function BlogDetailPage() {
             <Card className="mb-12">
               <CardContent className="p-8">
                 <h3 className="text-xl font-bold text-gray-900 mb-4">Media Gallery</h3>
-                <ImageGallery attachments={(blog as any).attachments} />
+                <MediaGallery items={(blog as any).attachments} />
               </CardContent>
             </Card>
           )}
