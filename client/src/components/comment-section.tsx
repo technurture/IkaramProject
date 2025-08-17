@@ -92,14 +92,17 @@ const CommentInput = React.memo(({
 const Comment = React.memo(({ 
   comment, 
   isReply = false, 
-  onReply 
+  onReply,
+  depth = 0
 }: { 
   comment: CommentWithAuthor; 
   isReply?: boolean;
   onReply: (commentId: string, content: string) => void;
+  depth?: number;
 }) => {
   const [showReplyForm, setShowReplyForm] = useState(false);
   const [replyContent, setReplyContent] = useState("");
+  const [showReplies, setShowReplies] = useState(true);
   
   const handleReplySubmit = useCallback(() => {
     if (replyContent.trim()) {
@@ -119,61 +122,87 @@ const Comment = React.memo(({
     setReplyContent("");
   }, [showReplyForm]);
 
+  const toggleRepliesVisibility = useCallback(() => {
+    setShowReplies(!showReplies);
+  }, [showReplies]);
+
+  const hasReplies = comment.replies && comment.replies.length > 0;
+  const indentationLevel = Math.min(depth * 2, 6); // Max 6 levels deep
+
   return (
-    <div className={`comment-item ${isReply ? 'ml-8 mt-4' : 'mb-6'}`} data-comment-id={comment.id || comment._id || 'anonymous'}>
-      <Card className={isReply ? 'border-l-4 border-l-blue-200 bg-blue-50/30' : ''}>
+    <div 
+      className={`comment-item ${depth > 0 ? `ml-${indentationLevel} mt-3` : 'mb-6'}`} 
+      data-comment-id={comment.id || comment._id || 'anonymous'}
+    >
+      <Card className={depth > 0 ? `border-l-4 border-l-blue-200 bg-blue-50/20` : 'border border-gray-200'}>
         <CardContent className="p-4">
           <div className="flex items-start space-x-3">
-            <Avatar className={isReply ? 'h-6 w-6' : 'h-8 w-8'}>
+            <Avatar className={depth > 0 ? 'h-6 w-6' : 'h-8 w-8'}>
               {comment.author ? (
                 <>
                   <AvatarImage src={comment.author.profileImage || undefined} />
-                  <AvatarFallback className={isReply ? 'text-xs' : ''}>
+                  <AvatarFallback className={depth > 0 ? 'text-xs' : ''}>
                     {comment.author.firstName[0]}{comment.author.lastName[0]}
                   </AvatarFallback>
                 </>
               ) : (
-                <AvatarFallback className={isReply ? 'text-xs' : ''}>
-                  <User className={isReply ? 'h-3 w-3' : 'h-4 w-4'} />
+                <AvatarFallback className={depth > 0 ? 'text-xs' : ''}>
+                  <User className={depth > 0 ? 'h-3 w-3' : 'h-4 w-4'} />
                 </AvatarFallback>
               )}
             </Avatar>
             <div className="flex-1">
               <div className="flex items-center space-x-2 mb-1">
-                {isReply && (
-                  <span className="text-xs text-blue-600 font-medium">↳ Reply:</span>
+                {depth > 0 && (
+                  <span className="text-xs text-blue-600 font-medium">
+                    {'└─'.repeat(Math.min(depth, 3))} Reply:
+                  </span>
                 )}
-                <span className={`font-medium text-gray-900 ${isReply ? 'text-sm' : ''}`}>
+                <span className={`font-medium text-gray-900 ${depth > 0 ? 'text-sm' : ''}`}>
                   {comment.author ? 
                     `${comment.author.firstName} ${comment.author.lastName}` : 
                     'Anonymous'
                   }
                 </span>
-                <span className={`text-gray-500 ${isReply ? 'text-xs' : 'text-sm'}`}>
+                <span className={`text-gray-500 ${depth > 0 ? 'text-xs' : 'text-sm'}`}>
                   {format(new Date(comment.createdAt), 'MMM dd, yyyy \'at\' h:mm a')}
                 </span>
               </div>
-              <p className={`text-gray-700 mb-2 ${isReply ? 'text-sm' : ''}`}>{comment.content}</p>
-              {!isReply && (
+              <p className={`text-gray-700 mb-3 ${depth > 0 ? 'text-sm' : ''}`}>{comment.content}</p>
+              
+              <div className="flex items-center space-x-3">
                 <Button
                   variant="ghost"
                   size="sm"
                   onClick={toggleReplyForm}
+                  className="text-xs"
                 >
-                  <MessageCircle className="h-4 w-4 mr-1" />
+                  <MessageCircle className="h-3 w-3 mr-1" />
                   Reply
                 </Button>
-              )}
+                
+                {hasReplies && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={toggleRepliesVisibility}
+                    className="text-xs text-blue-600"
+                  >
+                    {showReplies ? '▼' : '▶'} 
+                    {comment.replies!.length} {comment.replies!.length === 1 ? 'reply' : 'replies'}
+                  </Button>
+                )}
+              </div>
             </div>
           </div>
         </CardContent>
       </Card>
       
-      {/* Reply Form - Completely separate from comment card */}
-      {showReplyForm && !isReply && (
-        <div className="mt-4 ml-11">
-          <Card>
-            <CardContent className="p-4">
+      {/* Reply Form */}
+      {showReplyForm && (
+        <div className={`mt-3 ${depth > 0 ? `ml-${indentationLevel + 2}` : 'ml-11'}`}>
+          <Card className="border-dashed border-gray-300">
+            <CardContent className="p-3">
               <CommentInput
                 id={`reply-${comment.id || comment._id || 'anonymous'}`}
                 value={replyContent}
@@ -195,15 +224,16 @@ const Comment = React.memo(({
         </div>
       )}
       
-      {/* Replies */}
-      {comment.replies && comment.replies.length > 0 && (
-        <div className="replies-section">
-          {comment.replies.map((reply, index) => (
+      {/* Nested Replies - Collapsible */}
+      {hasReplies && showReplies && (
+        <div className="replies-section mt-2">
+          {comment.replies!.map((reply, index) => (
             <Comment 
               key={reply.id || reply._id || `reply-${index}`}
               comment={reply} 
               isReply={true}
               onReply={onReply}
+              depth={depth + 1}
             />
           ))}
         </div>
@@ -331,6 +361,7 @@ export const CommentSection: React.FC<CommentSectionProps> = ({
               key={comment.id || comment._id || `comment-${index}`}
               comment={comment} 
               onReply={handleReply}
+              depth={0}
             />
           ))}
         </div>
