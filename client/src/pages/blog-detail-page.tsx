@@ -15,6 +15,37 @@ import { useAuth } from "@/hooks/use-auth";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 
+// Simple isolated input component to prevent re-rendering issues
+const IsolatedTextarea = ({ value, onChange, placeholder, className, ...props }: {
+  value: string;
+  onChange: (value: string) => void;
+  placeholder?: string;
+  className?: string;
+  [key: string]: any;
+}) => {
+  const [internalValue, setInternalValue] = useState(value);
+
+  useEffect(() => {
+    setInternalValue(value);
+  }, [value]);
+
+  const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    const newValue = e.target.value;
+    setInternalValue(newValue);
+    onChange(newValue);
+  };
+
+  return (
+    <textarea
+      value={internalValue}
+      onChange={handleChange}
+      placeholder={placeholder}
+      className={className}
+      {...props}
+    />
+  );
+};
+
 // Media Gallery Component
 const ImageGallery = ({ attachments }: { attachments: string[] }) => {
   const [selectedImage, setSelectedImage] = useState<number | null>(null);
@@ -405,11 +436,11 @@ export default function BlogDetailPage() {
     });
   }, []);
 
-  const CommentCard = ({ comment, isReply = false }: { comment: CommentWithAuthor; isReply?: boolean }) => {
+  const CommentCard = React.memo(({ comment, isReply = false }: { comment: CommentWithAuthor; isReply?: boolean }) => {
     const commentId = comment.id;
     
     return (
-      <div className={`${isReply ? 'ml-8 mt-4' : 'mb-6'}`}>
+      <div className={`comment-wrapper ${isReply ? 'ml-8 mt-4' : 'mb-6'}`} data-comment-id={commentId}>
         <Card>
           <CardContent className="p-4">
             <div className="flex items-start space-x-3">
@@ -452,15 +483,19 @@ export default function BlogDetailPage() {
                 )}
               </div>
             </div>
-            
-            {replyingTo === commentId && (
-              <div className="mt-4 ml-11">
-                <textarea
+          </CardContent>
+        </Card>
+        
+        {/* Reply Form - Outside the Card to prevent nesting issues */}
+        {replyingTo === commentId && !isReply && (
+          <div className="mt-4 ml-11">
+            <Card>
+              <CardContent className="p-4">
+                <IsolatedTextarea
                   placeholder="Write a reply..."
                   value={replyInputs[commentId] || ''}
-                  onChange={(e) => handleReplyInputChange(commentId, e.target.value)}
+                  onChange={(value) => handleReplyInputChange(commentId, value)}
                   className="flex min-h-[80px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 mb-2"
-                  autoFocus
                   data-testid={`input-reply-${commentId}`}
                 />
                 <div className="flex space-x-2">
@@ -482,17 +517,26 @@ export default function BlogDetailPage() {
                     Cancel
                   </Button>
                 </div>
-              </div>
-            )}
-          </CardContent>
-        </Card>
+              </CardContent>
+            </Card>
+          </div>
+        )}
         
-        {comment.replies?.map((reply) => (
-          <CommentCard key={reply.id} comment={reply} isReply />
-        ))}
+        {/* Replies - Only show if there are replies */}
+        {comment.replies && comment.replies.length > 0 && (
+          <div className="replies-container">
+            {comment.replies.map((reply, index) => (
+              <CommentCard 
+                key={`reply-${reply.id}-${index}`} 
+                comment={reply} 
+                isReply={true} 
+              />
+            ))}
+          </div>
+        )}
       </div>
     );
-  };
+  });
 
   if (blogLoading) {
     return (
@@ -645,10 +689,10 @@ export default function BlogDetailPage() {
                     </Avatar>
                   )}
                   <div className="flex-1">
-                    <textarea
+                    <IsolatedTextarea
                       placeholder="Share your thoughts..."
                       value={commentContent}
-                      onChange={(e) => setCommentContent(e.target.value)}
+                      onChange={setCommentContent}
                       className="flex min-h-[80px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 mb-4"
                       data-testid="input-main-comment"
                     />
