@@ -1,5 +1,7 @@
 import { v2 as cloudinary } from 'cloudinary';
 import multer from 'multer';
+import dotenv from 'dotenv';
+dotenv.config();
 
 // Configure Cloudinary using environment variable
 if (!process.env.CLOUDINARY_URL) {
