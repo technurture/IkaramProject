@@ -162,7 +162,11 @@ export default function RegularAdminDashboard() {
 
   // Filter content to show only user's own posts
   const userBlogs = allBlogs?.filter(blog => blog.author._id === user?._id) || [];
-  const userEvents = allEvents?.filter(event => event.createdBy === user?._id) || [];
+  const userEvents = allEvents?.filter(event => {
+    // Handle both cases: createdBy as string or as object with _id
+    const createdById = typeof event.createdBy === 'string' ? event.createdBy : event.createdBy?._id;
+    return createdById === user?._id;
+  }) || [];
   const recentBlogs = userBlogs.slice(0, 5);
   const recentEvents = userEvents.slice(0, 5);
 
