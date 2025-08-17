@@ -269,11 +269,11 @@ export default function BlogDetailPage() {
                   disabled={likeMutation.isPending}
                 >
                   <Heart className={`h-4 w-4 mr-1 ${isLiked ? 'fill-current' : ''}`} />
-                  {blog._count.likes}
+                  {blog._count?.likes || 0}
                 </Button>
                 <span className="flex items-center space-x-1 text-gray-500">
                   <MessageCircle className="h-4 w-4" />
-                  <span>{blog._count.comments}</span>
+                  <span>{blog._count?.comments || 0}</span>
                 </span>
               </div>
             </div>
@@ -306,7 +306,7 @@ export default function BlogDetailPage() {
           {/* Comments Section */}
           <div className="mt-12">
             <h2 className="text-2xl font-bold text-gray-900 mb-6">
-              Comments ({blog._count.comments})
+              Comments ({blog._count?.comments || 0})
             </h2>
             
             {/* Add Comment */}
