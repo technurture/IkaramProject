@@ -253,14 +253,14 @@ export const insertCommentSchema = z.object({
 export const insertEventSchema = z.object({
   title: z.string().min(1).max(200),
   description: z.string().min(1),
-  startDate: z.date(),
-  endDate: z.date().optional(),
+  startDate: z.union([z.date(), z.string()]).transform((val) => typeof val === 'string' ? new Date(val) : val),
+  endDate: z.union([z.date(), z.string()]).transform((val) => typeof val === 'string' ? new Date(val) : val).optional(),
   location: z.string().min(1),
   category: z.string().min(1),
   featuredImage: z.string().optional(),
   isVirtual: z.boolean().default(false),
   maxAttendees: z.number().positive().optional(),
-  registrationDeadline: z.date().optional(),
+  registrationDeadline: z.union([z.date(), z.string()]).transform((val) => typeof val === 'string' ? new Date(val) : val).optional(),
   status: z.enum(['upcoming', 'ongoing', 'completed', 'cancelled']).default('upcoming'),
   createdBy: z.string()
 });

@@ -255,7 +255,8 @@ export async function registerRoutes(app: Express, storage: IMongoStorage): Prom
       const event = await storage.createEvent(eventData);
       res.status(201).json(event);
     } catch (error) {
-      res.status(400).json({ message: "Invalid event data" });
+      console.error('Event creation error:', error);
+      res.status(400).json({ message: "Invalid event data", details: error });
     }
   });
 
