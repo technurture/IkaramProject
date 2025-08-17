@@ -154,6 +154,7 @@ export default function SuperAdminDashboard() {
   const [uploadingImage, setUploadingImage] = useState(false);
   const [uploadingBlogMedia, setUploadingBlogMedia] = useState(false);
   const [uploadingEventMedia, setUploadingEventMedia] = useState(false);
+  const [selectedAdminId, setSelectedAdminId] = useState<string | null>(null);
 
   // Redirect if not super admin
   if (!user || user.role !== 'super_admin') {
@@ -226,13 +227,18 @@ export default function SuperAdminDashboard() {
   // Profile update mutation
   const updateProfileMutation = useMutation({
     mutationFn: async (data: z.infer<typeof profileFormSchema>) => {
-      const res = await apiRequest("PUT", `/api/users/${user!._id}`, data);
+      const targetUserId = selectedAdminId || user!._id;
+      const res = await apiRequest("PUT", `/api/users/${targetUserId}`, data);
       return await res.json();
     },
     onSuccess: () => {
       toast({ title: "Profile updated successfully" });
       setProfileOpen(false);
+      setSelectedAdminId(null);
+      // Invalidate multiple queries to refresh all user data
       queryClient.invalidateQueries({ queryKey: ["/api/user"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/all"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/users/all"] });
     },
     onError: (error: Error) => {
       toast({ title: "Failed to update profile", description: error.message, variant: "destructive" });
@@ -876,6 +882,18 @@ export default function SuperAdminDashboard() {
                 <AdminTable 
                   admins={allAdmins || []} 
                   type="all"
+                  onEdit={(admin) => {
+                    // Pre-fill the edit form with admin data
+                    profileForm.setValue('firstName', admin.firstName);
+                    profileForm.setValue('lastName', admin.lastName);
+                    profileForm.setValue('email', admin.email);
+                    profileForm.setValue('username', admin.username);
+                    profileForm.setValue('bio', admin.bio || '');
+                    profileForm.setValue('graduationYear', admin.graduationYear || undefined);
+                    profileForm.setValue('profileImage', admin.profileImage || '');
+                    setSelectedAdminId(admin._id);
+                    setProfileOpen(true);
+                  }}
                   onReactivate={(id) => reactivateAdminMutation.mutate(id)}
                   onDelete={(id) => deleteAdminMutation.mutate(id)}
                 />
@@ -903,6 +921,18 @@ export default function SuperAdminDashboard() {
                 <AdminTable 
                   admins={allUsers || []} 
                   type="all"
+                  onEdit={(admin) => {
+                    // Pre-fill the edit form with user data
+                    profileForm.setValue('firstName', admin.firstName);
+                    profileForm.setValue('lastName', admin.lastName);
+                    profileForm.setValue('email', admin.email);
+                    profileForm.setValue('username', admin.username);
+                    profileForm.setValue('bio', admin.bio || '');
+                    profileForm.setValue('graduationYear', admin.graduationYear || undefined);
+                    profileForm.setValue('profileImage', admin.profileImage || '');
+                    setSelectedAdminId(admin._id);
+                    setProfileOpen(true);
+                  }}
                   onReactivate={(id) => reactivateAdminMutation.mutate(id)}
                   onDelete={(id) => deleteAdminMutation.mutate(id)}
                 />
@@ -1179,8 +1209,15 @@ export default function SuperAdminDashboard() {
         <ScrollableDialog open={profileOpen} onOpenChange={setProfileOpen}>
           <ScrollableDialogContent className="max-w-lg">
             <ScrollableDialogHeader>
-              <ScrollableDialogTitle>Edit Profile</ScrollableDialogTitle>
-              <ScrollableDialogDescription>Update your personal information and account details.</ScrollableDialogDescription>
+              <ScrollableDialogTitle>
+                {selectedAdminId ? 'Edit Admin Profile' : 'Edit Profile'}
+              </ScrollableDialogTitle>
+              <ScrollableDialogDescription>
+                {selectedAdminId 
+                  ? 'Update this administrator\'s information and account details.' 
+                  : 'Update your personal information and account details.'
+                }
+              </ScrollableDialogDescription>
             </ScrollableDialogHeader>
             <ScrollableDialogBody>
               <Form {...profileForm}>

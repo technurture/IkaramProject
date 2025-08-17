@@ -3,7 +3,7 @@ import { IUser } from '@shared/mongodb-schema';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
-import { MoreHorizontal, Check, X, RefreshCw, Trash2, User } from 'lucide-react';
+import { MoreHorizontal, Check, X, RefreshCw, Trash2, User, Edit } from 'lucide-react';
 import { format } from 'date-fns';
 
 interface AdminTableProps {
@@ -12,6 +12,7 @@ interface AdminTableProps {
   onApprove?: (id: string, approved: boolean) => void;
   onReactivate?: (id: string) => void;
   onDelete?: (id: string) => void;
+  onEdit?: (admin: IUser) => void;
   loading?: boolean;
 }
 
@@ -21,6 +22,7 @@ export function AdminTable({
   onApprove, 
   onReactivate, 
   onDelete, 
+  onEdit,
   loading = false 
 }: AdminTableProps) {
   if (loading) {
@@ -131,6 +133,15 @@ export function AdminTable({
                     
                     {type === 'all' && (
                       <>
+                        {onEdit && (
+                          <DropdownMenuItem 
+                            onClick={() => onEdit(admin)}
+                            data-testid={`edit-admin-${admin._id}`}
+                          >
+                            <Edit className="h-4 w-4 mr-2" />
+                            Edit
+                          </DropdownMenuItem>
+                        )}
                         {!admin.isActive && onReactivate && (
                           <DropdownMenuItem 
                             onClick={() => onReactivate(admin._id)}
