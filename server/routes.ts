@@ -262,12 +262,18 @@ export async function registerRoutes(app: Express, storage: IMongoStorage): Prom
 
   app.put("/api/events/:id", requireAdmin, async (req, res) => {
     try {
-      const updates = insertEventSchema.partial().parse(req.body);
-      const updatedEvent = await storage.updateEvent(req.params.id, updates);
-      
-      if (!updatedEvent) {
+      const event = await storage.getEvent(req.params.id);
+      if (!event) {
         return res.status(404).json({ message: "Event not found" });
       }
+      
+      // Only allow creator or super_admin to update
+      if (event.createdBy !== req.user!._id.toString() && req.user!.role !== 'super_admin') {
+        return res.status(403).json({ message: "Not authorized to update this event" });
+      }
+
+      const updates = insertEventSchema.partial().parse(req.body);
+      const updatedEvent = await storage.updateEvent(req.params.id, updates);
       
       res.json(updatedEvent);
     } catch (error) {
@@ -277,6 +283,16 @@ export async function registerRoutes(app: Express, storage: IMongoStorage): Prom
 
   app.delete("/api/events/:id", requireAdmin, async (req, res) => {
     try {
+      const event = await storage.getEvent(req.params.id);
+      if (!event) {
+        return res.status(404).json({ message: "Event not found" });
+      }
+      
+      // Only allow creator or super_admin to delete
+      if (event.createdBy !== req.user!._id.toString() && req.user!.role !== 'super_admin') {
+        return res.status(403).json({ message: "Not authorized to delete this event" });
+      }
+
       const deleted = await storage.deleteEvent(req.params.id);
       if (deleted) {
         res.json({ message: "Event deleted successfully" });
