@@ -249,7 +249,7 @@ export async function registerRoutes(app: Express, storage: IMongoStorage): Prom
     try {
       const eventData = insertEventSchema.parse({
         ...req.body,
-        createdBy: req.user!._id
+        createdBy: req.user!._id.toString()
       });
       
       const event = await storage.createEvent(eventData);
